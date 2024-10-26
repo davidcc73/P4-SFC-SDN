@@ -1,0 +1,13 @@
+sudo make stop     #Stop/Delete the mininet and ONOS containers
+sudo mn -c         #Delete virtual interfaces that mininet created
+sudo make clean    #Delete Previous P4 and ONOS Builds compilations
+
+xhost +               #Enable X11 forwarding
+sudo make start       #Start ONOS and mininet containers
+sudo make app-build   #Compile P4 code and ONOS apps and push its .oar executable to ONOS
+
+
+
+make app-reload       #Push ONOS apps to ONOS, so it can be registered
+make netcfg           #Push mininet topology to ONOS
+

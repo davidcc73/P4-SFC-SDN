@@ -1,0 +1,33 @@
+
+############ r9
+#h1
+route-insert device:r9 2001:1:1::0 64 00:aa:00:00:00:01
+#h2
+route-insert device:r9 2001:1:2::0 64 00:aa:00:00:00:0e
+
+#r1
+route-insert device:r9 fcbb:bb00:01:: 48 00:aa:00:00:00:01
+#r2
+route-insert device:r9 fcbb:bb00:02:: 48 00:aa:00:00:00:0e
+#r3
+route-insert device:r9 fcbb:bb00:03:: 48 00:aa:00:00:00:0e
+#r4
+route-insert device:r9 fcbb:bb00:04:: 48 00:aa:00:00:00:04
+#r5
+route-insert device:r9 fcbb:bb00:05:: 48 00:aa:00:00:00:0a
+#r6
+route-insert device:r9 fcbb:bb00:06:: 48 00:aa:00:00:00:0d
+#r7
+route-insert device:r9 fcbb:bb00:07:: 48 00:aa:00:00:00:0d
+#r8
+route-insert device:r9 fcbb:bb00:08:: 48 00:aa:00:00:00:0a
+#r10
+route-insert device:r9 fcbb:bb00:0a:: 48 00:aa:00:00:00:0a
+#r11
+route-insert device:r9 fcbb:bb00:0b:: 48 00:aa:00:00:00:0a
+#r12
+route-insert device:r9 fcbb:bb00:0c:: 48 00:aa:00:00:00:0a
+#r13
+route-insert device:r9 fcbb:bb00:0d:: 48 00:aa:00:00:00:0d
+#r14
+route-insert device:r9 fcbb:bb00:0e:: 48 00:aa:00:00:00:0e

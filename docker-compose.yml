@@ -1,0 +1,33 @@
+services:
+  mininet:
+    #image: opennetworking/ngsdn-tutorial:stratum_bmv2
+    image: davidcc73/stratum_bmv2_x11_scapy_pip3:latest
+    hostname: mininet
+    container_name: mininet
+    privileged: true
+    tty: true
+    stdin_open: true
+    restart: always
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./tmp:/tmp
+      - ./mininet:/mininet
+      - ./INT:/INT
+      - ./config:/config
+    entrypoint: "/bin/bash -c 'while [ ! -f /mininet/topo.py ]; do sleep 1; done; python3 /mininet/topo.py'"
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=${XAUTHORITY}
+
+  onos:
+    image: onosproject/onos:2.5.9
+    hostname: onos
+    container_name: onos
+    network_mode: "host"
+    volumes:
+      - ./tmp/onos:/root/onos/apache-karaf-4.2.8/data/tmp
+      - ./config:/config
+      - ./config/onos-config/onos1:/root/onos/config
+    environment:
+      - ONOS_APPS=gui2,drivers.bmv2,lldpprovider,hostprovider

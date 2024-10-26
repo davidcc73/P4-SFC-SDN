@@ -1,0 +1,230 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 37375156
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 28792405
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43012897
+    name: "MyIngress.sf_processing"
+    alias: "sf_processing"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.sfc_chain[0].sf"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28520660
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43267361
+    name: "MyIngress.sfc_classifier"
+    alias: "sfc_classifier"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dscp"
+    bitwidth: 6
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20194617
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 44973410
+    name: "MyIngress.sfc_egress"
+    alias: "sfc_egress"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.sfc_chain[0].sf"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27370662
+  }
+  action_refs {
+    id: 25652968
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25652968
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 28792405
+    name: "MyIngress.ipv4_forward"
+    alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 28520660
+    name: "MyIngress.sf_action"
+    alias: "sf_action"
+  }
+}
+actions {
+  preamble {
+    id: 18140899
+    name: "MyIngress.sfc_decapsulation"
+    alias: "sfc_decapsulation"
+  }
+}
+actions {
+  preamble {
+    id: 20194617
+    name: "MyIngress.sfc_encapsulation"
+    alias: "sfc_encapsulation"
+  }
+  params {
+    id: 1
+    name: "id"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "sc"
+    bitwidth: 8
+  }
+  params {
+    id: 3
+    name: "sf1"
+    bitwidth: 9
+  }
+  params {
+    id: 4
+    name: "sf2"
+    bitwidth: 9
+  }
+  params {
+    id: 5
+    name: "sf3"
+    bitwidth: 9
+  }
+  params {
+    id: 6
+    name: "sf4"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 27370662
+    name: "MyIngress.sfc_forward"
+    alias: "sfc_forward"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+counters {
+  preamble {
+    id: 313690024
+    name: "MyIngress.ingressSFCCounter"
+    alias: "ingressSFCCounter"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 65536
+}
+controller_packet_metadata {
+  preamble {
+    id: 81826293
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "ingress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "_pad"
+    bitwidth: 7
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 76689799
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "_pad"
+    bitwidth: 7
+  }
+}
+type_info {
+}
