@@ -1,8 +1,0 @@
-/mvn-src/src/main/java/org/onosproject/srv6_usid/pipeconf/InterpreterImpl.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/pipeconf/PipelinerImpl.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/cli/RouteInsertCommand.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/common/Utils.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/pipeconf/PipeconfLoader.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/MainComponent.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/Ipv6RoutingComponent.java
-/mvn-src/src/main/java/org/onosproject/srv6_usid/AppConstants.java

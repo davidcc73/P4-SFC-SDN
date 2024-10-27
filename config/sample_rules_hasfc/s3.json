@@ -1,0 +1,58 @@
+{
+  "target": "bmv2",
+  "p4info": "build/ha-sfc.p4.p4info.txt",
+  "bmv2_json": "build/ha-sfc.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.1.1", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "dstAddr": "00:00:00:00:10:01",
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "dstAddr": "00:00:00:00:40:01",
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.sfc_egress",
+      "match": {
+        "hdr.sfc_chain[0].sf": 4
+      },
+      "action_name": "MyIngress.sfc_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.sfc_egress",
+      "match": {
+        "hdr.sfc_chain[0].sf": 1
+      },
+      "action_name": "MyIngress.sfc_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.sf_processing",
+      "match": {
+        "hdr.sfc_chain[0].sf": 3
+      },
+      "action_name": "MyIngress.sf_action",
+      "action_params": {
+      }
+    }
+  ]
+}

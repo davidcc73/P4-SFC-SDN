@@ -17,33 +17,33 @@
 package org.onosproject.srv6_usid.pipeconf;
 
 import org.onosproject.net.DeviceId;
-import org.onosproject.net.PortNumber;
+//import org.onosproject.net.PortNumber;
 import org.onosproject.net.behaviour.NextGroup;
 import org.onosproject.net.behaviour.Pipeliner;
 import org.onosproject.net.behaviour.PipelinerContext;
 import org.onosproject.net.driver.AbstractHandlerBehaviour;
-import org.onosproject.net.flow.DefaultFlowRule;
-import org.onosproject.net.flow.DefaultTrafficTreatment;
-import org.onosproject.net.flow.FlowRule;
+//import org.onosproject.net.flow.DefaultFlowRule;
+//import org.onosproject.net.flow.DefaultTrafficTreatment;
+//import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
-import org.onosproject.net.flow.instructions.Instructions;
+//import org.onosproject.net.flow.instructions.Instructions;
 import org.onosproject.net.flowobjective.FilteringObjective;
 import org.onosproject.net.flowobjective.ForwardingObjective;
 import org.onosproject.net.flowobjective.NextObjective;
 import org.onosproject.net.flowobjective.ObjectiveError;
-import org.onosproject.net.group.GroupDescription;
+//import org.onosproject.net.group.GroupDescription;
 import org.onosproject.net.group.GroupService;
-import org.onosproject.net.pi.model.PiActionId;
-import org.onosproject.net.pi.model.PiTableId;
-import org.onosproject.net.pi.runtime.PiAction;
-import org.onosproject.srv6_usid.common.Utils;
+//import org.onosproject.net.pi.model.PiActionId;
+//import org.onosproject.net.pi.model.PiTableId;
+//import org.onosproject.net.pi.runtime.PiAction;
+//import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
-import static org.onosproject.srv6_usid.AppConstants.CPU_CLONE_SESSION_ID;
+//import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
+//import static org.onosproject.srv6_usid.AppConstants.CPU_CLONE_SESSION_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

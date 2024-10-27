@@ -12,7 +12,6 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./tmp:/tmp
       - ./mininet:/mininet
-      - ./INT:/INT
       - ./config:/config
     entrypoint: "/bin/bash -c 'while [ ! -f /mininet/topo.py ]; do sleep 1; done; python3 /mininet/topo.py'"
     network_mode: "host"

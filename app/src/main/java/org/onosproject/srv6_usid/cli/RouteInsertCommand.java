@@ -19,77 +19,97 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.onlab.packet.IpAddress;
 import org.onosproject.cli.AbstractShellCommand;
 import org.onosproject.cli.net.DeviceIdCompleter;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.device.DeviceService;
-import org.onlab.packet.MacAddress;
-import org.onosproject.srv6_usid.Ipv6RoutingComponent;
+import org.onosproject.srv6_usid.Ipv4RoutingComponent;
 
-/**
- * Ipv6 Route Insert Command
- */
 @Service
-@Command(scope = "onos", name = "route-insert",
-         description = "Insert a rule in a KShort or ECMP routing tables")
+@Command(scope = "onos", name = "table_add",
+        description = "Insert a table rule")
 public class RouteInsertCommand extends AbstractShellCommand {
 
     @Argument(index = 0, name = "uri", description = "Device ID",
-              required = true, multiValued = false)
+            required = true, multiValued = false)
     @Completion(DeviceIdCompleter.class)
     String uri = null;
 
     @Argument(index = 1, name = "table",
-            description = "to each table the command is for",
+            description = "Table to which the command applies",
             required = true, multiValued = false)
     String table = null;
 
-    @Argument(index = 2, name = "ipv6NetAddress",
-            description = "IPv6 address",
+    @Argument(index = 2, name = "action",
+            description = "Action triggered",
             required = true, multiValued = false)
-    String ipv6NetAddr = null;
+    String action = null;
 
-    @Argument(index = 3, name = "dst_mask",
-            description = "IPv6 dst_mask",
-            required = false, multiValued = false)
-    int dst_mask = 64;
-
-    @Argument(index = 4, name = "macDstAddr",
-            description = "MAC destination address",
+    @Argument(index = 3, name = "criteria",
+            description = "Conparison criteria",
             required = true, multiValued = false)
-    String macDstAddr = null;
+    String criteria = null;
+
+    @Argument(index = 4, name = "fields_key",
+        description = "Fields of the keys to match",
+        required = true, multiValued = false)
+    String fields_key = null;
+
+    @Argument(index = 5, name = "keys",
+        description = "Keys to match",
+        required = true, multiValued = false)
+    String key = null;
+
+    @Argument(index = 6, name = "args_field",
+        description = "Fields pf the args for the action",
+        required = true, multiValued = false)
+    String args_field = null;
+
+    @Argument(index = 7, name = "args",
+        description = "args for the action",
+        required = true, multiValued = false)
+    String arg = null;
+
 
     @Override
     protected void doExecute() {
-        int max_FlowLabel = 3;
         DeviceService deviceService = get(DeviceService.class);
-        Ipv6RoutingComponent app = get(Ipv6RoutingComponent.class);
+        Ipv4RoutingComponent app = get(Ipv4RoutingComponent.class);
 
+        // Retrieve device by URI
         Device device = deviceService.getDevice(DeviceId.deviceId(uri));
         if (device == null) {
             print("Device \"%s\" is not found", uri);
             return;
         }
-        
-        IpAddress destIp = IpAddress.valueOf(ipv6NetAddr);
-        MacAddress nextHop = MacAddress.valueOf(macDstAddr);
 
-        print("Installing route on device %s", uri);
         /*
-        if(table.equals("KShort")){
-            app.insertRoutingRuleKShort(device.id(), destIp, dst_mask, nextHop);
-        }else if(table.equals("ECMP")){
-            for(int currentFlowLabel = 0; currentFlowLabel <= max_FlowLabel; currentFlowLabel++){ 
-                //mask 0, to forward host traffic to them, no matter the source of it
-                app.insertRoutingRuleECMP(device.id(), Ip6Address.valueOf("0:0:0::0"), destIp, 0, dst_mask, currentFlowLabel, nextHop);
-            }
-        }
-        else{
-            print("Invalid table");
-        }  
-        */
+        print("Device ID (URI): %s", uri);
+        print("Table: %s", table);
+        print("Action: %s", action);
+
+        print("Criteria: %s", criteria);
+        print("Fields of the keys to match: %s", fields_key);
+        print("Keys to match: %s", key);
+        print("Fields of the args for the action: %s", args_field);
+        print("Args for the action: %s", arg)*/
+
+
+        // parse keys by space
+        String[] fields_keys = null;
+        String[] keys = null;
+        String[] args_fields = null;
+        String[] args = null;
+
+        if(!fields_key.trim().equals("")) fields_keys = fields_key.split(" ");
+        if(!key.trim().equals("")) keys = key.split(" ");
+        if(!args_field.trim().equals("")) args_fields = args_field.split(" ");
+        if(!arg.trim().equals("")) args = arg.split(" ");
+
+        // Execute command - replace this line with actual logic to interact with the device
+        print("Installing route on device %s", uri);
+        app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args);
     }
 
 }
