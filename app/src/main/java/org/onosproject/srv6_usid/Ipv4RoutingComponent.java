@@ -56,7 +56,7 @@ import static org.onosproject.srv6_usid.AppConstants.INITIAL_SETUP_DELAY;
 import java.util.List;
 
 /**
- * App component that configures devices to provide IPv6 routing capabilities
+ * App component that configures devices to provide IPv4 routing capabilities
  * across the whole fabric.
  */
 @Component(
@@ -314,7 +314,7 @@ public class Ipv4RoutingComponent{
     //--------------------------------------------------------------------------
 
     /**
-     * Sets up IPv6 routing on all devices known by ONOS and for which this ONOS
+     * Sets up IPv4 routing on all devices known by ONOS and for which this ONOS
      * node instance is currently master.
      */
     private synchronized void setUpAllDevices() {       //acivated at this component boot
@@ -324,7 +324,7 @@ public class Ipv4RoutingComponent{
                 .map(Device::id)
                 .filter(mastershipService::isLocalMaster)
                 .forEach(deviceId -> {
-                    log.info("*** IPV6 ROUTING - Starting initial set up for {}...", deviceId);
+                    log.info("*** IPV4 ROUTING - Starting initial set up for {}...", deviceId);
                     setUpMyStationTable(deviceId);
                     setUpL2NextHopRules(deviceId);
                 });       */ 
