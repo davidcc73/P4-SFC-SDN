@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 //#include "include/header.p4"
-//#include "include/parser.p4"
+#include "include/deparser.p4"
 //#include "include/checksum.p4"
 //#include "include/Ingress.p4"
 //#include "include/Egress.p4"
@@ -235,21 +235,6 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
               hdr.ipv4.dstAddr },
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
-    }
-}
-
-/*************************************************************************
-***********************  D E P A R S E R  *******************************
-*************************************************************************/
-
-control MyDeparser(packet_out packet, in headers hdr) {
-    apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.sfc);
-        packet.emit(hdr.sfc_chain);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.tcp);
-        packet.emit(hdr.udp);
     }
 }
 
