@@ -29,4 +29,4 @@ services:
       - ./config:/config
       - ./config/onos-config/onos1:/root/onos/config
     environment:
-      - ONOS_APPS=gui2,drivers.bmv2,lldpprovider,hostprovider
+      - ONOS_APPS=gui2,drivers.bmv2

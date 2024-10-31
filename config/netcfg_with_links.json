@@ -1,0 +1,287 @@
+{
+  "devices": {
+    "device:s1": {
+      "basic": {
+        "managementAddress": "grpc://localhost:50001?device_id=1",
+        "driver": "stratum-bmv2",
+        "pipeconf": "org.p4.srv6_usid"
+      }
+    },
+    "device:s2": {
+      "basic": {
+        "managementAddress": "grpc://localhost:50002?device_id=1",
+        "driver": "stratum-bmv2",
+        "pipeconf": "org.p4.srv6_usid"
+      }
+    },
+    "device:s3": {
+      "basic": {
+        "managementAddress": "grpc://localhost:50003?device_id=1",
+        "driver": "stratum-bmv2",
+        "pipeconf": "org.p4.srv6_usid"
+      }
+    },
+    "device:s4": {
+      "basic": {
+        "managementAddress": "grpc://localhost:50004?device_id=1",
+        "driver": "stratum-bmv2",
+        "pipeconf": "org.p4.srv6_usid"
+      }
+    }
+  },
+  "ports": {
+    "device:s1/1": {
+      "interfaces": [
+        {
+          "name": "s1/1",
+          "ips": ["10.0.1.10/24"]
+        }
+      ]
+    },
+    "device:s1/2": {
+      "interfaces": [
+        {
+          "name": "s1/2",
+          "ips": ["10.0.1.2/24"]
+        }
+      ]
+    },
+    "device:s1/3": {
+      "interfaces": [
+        {
+          "name": "s1/3",
+          "ips": ["10.0.1.3/24"]
+        }
+      ]
+    },
+
+
+
+
+
+    "device:s2/1": {
+      "interfaces": [
+        {
+          "name": "s2/1",
+          "ips": ["10.0.2.1/24"]
+        }
+      ]
+    },
+    "device:s2/2": {
+      "interfaces": [
+        {
+          "name": "s2/2",
+          "ips": ["10.0.2.2/24"]
+        }
+      ]
+    },
+
+
+
+
+
+    "device:s3/1": {
+      "interfaces": [
+        {
+          "name": "s3/1",
+          "ips": ["10.0.3.1/24"]
+        }
+      ]
+    },
+    "device:s3/2": {
+      "interfaces": [
+        {
+          "name": "s3/2",
+          "ips": ["10.0.3.2/24"]
+        }
+      ]
+    },
+
+
+
+    "device:s4/1": {
+      "interfaces": [
+        {
+          "name": "s4/1",
+          "ips": ["10.0.4.10/24"]
+        }
+      ]
+    },
+    "device:s4/2": {
+      "interfaces": [
+        {
+          "name": "s4/2",
+          "ips": ["10.0.4.2/24"]
+        }
+      ]
+    },
+    "device:s4/3": {
+      "interfaces": [
+        {
+          "name": "s4/3",
+          "ips": ["10.0.4.3/24"]
+        }
+      ]
+    }
+
+
+  },
+  "hosts": {
+    "00:00:00:00:00:10/None": {
+      "basic": {
+        "name": "h1"
+      }
+    },
+    "00:00:00:00:00:20/None": {
+      "basic": {
+        "name": "h2"
+      }
+    }
+  },
+  "links": {
+    "link:s1/s2": {
+      "src": {
+        "device": "device:s1",
+        "port": "2"
+      },
+      "dst": {
+        "device": "device:s2",
+        "port": "1"
+      },
+      "type": "DIRECT"
+    },
+    "link:s2/s1": {
+      "dst": {
+        "device": "device:s1",
+        "port": "2"
+      },
+      "src": {
+        "device": "device:s2",
+        "port": "1"
+      },
+      "type": "DIRECT"
+    },
+
+
+    "link:s1/s3": {
+      "src": {
+        "device": "device:s1",
+        "port": "3"
+      },
+      "dst": {
+        "device": "device:s3",
+        "port": "1"
+      },
+      "type": "DIRECT"
+    },
+    "link:s3/s1": {
+      "dst": {
+        "device": "device:s1",
+        "port": "3"
+      },
+      "src": {
+        "device": "device:s3",
+        "port": "1"
+      },
+      "type": "DIRECT"
+    },
+
+
+
+    "link:s2/s4": {
+      "src": {
+        "device": "device:s2",
+        "port": "2"
+      },
+      "dst": {
+        "device": "device:s4",
+        "port": "2"
+      },
+      "type": "DIRECT"
+    },
+    "link:s4/s2": {
+      "dst": {
+        "device": "device:s2",
+        "port": "2"
+      },
+      "src": {
+        "device": "device:s4",
+        "port": "2"
+      },
+      "type": "DIRECT"
+    },
+
+
+
+    "link:s3/s4": {
+      "src": {
+        "device": "device:s3",
+        "port": "2"
+      },
+      "dst": {
+        "device": "device:s4",
+        "port": "3"
+      },
+      "type": "DIRECT"
+    },
+    "link:s4/s3": {
+      "dst": {
+        "device": "device:s3",
+        "port": "2"
+      },
+      "src": {
+        "device": "device:s4",
+        "port": "3"
+      },
+      "type": "DIRECT"
+    },
+
+
+    "link:s1/h1": {
+      "src": {
+        "device": "device:s1",
+        "port": "1"
+      },
+      "dst": {
+        "device": "00:00:00:00:01:01/None",
+        "port": "0"
+      },
+      "type": "DIRECT"
+    },
+    "link:h1/s1": {
+      "dst": {
+        "device": "device:s1",
+        "port": "1"
+      },
+      "src": {
+        "device": "00:00:00:00:01:01/None",
+        "port": "0"
+      },
+      "type": "DIRECT"
+    },
+
+
+    "link:s4/h2": {
+      "src": {
+        "device": "device:s4",
+        "port": "1"
+      },
+      "dst": {
+        "device": "00:00:00:00:02:02/None",
+        "port": "0"
+      },
+      "type": "DIRECT"
+    },
+    "link:h2/s4": {
+      "dst": {
+        "device": "device:s4",
+        "port": "1"
+      },
+      "src": {
+        "device": "00:00:00:00:02:02/None",
+        "port": "0"
+      },
+      "type": "DIRECT"
+    }
+  }
+}

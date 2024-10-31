@@ -6,7 +6,6 @@ import importlib
 import json
 import os
 import interface
-import constants
 
 from mininet.net import Mininet
 from mininet.node import RemoteController
@@ -15,7 +14,7 @@ from mininet.link import TCLink
 
 from stratum import StratumBmv2Switch
 
-CPU_PORT = constants.CPU_PORT
+CPU_PORT = 255
 
 class DynamicTopo(Topo):
 
@@ -56,9 +55,6 @@ class DynamicTopo(Topo):
                 port_switch0 = int(link[0].split("p")[1])
                 port_switch1 = int(link[1].split("p")[1])
 
-                #print("id_switch: ", id_switch0, "port: ", port_switch0)
-                #print("id_switch: ", id_switch1, "port: ", port_switch1)
-                #print("\n")
                 
                 self.addLink(id_switch0, id_switch1, cls=TCLink, port1 = port_switch0, port2 = port_switch1)
                 
@@ -74,10 +70,6 @@ class DynamicTopo(Topo):
                 port_switch = int(switch.split("p")[1])
 
                 id_host = host
-
-                #print("id_switch: ", id_switch, "port: ", port_switch)
-                #print("id_host: ", id_host, "port: ", 0)
-                #print("\n")
 
                 self.addLink(id_host, id_switch, port1 = 0, port2 = port_switch, cls=TCLink)
 
