@@ -1,0 +1,13 @@
+# device table action criteria fields key_fields keys args_fields args
+
+table_add device:s4 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr port" "00:00:00:00:40:01 3"
+
+table_add device:s4 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr port" "00:00:00:00:02:02 1"
+
+table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "1" "port" "3"
+
+table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "2" "port" "2"
+
+table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "3" "port" "3"
+
+table_add device:s4 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "4" "" ""

@@ -1,0 +1,1 @@
+all table entries converted  from .json to runtime commands
