@@ -1,7 +1,8 @@
 /.vscode
 /tmp
-app/target/*
+app/target/
 resources/
+
 *.class
 *.pyc
 
