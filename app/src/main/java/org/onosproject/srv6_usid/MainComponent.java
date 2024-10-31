@@ -78,11 +78,11 @@ public class MainComponent {
         waitPreviousCleanup();
 
         compCfgService.preSetProperty("org.onosproject.net.flow.impl.FlowRuleManager",
-                                      "fallbackFlowPollFrequency", "4", false);
+                                    "fallbackFlowPollFrequency", "4", false);
         compCfgService.preSetProperty("org.onosproject.net.group.impl.GroupManager",
-                                      "fallbackGroupPollFrequency", "3", false);
-        compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
-                                      "requestIpv6ND", "true", false);
+                                    "fallbackGroupPollFrequency", "3", false);
+        //compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
+                                    //"requestIpv6ND", "true", false);
 
         log.info("Started");
     }
