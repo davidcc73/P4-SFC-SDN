@@ -28,7 +28,8 @@ import org.onosproject.srv6_usid.Ipv4RoutingComponent;
 
 @Service
 @Command(scope = "onos", name = "table_add",
-        description = "Insert a table rule")
+        description = "Insert a table rule [table_add device table action criteria fields key_fields keys args_fields args
+]")
 public class RouteInsertCommand extends AbstractShellCommand {
 
     @Argument(index = 0, name = "uri", description = "Device ID",

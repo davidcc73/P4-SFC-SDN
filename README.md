@@ -1,12 +1,11 @@
-# p4-srv6-INT
+# P4-SFC-SDN
 This work was performed in the scope of the project MH-SDVanet: Multihomed Software Defined Vehicular Networks (reference PTDC/EEI-COM/5284/2020).<br/>
 
 
-Fork of the project [](), implements 
+Fork of the project [multip4/P4-SFC](https://github.com/multip4/P4-SFC), more exactly this version [davidcc73/P4-SFC](https://github.com/davidcc73/P4-SFC), that implements SFC using P4 switches with no SDN Controller, this project aims to migrate it to Docker Containers and add to it a ONOS Controller, responsible for the pushing of the P4 Pipelines and the Table entries.
 
 
 
-# Credits<br/>
 
 # Repository structure
 This repository is structured as follows: <br/>
@@ -15,17 +14,23 @@ This repository is structured as follows: <br/>
  * `mininet/` Mininet scripts to emulate a topology of `stratum_bmv2` devices <br/>
  * `images/` Contains the images used on this ReadMe file. <br/>
  * `p4src/` P4 implementation <br/>
-  * `Commands/` Contains files with CLI commands for testing <br/>
- * `test/` some test scripts be runned directly on the hosts of the topology <br/>
+ * `Commands/` Contains files with CLI commands for testing <br/>
  * `utils/` utilities include dockerfile and wireshark plugin <br/>
  * `tmp/` temporary directory that contains the logs from `ONOS` and the `P4 Switches`<br/>
 
-# Architecture
+
+# Topology
+
+The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, it's imporntant that the 2 do coincide.
+
+Our Topology:
+![Topology](images/topology.drawio.png "Topology")
+
 
 
 # Setup
 
-For the developemnt of this project we used Ubuntu LTS 20.04/22.04, so the presented commands are meant to it.
+For the developemnt of this project we used Ubuntu LTS 22.04, so the presented commands are meant to it.
 Any Linux Distro capable of installing the needed programs should work fine.
 
 ### Install Docker Engine
@@ -45,17 +50,6 @@ sudo make deps
 ```
 
 
-
-
-### Wireshark (Optional)
-To help dissecting INT reports, install wirehsark plugin located at "util/wireshark/P4INT_report_IPV6.lua"<br/>
-into <br/>"/usr/lib/x86_64-linux-gnu/wireshark/plugins/"
-
-It's limited to a fixed number of hops, but is easy to modify to a different number and to new report's fields.
-
-Some data is displeyed incorrectly, trust the one printed by the INT collector.
-
-
 # Implementation
 
 
@@ -63,7 +57,7 @@ Some data is displeyed incorrectly, trust the one printed by the INT collector.
 
 ### Stratum Image
 The stratum image used is a custom image of stratrum version: `2022-06-30` built from source by modifying the `Dockerfile`
-by adding X11, pip3 at runtime and scapy to it (new version at util/stratum/Dockerfile).
+by adding X11, pip3 at runtime and scapy to it (new version at util/docker/stratum_bmv2/Dockerfile).
 
 If needed to recompile the image, drop de Dockerfile at /tools/mininet/, the current image was compiled with name:`davidcc73/ngsdn-tutorial:stratum_bmv2_X11_scapy`
 (the official installation script contains some small naming errors that will pop up during compilation).
@@ -73,7 +67,7 @@ The custom image was published at docker hub, and is pulled from there, by doing
 
 
 ### Interfaces
-
+`TODO`
 
 
 ## ONOS
@@ -81,7 +75,7 @@ Our custom ONOS' CLI commands:
 
 | Command           | Description   |
 |-------------------|---------------|
-|       |  |
+| table_add      | Insert a table rule on a specifi switch |
 
 ## P4
 All switches P4 enabled (based on [bmv2](https://github.com/p4lang/behavioral-model) P4 software implementation)
@@ -172,8 +166,11 @@ Connect to ONOS CLI by doing `sudo make onos-cli` and run:
 
 ### Basic Configuration:
 ```bash
-#           
-onos-cli>    
+# Push Table entries to each switch          
+source /config/sample_rules_hasfc/s1.txt 
+source /config/sample_rules_hasfc/s2.txt
+source /config/sample_rules_hasfc/s3.txt
+source /config/sample_rules_hasfc/s4.txt
 ```
 
 
@@ -181,16 +178,8 @@ onos-cli>
 
 
 
-
-
-
-
-
-
-
-
-
 ## Tests
+`TODO`
 
 
 ### ONOS UI
@@ -200,3 +189,33 @@ Then, return to the UI and press <br/>
 * `h` to show the hosts <br/>
 * `l` to display the nodes labels <br/>
 * `a` a few times until it displays link utilization in packets per second <br/>
+
+Currently ONOS UI does not represent the links between switchs because we are not using LLDP.
+
+
+
+# Original P4-SFC ReadMe
+
+## High Performance and High available Service Function Chaining in Programmable Data Plane
+
+This is a P4 (P4_16) implementation of service function chaining 
+Our implementation includes the following SFC core components and functions.
+
+* Classifier
+  * Service Function Path assignment
+  * SFC encapsulation
+* Service Function Forwarder (SFF)
+  * SF forwarding
+  * SFC Decapsulation
+
+### System Requirements
+* Ubuntu 14.04+
+* [P4 BMv2](https://github.com/p4lang/behavioral-model)
+* [p4c](https://github.com/p4lang/p4c)
+* [p4Runtime](https://github.com/p4lang/PI)
+
+We highly recommend to use [a VM of P4 tutorials](https://github.com/p4lang/tutorials/tree/sigcomm18-final-edits) that has all of the required software installed.
+
+Note that this implementation has only been tested in BMv2.
+Therefore, it may not work as is on production P4-enabled programmable switches.
+
