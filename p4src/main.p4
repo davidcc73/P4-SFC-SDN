@@ -2,11 +2,10 @@
 #include <core.p4>
 #include <v1model.p4>
 
-//#include "include/header.p4"
 #include "include/deparser.p4"
 //#include "include/checksum.p4"
 //#include "include/Ingress.p4"
-//#include "include/Egress.p4"
+#include "include/Egress.p4"
 #include "include/define.p4"
 #include "include/headers.p4"
 
@@ -203,15 +202,6 @@ control MyIngress(inout headers hdr,
     }
 }
 
-/*************************************************************************
-****************  E G R E S S   P R O C E S S I N G   *******************
-*************************************************************************/
-
-control MyEgress(inout headers hdr,
-                 inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
-    apply { }
-}
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
