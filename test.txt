@@ -25,4 +25,4 @@ source /config/sample_rules_hasfc/s4.txt
 h1 python3 /mininet/tools/send.py -ip_addr h2 -i 0.1 -dscp 0
 
 
-h2 python3 /mininet/tools/receive.py 
+python3 /mininet/tools/receive.py 

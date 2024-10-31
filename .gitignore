@@ -3,6 +3,6 @@
 app/target/*
 resources/
 *.class
-
+*.pyc
 
 test.txt

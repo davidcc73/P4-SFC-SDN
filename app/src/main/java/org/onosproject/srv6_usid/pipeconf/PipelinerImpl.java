@@ -107,7 +107,7 @@ public class PipelinerImpl extends AbstractHandlerBehaviour implements Pipeliner
                 .fromApp(obj.appId())
                 .withPriority(obj.priority())
                 .withTreatment(DefaultTrafficTreatment.builder()
-                                       .piTableAction(cloneToCpuAction).build());
+                .piTableAction(cloneToCpuAction).build());
 
         if (obj.permanent()) {
             ruleBuilder.makePermanent();

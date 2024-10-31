@@ -165,8 +165,8 @@ public class MainComponent {
             }
 
             log.info("Waiting to remove flows and groups from " +
-                             "previous execution of {}...",
-                     appId.name());
+                            "previous execution of {}...",
+                    appId.name());
 
             sleep(CLEAN_UP_DELAY);
 

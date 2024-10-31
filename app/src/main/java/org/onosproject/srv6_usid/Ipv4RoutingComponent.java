@@ -151,28 +151,6 @@ public class Ipv4RoutingComponent{
      * @param deviceId the device ID
      */
     private void setUpMyStationTable(DeviceId deviceId) {
-        /*
-        log.info("Adding My Station rules to {}...", deviceId);
-
-        final MacAddress myStationMac = getMyStationMac(deviceId);
-
-        final String tableId = "IngressPipeImpl.l2_firewall";
-
-        final PiCriterion match = PiCriterion.builder()
-                .matchExact(
-                        PiMatchFieldId.of("hdr.ethernet.dst_addr"),
-                        myStationMac.toBytes())
-                .build();
-
-        final PiTableAction action = PiAction.builder()
-                .withId(PiActionId.of("NoAction"))
-                .build();
-
-        final FlowRule myStationRule = Utils.buildFlowRule(
-                deviceId, appId, tableId, match, action);
-
-        flowRuleService.applyFlowRules(myStationRule);*/
-
         log.info("Detected device: {}...", deviceId);
     }
 
