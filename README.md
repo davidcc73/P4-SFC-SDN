@@ -24,6 +24,7 @@ This repository is structured as follows: <br/>
 The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, it's imporntant that the 2 do coincide.
 
 Our Topology:
+
 ![Topology](images/topology.drawio.png "Topology")
 
 
