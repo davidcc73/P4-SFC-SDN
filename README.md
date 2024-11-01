@@ -2,7 +2,7 @@
 This work was performed in the scope of the project MH-SDVanet: Multihomed Software Defined Vehicular Networks (reference PTDC/EEI-COM/5284/2020).<br/>
 
 
-Fork of the project [multip4/P4-SFC](https://github.com/multip4/P4-SFC), more exactly this version [davidcc73/P4-SFC](https://github.com/davidcc73/P4-SFC), that implements SFC using P4 switches with no SDN Controller, this project aims to migrate it to Docker Containers and add to it a ONOS Controller, responsible for the pushing of the P4 Pipelines and the Table entries.
+Fork of the project [multip4/P4-SFC](https://github.com/multip4/P4-SFC), more exactly this version [davidcc73/P4-SFC](https://github.com/davidcc73/P4-SFC) and its corrections, `multip4/P4-SFC` implements SFC using P4 switches with no SDN Controller, this project aims to migrate it to Docker Containers and add to it a ONOS Controller, responsible for the pushing of the P4 Pipelines and the Table entries.
 
 
 
