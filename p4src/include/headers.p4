@@ -35,7 +35,7 @@ header ethernet_t {
 
 header sfc_t {
     bit<8> id;
-    bit<8> sc; // Chaint racker
+    bit<8> sc; // Chain tracker (number of nodes, including encapsulation, no matter where, if 0 decapsulate)
 }
 
 header sfc_chain_t {

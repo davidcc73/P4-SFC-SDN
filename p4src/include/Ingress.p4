@@ -44,7 +44,7 @@ control MyIngress(inout headers hdr,
     }
     table sf_processing {
         key = {
-            hdr.sfc_chain[0].sf: exact;
+            hdr.sfc_chain[0].sf: exact;       //it's the id of the current node, causing the pop in the SFC stack (to simulate processing). NOT DONE NOW: if not trigered, we keep doing SFC forwarding.
         }
         actions = {
             sf_action;
@@ -76,8 +76,8 @@ control MyIngress(inout headers hdr,
         hdr.sfc_chain[0].sf = sf1; // Too ugly tough.. ASIC does not allow loops
         hdr.sfc_chain[1].sf = sf2;
         hdr.sfc_chain[2].sf = sf3;
-        hdr.sfc_chain[3].sf = sf4;
-        hdr.sfc_chain[0].tail = 0; // Too ugly tough..
+        hdr.sfc_chain[3].sf = sf4; //this means at the most we can do visit 4 SFs
+        hdr.sfc_chain[0].tail = 0; // Too ugly tough..   This are never used!
         hdr.sfc_chain[1].tail = 0;
         hdr.sfc_chain[2].tail = 0;
         hdr.sfc_chain[3].tail = 1;
@@ -100,7 +100,7 @@ control MyIngress(inout headers hdr,
     }
     table sfc_egress { // overlay forwarding
         key = {
-            hdr.sfc_chain[0].sf: exact;
+            hdr.sfc_chain[0].sf: exact;             //id of the next node in the chain, loop to self is not implemented in the P4 code
         }
         actions = {
             sfc_forward;

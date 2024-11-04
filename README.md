@@ -146,6 +146,17 @@ These two files are symlinked inside the `app/src/main/resources/` folder and us
 
 
 
+## SFC
+| DSCP  | Nodes to Travel to before DST |
+|-------|------------------|
+| 2     | s2              |
+| 3     | s3              |
+| 10    | s2 -> s3        |
+| 11    | s3 -> s2        |
+| Others| None            |
+
+
+
 
 ## ONOS Apps and Connections
 After ONOS boots, run:

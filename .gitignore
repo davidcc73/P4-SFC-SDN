@@ -7,3 +7,4 @@ resources/
 *.pyc
 
 test.txt
+p4src/build/
