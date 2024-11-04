@@ -1,1 +1,4 @@
 all table entries converted  from .json to runtime commands
+
+
+currently all switches can be specified to be traveled to via SFC, but we only have rules for combinations of s2 and s3
