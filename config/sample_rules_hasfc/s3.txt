@@ -1,15 +1,15 @@
 # table_add device table action criteria fields key_fields keys args_fields args
 
+#IPv4 Forwarding
 table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr port" "00:00:00:00:10:01 1"
-
 table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr port" "00:00:00:00:40:01 2"
 
 
-#SFC Processing
+#SFC Processing (refers to current node)
 table_add device:s3 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "3" "" ""
 
 
-#SFC Forwarding
+#SFC Forwarding (Has SFC Header, but not for us)
 table_add device:s3 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "1" "port" "1"
 table_add device:s3 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "2" "port" "3"
 table_add device:s3 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "4" "port" "2"
