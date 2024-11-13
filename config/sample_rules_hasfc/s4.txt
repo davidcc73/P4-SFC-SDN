@@ -9,16 +9,16 @@ table_add device:s4 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstA
 table_add device:s4 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "4" "" ""
 
 
-#SFC Forwarding (Has SFC Header, but not for us)
+#SFC Forwarding (Has SFC Header, but the current SFC value is not for us, ONE ENTRY PER POSSIBLE SFC VALUE)
 table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "1" "port" "4"
 table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "2" "port" "2"
 table_add device:s4 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "3" "port" "3"
 
 
-#SFC Encapsulation (rule_ID num_of_sf sf1 sf2 sf3 sf4)
-table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "2" "id sc sf1 sf2 sf3 sf4" "1 2 4 2 0 0"
-table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "3" "id sc sf1 sf2 sf3 sf4" "2 2 4 3 0 0"
-table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "10" "id sc sf1 sf2 sf3 sf4" "3 3 4 2 3 0"
-table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "11" "id sc sf1 sf2 sf3 sf4" "4 3 4 3 2 0"
+#SFC Encapsulation (rule_ID num_of_sf sf1 sf2 sf3 sf4) (the encapsulation node does not needed in the chain, only if intended to loop back)
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "2" "id sc sf1 sf2 sf3 sf4" "1 1 2 0 0 0"
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "3" "id sc sf1 sf2 sf3 sf4" "2 1 3 0 0 0"
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "10" "id sc sf1 sf2 sf3 sf4" "3 2 2 3 0 0"
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "11" "id sc sf1 sf2 sf3 sf4" "4 2 3 2 0 0"
 
 

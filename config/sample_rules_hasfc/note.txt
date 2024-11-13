@@ -1,4 +1,0 @@
-all table entries converted  from .json to runtime commands
-
-
-all switches can be specified to be traveled to via SFC, but currently we only have encapsulation rules for combinations of s2 and s3
