@@ -27,6 +27,13 @@
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
       }
+    },
+    "device:s5": {
+      "basic": {
+        "managementAddress": "grpc://localhost:50005?device_id=1",
+        "driver": "stratum-bmv2",
+        "pipeconf": "org.p4.srv6_usid"
+      }
     }
   },
   "ports": {
@@ -62,6 +69,22 @@
         }
       ]
     },
+    "device:s1/5": {
+      "interfaces": [
+        {
+          "name": "s1/5",
+          "ips": ["10.0.1.5/24"]
+        }
+      ]
+    },
+    "device:s1/20": {
+      "interfaces": [
+        {
+          "name": "s1/20",
+          "ips": ["10.0.1.20/24"]
+        }
+      ]
+    },
 
 
 
@@ -91,6 +114,14 @@
         }
       ]
     },
+    "device:s2/4": {
+      "interfaces": [
+        {
+          "name": "s2/4",
+          "ips": ["10.0.2.4/24"]
+        }
+      ]
+    },
 
 
 
@@ -117,6 +148,14 @@
         {
           "name": "s3/3",
           "ips": ["10.0.3.3/24"]
+        }
+      ]
+    },
+    "device:s3/4": {
+      "interfaces": [
+        {
+          "name": "s3/4",
+          "ips": ["10.0.3.4/24"]
         }
       ]
     },
@@ -155,19 +194,81 @@
           "ips": ["10.0.4.4/24"]
         }
       ]
+    },
+    "device:s4/5": {
+      "interfaces": [
+        {
+          "name": "s4/5",
+          "ips": ["10.0.4.5/24"]
+        }
+      ]
+    },
+
+
+
+
+    "device:s5/1": {
+      "interfaces": [
+        {
+          "name": "s5/1",
+          "ips": ["10.0.5.1/24"]
+        }
+      ]
+    },
+    "device:s5/2": {
+      "interfaces": [
+        {
+          "name": "s5/2",
+          "ips": ["10.0.5.2/24"]
+        }
+      ]
+    },
+    "device:s5/3": {
+      "interfaces": [
+        {
+          "name": "s5/3",
+          "ips": ["10.0.5.3/24"]
+        }
+      ]
+    },
+    "device:s5/4": {
+      "interfaces": [
+        {
+          "name": "s5/4",
+          "ips": ["10.0.5.4/24"]
+        }
+      ]
+    },
+    "device:s5/20": {
+      "interfaces": [
+        {
+          "name": "s5/20",
+          "ips": ["10.0.5.10/24"]
+        }
+      ]
     }
 
 
   },
   "hosts": {
-    "00:00:00:00:00:10/None": {
+    "00:00:00:00:01:01/None": {
       "basic": {
         "name": "h1"
       }
     },
-    "00:00:00:00:00:20/None": {
+    "00:00:00:00:02:02/None": {
       "basic": {
         "name": "h2"
+      }
+    },
+    "00:00:00:00:05:01/None": {
+      "basic": {
+        "name": "h3"
+      }
+    },
+    "00:00:00:00:01:02/None": {
+      "basic": {
+        "name": "h4"
       }
     }
   }
