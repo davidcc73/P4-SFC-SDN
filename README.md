@@ -147,12 +147,28 @@ These two files are symlinked inside the `app/src/main/resources/` folder and us
 
 
 ## SFC
+The last node in the chain is responsible for decapsulation of SFC and will forward the pkt using IPv4.
+
+Not all nodes need to be in the chain, there is support for intermediary nodes, by reading the current `sf` in the top of the chain (next service to be applyed).
+
+At decapsulation, DSCP is set to 0, to avoid re-encapsulation at the nodes that can do it.
+
+<strong>Currently Programmed Chains:</strong>
+
 | DSCP  | Nodes to Travel to before DST |
-|-------|------------------|
+|-------|-----------------|
+| 1     | s1              |
 | 2     | s2              |
 | 3     | s3              |
+| 4     | s4              |
+| 5     | s5              |
 | 10    | s2 -> s3        |
 | 11    | s3 -> s2        |
+| 12    | s2 -> s3 -> s4  |
+| 13    | s2 -> s4        |
+| 14    | s5 -> s4        |
+| 15    | s2 -> s3 -> s1  |
+| 16    | s2 -> s1        |
 | Others| None            |
 
 

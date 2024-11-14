@@ -23,9 +23,17 @@ table_add device:s1 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_ch
 
 
 #SFC Encapsulation (rule_ID num_of_sf sf1 sf2 sf3 sf4) (the encapsulation node does not needed in the chain, only if intended to loop back)
-table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "2" "id sc sf1 sf2 sf3 sf4" "1 1 2 0 0 0"
-table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "3" "id sc sf1 sf2 sf3 sf4" "2 1 3 0 0 0"
-table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "10" "id sc sf1 sf2 sf3 sf4" "3 2 2 3 0 0"
-table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "11" "id sc sf1 sf2 sf3 sf4" "4 2 3 2 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "1" "id sc sf1 sf2 sf3 sf4" "1 1 1 0 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "2" "id sc sf1 sf2 sf3 sf4" "2 1 2 0 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "3" "id sc sf1 sf2 sf3 sf4" "3 1 3 0 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "4" "id sc sf1 sf2 sf3 sf4" "4 1 4 0 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "5" "id sc sf1 sf2 sf3 sf4" "5 1 5 0 0 0"
 
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "10" "id sc sf1 sf2 sf3 sf4" "10 2 2 3 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "11" "id sc sf1 sf2 sf3 sf4" "11 2 3 2 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "12" "id sc sf1 sf2 sf3 sf4" "12 3 2 3 4 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "13" "id sc sf1 sf2 sf3 sf4" "13 2 2 4 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "14" "id sc sf1 sf2 sf3 sf4" "14 2 5 4 0 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "15" "id sc sf1 sf2 sf3 sf4" "15 3 2 3 1 0"
+table_add device:s1 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "16" "id sc sf1 sf2 sf3 sf4" "16 2 2 1 0 0"
 

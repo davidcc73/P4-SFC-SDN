@@ -56,7 +56,7 @@ control MyIngress(inout headers hdr,
 
     action sfc_decapsulation() {
         hdr.ethernet.etherType = TYPE_IPV4;
-        hdr.ipv4.dscp = 0;
+        hdr.ipv4.dscp = 0;                     //avoids re-encapsulations on nodes that can encapsulate
         hdr.sfc.setInvalid();
         hdr.sfc_chain[0].setInvalid();
         hdr.sfc_chain[1].setInvalid();

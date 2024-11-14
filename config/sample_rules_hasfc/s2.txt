@@ -21,3 +21,6 @@ table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_ch
 table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "4" "port" "2"
 table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "5" "port" "4"
 
+
+#SFC Encapsulation 
+#no encapsulation needed, not connected to any host
