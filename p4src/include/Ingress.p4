@@ -17,7 +17,7 @@ control MyIngress(inout headers hdr,
 
     counter(MAX_SFC_ID, CounterType.packets_and_bytes) ingressSFCCounter;
     action drop() {
-        mark_to_drop(standard_metadata);
+        mark_to_drop(standard_metadata);                           //change egress_port, so pkt is deopped at Ingrees' end
     }
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
@@ -140,9 +140,14 @@ control MyIngress(inout headers hdr,
             sf_processing.apply();          // If this Sw includes SF, just do it.
             ingressSFCCounter.count((bit<32>) hdr.sfc.id);
 
-            if(meta.l3_firewall == 1){     // If this node is a l3_fireWall, do it
-                l3_fireWall.apply();
+            if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
+                if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress port special value
+                    return;                          // finish the Ingress processing
+                }
             }
+
+
+            //--------------------------------- L2 Forwarding (Set the Egress Port)---------------------------------
 
             if (hdr.sfc.sc == 0){           // SFC ends
                 sfc_decapsulation();        //Decaps the packet
