@@ -37,10 +37,11 @@ control MyIngress(inout headers hdr,
         size = 1024;
         default_action = drop();
     }
-    action sf_action() { // Firewall, NAT, etc... SW can be SF
+    action sf_action(bit<1> fireWall) { // Firewall, NAT, etc... SW can be SF
         hdr.sfc.sc = hdr.sfc.sc - 1; // decrease chain tracker/length
         hdr.sfc_chain.pop_front(1); // Remove used SF
-
+        
+        meta.l3_firewall = fireWall;       // Flag current node as being Firewall or not
     }
     table sf_processing {
         key = {
@@ -110,6 +111,18 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
+    table l3_fireWall {
+        key = {
+            hdr.ipv4.dstAddr: lpm;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
     apply {
         // ICMP pkts are being parsed and treated as regular ipv4
         if(!hdr.ipv4.isValid()){
@@ -126,6 +139,10 @@ control MyIngress(inout headers hdr,
 
             sf_processing.apply();          // If this Sw includes SF, just do it.
             ingressSFCCounter.count((bit<32>) hdr.sfc.id);
+
+            if(meta.l3_firewall == 1){     // If this node is a l3_fireWall, do it
+                l3_fireWall.apply()
+            }
 
             if (hdr.sfc.sc == 0){           // SFC ends
                 sfc_decapsulation();        //Decaps the packet

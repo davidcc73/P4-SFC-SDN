@@ -82,7 +82,7 @@ header udp_t {
 }
 
 struct metadata {
-    /* empty */
+    bit<1> l3_firewall;                        //flag to mark if the current node is a l3_firewall
 }
 
 struct headers {

@@ -145,6 +145,11 @@ Moreover, it will compile the p4 code contained in `p4src` creating two output f
 These two files are symlinked inside the `app/src/main/resources/` folder and used to build the application. <br/>
 
 
+## Firewall
+The node s2 is defined to act as a L3 firewall, it reads the packet's `dstAddr` and drops if it does not match any of the IPs on its L3 firewall table, the IPs in the table are the ones from all the hosts in the topology.
+
+The table entries with the IPs, are given to the switch via its configuration file.
+
 
 ## SFC
 The last node in the chain is responsible for decapsulation of SFC and will forward the pkt using IPv4.
