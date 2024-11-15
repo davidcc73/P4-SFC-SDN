@@ -141,7 +141,7 @@ control MyIngress(inout headers hdr,
             ingressSFCCounter.count((bit<32>) hdr.sfc.id);
 
             if(meta.l3_firewall == 1){     // If this node is a l3_fireWall, do it
-                l3_fireWall.apply()
+                l3_fireWall.apply();
             }
 
             if (hdr.sfc.sc == 0){           // SFC ends
