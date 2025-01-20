@@ -126,11 +126,11 @@ control MyIngress(inout headers hdr,
     action set_multicast_group(group_id_t gid) {
         log_msg("Multicast group set to:{}", {gid});
         standard_metadata.mcast_grp = gid;
-        local_metadata.is_multicast = true;
+        meta.is_multicast = true;
     }
     table multicast {                       // each multicast address will represent a group
         key = {
-            hdr.ethernet.dst_addr: ternary;
+            hdr.ethernet.dstAddr: ternary;
         }
         actions = {
             set_multicast_group;
@@ -145,10 +145,11 @@ control MyIngress(inout headers hdr,
             return;
         }
 
-        if (hdr.ipv4.dscp == 0){
-            ipv4_lpm.apply();
-        }
-        else{   // SFC packets (dscp > 0)
+
+        //---------------SFC
+        if (hdr.ipv4.dscp != 0){
+        
+            // SFC packets (dscp > 0)
             if (!hdr.sfc.isValid()){        // intial stage?
                 sfc_classifier.apply();     // Encaps the packet
             }
@@ -162,21 +163,19 @@ control MyIngress(inout headers hdr,
                 }
             }
 
-
-            //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
-
             if (hdr.sfc.sc == 0){           // SFC ends
                 sfc_decapsulation();        // Decaps the packet
-
-                // Underlay forwarding
-                if(!ipv4_lpm.apply().hit){  // unicast
-                    multicast().apply();    // Multicast (based on the dstAddr, sets )
-                }           
             }
-            else{
+            else{       //L2 Forwarding using SFC
                 sfc_egress.apply();         // Overlay forwarding
+                return;
             }
         }
+        
+        //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
+        if(!ipv4_lpm.apply().hit){  // unicast
+            multicast.apply();    // Multicast (based on the dstAddr, sets )
+        } 
     }
 }
 
@@ -184,7 +183,8 @@ control MyIngress(inout headers hdr,
 #endif
 
 
+//pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want
 //set group multicast e seus ports em cada switch pelo net.cfg
 //DSCP (nó especial, manipula para passar a ser multicast) -> DST ADDR ETH/IP    -> MULTICAST GROUP e PORT   esta ultima transição é feita pelo proprio straum (n consigo fazer manualmente por ONOS) 
-//o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de formaautomatica e escalavel
+//o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de forma automatica e escalavel
 //no noss cenario com o ONSO a so fazer push de regras antigas, so vamos ate aos addresses multicast e depois mapeamos diretamente para os portos de forma manual e estatica

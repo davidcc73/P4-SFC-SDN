@@ -11,6 +11,7 @@ typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 typedef bit<9>   port_num_t;    //added as part of having Controller
+typedef bit<16> group_id_t;
 
 
 //added as part of having Controller
@@ -83,7 +84,7 @@ header udp_t {
 
 struct metadata {
     bit<1> l3_firewall;                        //flag to mark if the current node is a l3_firewall
-    bit<1> is_multicast;
+    bool is_multicast;
 }
 
 struct headers {

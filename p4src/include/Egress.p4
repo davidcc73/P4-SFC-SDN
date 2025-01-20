@@ -12,7 +12,7 @@ control MyEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     apply { 
-        if (local_metadata.is_multicast == true && standard_metadata.ingress_port == standard_metadata.egress_port) {   //avoid multicast loops
+        if (meta.is_multicast == true && standard_metadata.ingress_port == standard_metadata.egress_port) {   //avoid multicast loops
             mark_to_drop(standard_metadata);
         }
     }
