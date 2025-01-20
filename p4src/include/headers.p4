@@ -83,6 +83,7 @@ header udp_t {
 
 struct metadata {
     bit<1> l3_firewall;                        //flag to mark if the current node is a l3_firewall
+    bit<1> is_multicast;
 }
 
 struct headers {

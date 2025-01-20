@@ -123,6 +123,22 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
+    action set_multicast_group(group_id_t gid) {
+        log_msg("Multicast group set to:{}", {gid});
+        standard_metadata.mcast_grp = gid;
+        local_metadata.is_multicast = true;
+    }
+    table multicast {                       // each multicast address will represent a group
+        key = {
+            hdr.ethernet.dst_addr: ternary;
+        }
+        actions = {
+            set_multicast_group;
+            drop;
+        }
+        default_action = drop();
+    }
+
     apply {
         // ICMP pkts are being parsed and treated as regular ipv4
         if(!hdr.ipv4.isValid()){
@@ -147,11 +163,15 @@ control MyIngress(inout headers hdr,
             }
 
 
-            //--------------------------------- L2 Forwarding (Set the egress_spec -> future output port)---------------------------------
+            //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
 
             if (hdr.sfc.sc == 0){           // SFC ends
                 sfc_decapsulation();        // Decaps the packet
-                ipv4_lpm.apply();           // Underlay forwarding
+
+                // Underlay forwarding
+                if(!ipv4_lpm.apply().hit){  // unicast
+                    multicast().apply();    // Multicast (based on the dstAddr, sets )
+                }           
             }
             else{
                 sfc_egress.apply();         // Overlay forwarding
@@ -162,3 +182,9 @@ control MyIngress(inout headers hdr,
 
 
 #endif
+
+
+//set group multicast e seus ports em cada switch pelo net.cfg
+//DSCP (nó especial, manipula para passar a ser multicast) -> DST ADDR ETH/IP    -> MULTICAST GROUP e PORT   esta ultima transição é feita pelo proprio straum (n consigo fazer manualmente por ONOS) 
+//o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de formaautomatica e escalavel
+//no noss cenario com o ONSO a so fazer push de regras antigas, so vamos ate aos addresses multicast e depois mapeamos diretamente para os portos de forma manual e estatica
