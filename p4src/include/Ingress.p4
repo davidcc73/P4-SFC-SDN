@@ -56,6 +56,7 @@ control MyIngress(inout headers hdr,
     }
 
     action sfc_decapsulation() {
+        log_msg("Doing SFC Decapsulation");
         hdr.ethernet.etherType = TYPE_IPV4;
         hdr.ipv4.dscp = 0;                     //avoids re-encapsulations on nodes that can encapsulate
         hdr.sfc.setInvalid();
@@ -66,6 +67,7 @@ control MyIngress(inout headers hdr,
     }
 
     action sfc_encapsulation(bit<8> id, bit<8> sc, bit<9> sf1, bit<9> sf2,bit<9> sf3, bit<9> sf4) {
+        log_msg("Doing SFC Encapsulation");
         hdr.ethernet.etherType = TYPE_SFC;
         hdr.sfc.setValid();
         hdr.sfc.id= id;
@@ -134,10 +136,10 @@ control MyIngress(inout headers hdr,
     }
 
     action set_dst_addr(ip4Addr_t ip, macAddr_t mac) {
-        log_msg("Dst IP addr set to:{}", {ip});
         log_msg("Dst MAC addr set to:{}", {mac});
-        hdr.ipv4.dstAddr = ip;
+        log_msg("Dst IP addr set to:{}", {ip});
         hdr.ethernet.dstAddr = mac;
+        hdr.ipv4.dstAddr = ip;
     }
     table multicast_dst_addr {         
         key = {
@@ -157,7 +159,7 @@ control MyIngress(inout headers hdr,
     }
     table multicast {                       // each multicast address will represent a group
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ethernet.dstAddr: lpm;
         }
         actions = {
             set_multicast_group;
@@ -186,25 +188,31 @@ control MyIngress(inout headers hdr,
 
             if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
                 if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress_spec special value
+                    log_msg("Pkt blocked by firewall");
                     return;                          // finish the Ingress processing
                 }
             }
 
-            if (hdr.sfc.sc == 0){//L2 Forwarding using SFC
+            if (hdr.sfc.sc != 0){           //L2 Forwarding using SFC
+                log_msg("Trying SFC forwarding");
                 sfc_egress.apply();         // Overlay forwarding
                 return;
             }
-            else{              // SFC ends
+            else{                           // SFC ends
                 sfc_decapsulation();        // Decaps the packet    
             }
         }
         
         //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
+        if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
+            log_msg("Trying to change pkt to multicast");
+            multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+        }
+
         if(!ipv4_lpm.apply().hit){  // Unicast Forwarding
-            if(multicaster.apply().hit){      // only the multicaster should change the dst ip to multicast
-                multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
-            }
+            log_msg("Unicast failed. Trying Multicast");
             if(!multicast.apply().hit){   // Multicast Forwarding (based on the dstAddr, sets mcast_grp)
+                log_msg("Multicast failed, droping pkt");
                 drop();                   // can not do uni or multicast, just drop
             }
         }

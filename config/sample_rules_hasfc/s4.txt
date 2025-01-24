@@ -46,6 +46,6 @@ table_add device:s4 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
 
 #### map multicast_ip_dst -> mcast_group
 #hosts: all
-table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.255 32" "gid" "1"
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FF 48" "gid" "1"
 #hosts: h2, h4
-table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.254 32" "gid" "2"
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "2"
