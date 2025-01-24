@@ -1,6 +1,6 @@
 # table_add device table action criteria fields key_fields keys args_fields args
 
-#IPv4 Forwarding
+#IPv4 Forwarding Unicast
 #Mine
 table_add device:s4 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr port" "00:00:00:00:02:02 1"
 #Others
@@ -37,3 +37,15 @@ table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "
 table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "15" "id sc sf1 sf2 sf3 sf4" "15 3 2 3 1 0"
 table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "16" "id sc sf1 sf2 sf3 sf4" "16 2 2 1 0 0"
 
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "51" "id sc sf1 sf2 sf3 sf4" "51 2 2 3 0 0"
+table_add device:s4 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "52" "id sc sf1 sf2 sf3 sf4" "52 2 2 3 0 0"
+
+################ Multicast
+#### mark node as multicaster
+table_add device:s4 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
+
+#### map multicast_ip_dst -> mcast_group
+#hosts: all
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.255 32" "gid" "1"
+#hosts: h2, h4
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.254 32" "gid" "2"

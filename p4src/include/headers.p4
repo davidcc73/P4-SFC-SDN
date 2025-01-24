@@ -83,8 +83,9 @@ header udp_t {
 }
 
 struct metadata {
-    bit<1> l3_firewall;                        //flag to mark if the current node is a l3_firewall
-    bool is_multicast;
+    bit<1> l3_firewall;                     //flag to mark if the current node is a l3_firewall
+    bool is_multicast;                      //id multicast pkts
+    bit<6> dscp_at_ingress;                 //needed because after decapsulation the DSCP is set to 0 so the pkt is not recapsulated by a switch with hosts
 }
 
 struct headers {

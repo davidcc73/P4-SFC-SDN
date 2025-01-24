@@ -1,6 +1,6 @@
 # table_add device table action criteria fields key_fields keys args_fields args
 
-#IPv4 Forwarding
+#IPv4 Forwarding Unicast
 #Others
 #s1
 table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr port" "00:00:00:00:10:01 1"
@@ -24,3 +24,18 @@ table_add device:s3 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_ch
 
 #SFC Encapsulation 
 #no encapsulation needed, not connected to any host
+
+
+################ Multicast
+#### mark node as multicaster
+table_add device:s3 MyIngress.multicaster NoAction EXACT "1" "1" "" ""
+
+#### map multicast_ip_dst -> mcast_group
+#hosts: all
+table_add device:s3 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.255 32" "gid" "1"
+#hosts: h2, h4
+table_add device:s3 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.254 32" "gid" "2"
+
+## map DSCP -> multicast_ip_dst
+table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "51" "mac ip" "FF:FF:FF:FF:FF:FF 224.255.255.255"
+table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "52" "mac ip" "FF:FF:FF:FF:FF:FE 224.255.255.254"

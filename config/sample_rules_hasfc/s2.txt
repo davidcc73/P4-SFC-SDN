@@ -1,6 +1,6 @@
 # table_add device table action criteria fields key_fields keys args_fields args
 
-#IPv4 Forwarding
+#IPv4 Forwarding Unicast
 #Others
 #s1
 table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr port" "00:00:00:00:10:01 1"
@@ -31,3 +31,14 @@ table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "" ""
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "" ""
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "" ""
+
+
+################ Multicast
+#### mark node as multicaster
+table_add device:s2 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
+
+#### map multicast_ip_dst -> mcast_group
+#hosts: all
+table_add device:s2 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.255 32" "gid" "1"
+#hosts: h2, h4
+table_add device:s2 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ipv4.dstAddr" "224.255.255.254 32" "gid" "2"

@@ -123,6 +123,33 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
+    table multicaster {
+        key = {
+            1w1: exact;    //dummy key of value 1
+        }
+        actions = {
+            NoAction;
+        }
+        default_action = NoAction();
+    }
+
+    action set_dst_addr(ip4Addr_t ip, macAddr_t mac) {
+        log_msg("Dst IP addr set to:{}", {ip});
+        log_msg("Dst MAC addr set to:{}", {mac});
+        hdr.ipv4.dstAddr = ip;
+        hdr.ethernet.dstAddr = mac;
+    }
+    table multicast_dst_addr {         
+        key = {
+            meta.dscp_at_ingress: exact;        //in case of SFC decap, the header dscp is 0
+        }
+        actions = {
+            set_dst_addr;
+            NoAction;
+        }
+        default_action = NoAction();
+    }
+
     action set_multicast_group(group_id_t gid) {
         log_msg("Multicast group set to:{}", {gid});
         standard_metadata.mcast_grp = gid;
@@ -130,13 +157,13 @@ control MyIngress(inout headers hdr,
     }
     table multicast {                       // each multicast address will represent a group
         key = {
-            hdr.ethernet.dstAddr: ternary;
+            hdr.ipv4.dstAddr: lpm;
         }
         actions = {
             set_multicast_group;
-            drop;
+            NoAction;
         }
-        default_action = drop();
+        default_action = NoAction();
     }
 
     apply {
@@ -144,8 +171,8 @@ control MyIngress(inout headers hdr,
         if(!hdr.ipv4.isValid()){
             return;
         }
-
-
+        meta.dscp_at_ingress = hdr.ipv4.dscp;
+        
         //---------------SFC
         if (hdr.ipv4.dscp != 0){
         
@@ -163,19 +190,24 @@ control MyIngress(inout headers hdr,
                 }
             }
 
-            if (hdr.sfc.sc == 0){           // SFC ends
-                sfc_decapsulation();        // Decaps the packet
-            }
-            else{       //L2 Forwarding using SFC
+            if (hdr.sfc.sc == 0){//L2 Forwarding using SFC
                 sfc_egress.apply();         // Overlay forwarding
                 return;
+            }
+            else{              // SFC ends
+                sfc_decapsulation();        // Decaps the packet    
             }
         }
         
         //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
-        if(!ipv4_lpm.apply().hit){  // unicast
-            multicast.apply();    // Multicast (based on the dstAddr, sets )
-        } 
+        if(!ipv4_lpm.apply().hit){  // Unicast Forwarding
+            if(multicaster.apply().hit){      // only the multicaster should change the dst ip to multicast
+                multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+            }
+            if(!multicast.apply().hit){   // Multicast Forwarding (based on the dstAddr, sets mcast_grp)
+                drop();                   // can not do uni or multicast, just drop
+            }
+        }
     }
 }
 
@@ -183,7 +215,7 @@ control MyIngress(inout headers hdr,
 #endif
 
 
-//pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want
+//pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want, fazer a decisao antes do desencapsualmento estara sempre a 0
 //set group multicast e seus ports em cada switch pelo net.cfg
 //DSCP (nó especial, manipula para passar a ser multicast) -> DST ADDR ETH/IP    -> MULTICAST GROUP e PORT   esta ultima transição é feita pelo proprio straum (n consigo fazer manualmente por ONOS) 
 //o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de forma automatica e escalavel

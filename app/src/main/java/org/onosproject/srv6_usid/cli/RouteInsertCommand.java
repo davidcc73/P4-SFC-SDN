@@ -109,7 +109,9 @@ public class RouteInsertCommand extends AbstractShellCommand {
 
         // Execute command - replace this line with actual logic to interact with the device
         print("Installing route on device %s", uri);
-        app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args);
+        String res = app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args);
+
+        if(res != null) print(res);
     }
 
 }

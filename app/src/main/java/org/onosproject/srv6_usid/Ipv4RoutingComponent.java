@@ -49,6 +49,9 @@ import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import com.google.common.collect.Lists;
 
 import static org.onosproject.srv6_usid.AppConstants.INITIAL_SETUP_DELAY;
@@ -157,7 +160,7 @@ public class Ipv4RoutingComponent{
     /**
      * @param deviceId the device ID
      */
-    public void setConfigTables(DeviceId deviceId, String tableId, String action, String criteria, 
+    public String setConfigTables(DeviceId deviceId, String tableId, String action, String criteria, 
                                 String[] fields_keys, String[] keys, 
                                 String[] args_fields, String[] args) {
         PiCriterion match = null;        
@@ -170,7 +173,7 @@ public class Ipv4RoutingComponent{
 
         //-------------------------------------Match
         if(fields_keys != null && keys != null) {
-            if(criteria.equals("LPM")) {                 //only for match IPv4 
+            if(criteria.equals("LPM")) {                 //only to match 1 IPv4 
                 IpAddress ip = IpAddress.valueOf(keys[0]);
                 int prefix = Integer.valueOf(keys[1]);
                 builder_match = builder_match
@@ -178,7 +181,7 @@ public class Ipv4RoutingComponent{
                         PiMatchFieldId.of(fields_keys[0]),
                         ip.toOctets(),
                         prefix);
-            } else if(criteria.equals("EXACT")) {        
+            } else if(criteria.equals("EXACT")) {        //only to match x Integers
                 for(int i = 0; i < fields_keys.length; i++) {
                     builder_match = builder_match
                         .matchExact(
@@ -194,8 +197,16 @@ public class Ipv4RoutingComponent{
             for(int i = 0; i < args_fields.length; i++) {
                 if(args[i].contains(":")){                      //either mac
                     param = new PiActionParam(PiActionParamId.of(args_fields[i]), MacAddress.valueOf(args[i]).toBytes());
-                } 
-                else {  // or integer
+                }
+                else if(args[i].contains(".")){                 //IPv4
+                    try {
+                        param = new PiActionParam(PiActionParamId.of(args_fields[i]), InetAddress.getByName(args[i]).getAddress());
+                    }catch (UnknownHostException e) {
+                        log.error("Invalid IPv4 address: {}", args[i], e);
+                        return "ERROR IPv4 conversion: SEE ONOS LOGS";
+                    }
+                }
+                else {                                          // or integer
                     param = new PiActionParam(PiActionParamId.of(args_fields[i]), Integer.valueOf(args[i]));
                 }
                 
@@ -211,6 +222,7 @@ public class Ipv4RoutingComponent{
                 deviceId, appId, tableId, match, tableAction);
 
         flowRuleService.applyFlowRules(Rule);
+        return null;
     }
 
 
