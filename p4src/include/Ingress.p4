@@ -19,8 +19,8 @@ control MyIngress(inout headers hdr,
     action drop() {
         mark_to_drop(standard_metadata);                           //changes egress_spec to special value, so pkt is dropped at Ingrees' end
     }
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
+
+    action ipv4_forward(macAddr_t dstAddr) {
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -31,12 +31,12 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             ipv4_forward;
-            drop;
             NoAction;
         }
         size = 1024;
-        default_action = drop();
+        default_action = NoAction();
     }
+
     action sf_action(bit<1> fireWall) { // Firewall, NAT, etc... SW can be SF
         hdr.sfc.sc = hdr.sfc.sc - 1; // decrease chain tracker/length
         hdr.sfc_chain.pop_front(1); // Remove used SF
@@ -125,6 +125,21 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
+    action set_egress_port(egressSpec_t port) {          //set the egress port, using the dst mac address
+        standard_metadata.egress_spec = port;
+    }
+    table unicast {
+        key = {
+            hdr.ethernet.dstAddr: lpm;
+        }
+        actions = {
+            set_egress_port;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
     table multicaster {
         key = {
             1w1: exact;    //dummy key of value 1
@@ -159,7 +174,7 @@ control MyIngress(inout headers hdr,
     }
     table multicast {                       // each multicast address will represent a group
         key = {
-            hdr.ethernet.dstAddr: lpm;
+            hdr.ethernet.dstAddr: ternary;
         }
         actions = {
             set_multicast_group;
@@ -168,12 +183,48 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
-    apply {
-        // ICMP pkts are being parsed and treated as regular ipv4
-        if(!hdr.ipv4.isValid()){
-            return;
+    /*
+     * ACL table  and actions.
+     * Clone the packet to the CPU (PacketIn) or drop.
+     */
+    action clone_to_cpu() {
+        meta.perserv_CPU_meta.ingress_port = standard_metadata.ingress_port;
+        meta.perserv_CPU_meta.egress_port = CPU_PORT;                         //the packet only gets the egress right before egress, so we use CPU_PORT value
+        meta.perserv_CPU_meta.to_CPU = true;
+        clone_preserving_field_list(CloneType.I2E, CPU_CLONE_SESSION_ID, CLONE_FL_clone3);
+    }
+
+    direct_counter(CounterType.packets_and_bytes) acl_counter;
+    table acl {
+        key = {
+            standard_metadata.ingress_port: ternary;
+            hdr.ethernet.dstAddr: ternary;
+            hdr.ethernet.srcAddr: ternary;
+            hdr.ethernet.etherType: ternary;
+            meta.ip_proto: ternary;
+            meta.icmp_type: ternary;
+            meta.l4_src_port: ternary;
+            meta.l4_dst_port: ternary;
         }
+        actions = {
+            clone_to_cpu;
+            drop;
+        }
+        counters = acl_counter;
+    }
+
+    apply {
+        if(hdr.ethernet.etherType == ETHERTYPE_LLDP){
+            log_msg("DETETEI PKT LLDP");
+        }
+        if(hdr.ethernet.etherType == ETHERTYPE_ARP){
+            log_msg("DETETEI PKT ARP");
+        }
+        // ICMP pkts are being parsed and treated as regular ipv4
         meta.dscp_at_ingress = hdr.ipv4.dscp;
+
+        //---------------Clone to CPU
+        acl.apply();
         
         //---------------SFC
         if (hdr.ipv4.dscp != 0){
@@ -209,7 +260,10 @@ control MyIngress(inout headers hdr,
             multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
         }
 
-        if(!ipv4_lpm.apply().hit){  // Unicast Forwarding
+        if(ipv4_lpm.apply().hit){  // Unicast Forwarding L3: dst IP -> dst ethernet
+            unicast.apply();       // L2: dst ethernet -> ports
+        }
+        else{
             log_msg("Unicast failed. Trying Multicast");
             if(!multicast.apply().hit){   // Multicast Forwarding (based on the dstAddr, sets mcast_grp)
                 log_msg("Multicast failed, droping pkt");
@@ -223,7 +277,7 @@ control MyIngress(inout headers hdr,
 #endif
 
 
-//pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want, fazer a decisao antes do desencapsualmento estara sempre a 0
+// pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want, fazer a decisao antes do desencapsualmento estara sempre a 0
 //set group multicast e seus ports em cada switch pelo net.cfg
 //DSCP (nó especial, manipula para passar a ser multicast) -> DST ADDR ETH/IP    -> MULTICAST GROUP e PORT   esta ultima transição é feita pelo proprio straum (n consigo fazer manualmente por ONOS) 
 //o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de forma automatica e escalavel

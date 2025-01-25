@@ -71,12 +71,12 @@ public class InterpreterImpl extends AbstractHandlerBehaviour
     private static final Map<Criterion.Type, String> CRITERION_MAP =
             new ImmutableMap.Builder<Criterion.Type, String>()
                     .put(Criterion.Type.IN_PORT, "standard_metadata.ingress_port")
-                    .put(Criterion.Type.ETH_DST, "hdr.ethernet.dst_addr")
-                    .put(Criterion.Type.ETH_SRC, "hdr.ethernet.src_addr")
-                    .put(Criterion.Type.ETH_TYPE, "hdr.ethernet.ether_type")
+                    .put(Criterion.Type.ETH_DST, "hdr.ethernet.dstAddr")
+                    .put(Criterion.Type.ETH_SRC, "hdr.ethernet.srcAddr")
+                    .put(Criterion.Type.ETH_TYPE, "hdr.ethernet.etherType")
                     .put(Criterion.Type.IPV4_DST, "hdr.ipv4.dstAddr")
-                    .put(Criterion.Type.IP_PROTO, "local_metadata.ip_proto")
-                    .put(Criterion.Type.ICMPV4_TYPE, "local_metadata.icmp_type")
+                    .put(Criterion.Type.IP_PROTO, "meta.ip_proto")
+                    .put(Criterion.Type.ICMPV4_TYPE, "meta.icmp_type")
                     .build();
 
     /**

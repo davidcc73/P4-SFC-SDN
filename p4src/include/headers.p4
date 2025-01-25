@@ -12,7 +12,16 @@ typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 typedef bit<9>   port_num_t;    //added as part of having Controller
 typedef bit<16> group_id_t;
+typedef bit<16> l4_port_t;
 
+struct preserving_metadata_CPU_t {
+    @field_list(CLONE_FL_clone3)
+    bit<9> ingress_port;
+    @field_list(CLONE_FL_clone3)
+    bit<9> egress_port;
+    @field_list(CLONE_FL_clone3)
+    bool to_CPU;                 //true when the packet is cloned to CPU/Controller, default is false, so non-CPU cloned packets will still have see the correct value (false)
+}
 
 //added as part of having Controller
 @controller_header("packet_in")
@@ -86,9 +95,15 @@ struct metadata {
     bit<1> l3_firewall;                     //flag to mark if the current node is a l3_firewall
     bool is_multicast;                      //id multicast pkts
     bit<6> dscp_at_ingress;                 //needed because after decapsulation the DSCP is set to 0 so the pkt is not recapsulated by a switch with hosts
+    bit<8> ip_proto;
+    bit<8> icmp_type;
+    l4_port_t l4_src_port;
+    l4_port_t l4_dst_port;
+    preserving_metadata_CPU_t perserv_CPU_meta; //to migrate from clone3() to clone_preserving() in the clone_to_CPU scenario
 }
 
 struct headers {
+    packet_in_header_t packet_in;
     ethernet_t ethernet;
     sfc_t sfc;
     sfc_chain_t[MAX_HOPS] sfc_chain;
@@ -96,7 +111,6 @@ struct headers {
     tcp_t tcp;
     udp_t udp;
 }
-
 
 
 #endif

@@ -3,12 +3,12 @@
 #IPv4 Forwarding Unicast
 #Others
 #s1
-table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr port" "00:00:00:00:10:01 1"
-table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "dstAddr port" "00:00:00:00:10:01 1"
+table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr" "00:00:00:00:10:01"
+table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "dstAddr" "00:00:00:00:10:01"
 #s4
-table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr port" "00:00:00:00:40:01 2"
+table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr" "00:00:00:00:40:01"
 #s5
-table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr port" "00:00:00:00:50:01 4"
+table_add device:s2 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr" "00:00:00:00:50:01"
 
 
 #SFC Processing (refers to current node)

@@ -271,41 +271,5 @@
         "name": "h4"
       }
     }
-  },
-  "apps": {
-    "org.onosproject.multicast": {
-      "multicastGroups": [
-        {
-          "groupId": 1,
-          "sinks": [
-            {
-              "device": "device:s1",
-              "ports": [1, 20]
-            },
-            {
-              "device": "device:s4",
-              "ports": [1]
-            },
-            {
-              "device": "device:s5",
-              "ports": [20]
-            }
-          ]
-        },
-        {
-          "groupId": 2,
-          "sinks": [
-            {
-              "device": "device:s4",
-              "ports": [1]
-            },
-            {
-              "device": "device:s5",
-              "ports": [20]
-            }
-          ]
-        }
-      ]
-    }
   }
 }

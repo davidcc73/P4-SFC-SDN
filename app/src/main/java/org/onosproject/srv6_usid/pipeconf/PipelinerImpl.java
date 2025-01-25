@@ -17,33 +17,33 @@
 package org.onosproject.srv6_usid.pipeconf;
 
 import org.onosproject.net.DeviceId;
-//import org.onosproject.net.PortNumber;
+import org.onosproject.net.PortNumber;
 import org.onosproject.net.behaviour.NextGroup;
 import org.onosproject.net.behaviour.Pipeliner;
 import org.onosproject.net.behaviour.PipelinerContext;
 import org.onosproject.net.driver.AbstractHandlerBehaviour;
-//import org.onosproject.net.flow.DefaultFlowRule;
-//import org.onosproject.net.flow.DefaultTrafficTreatment;
-//import org.onosproject.net.flow.FlowRule;
+import org.onosproject.net.flow.DefaultFlowRule;
+import org.onosproject.net.flow.DefaultTrafficTreatment;
+import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
-//import org.onosproject.net.flow.instructions.Instructions;
+import org.onosproject.net.flow.instructions.Instructions;
 import org.onosproject.net.flowobjective.FilteringObjective;
 import org.onosproject.net.flowobjective.ForwardingObjective;
 import org.onosproject.net.flowobjective.NextObjective;
 import org.onosproject.net.flowobjective.ObjectiveError;
-//import org.onosproject.net.group.GroupDescription;
+import org.onosproject.net.group.GroupDescription;
 import org.onosproject.net.group.GroupService;
-//import org.onosproject.net.pi.model.PiActionId;
-//import org.onosproject.net.pi.model.PiTableId;
-//import org.onosproject.net.pi.runtime.PiAction;
-//import org.onosproject.srv6_usid.common.Utils;
+import org.onosproject.net.pi.model.PiActionId;
+import org.onosproject.net.pi.model.PiTableId;
+import org.onosproject.net.pi.runtime.PiAction;
+import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
 
-//import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
-//import static org.onosproject.srv6_usid.AppConstants.CPU_CLONE_SESSION_ID;
+import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
+import static org.onosproject.srv6_usid.AppConstants.CPU_CLONE_SESSION_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -53,8 +53,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class PipelinerImpl extends AbstractHandlerBehaviour implements Pipeliner {
 
     // From the P4Info file
-    private static final String ACL_TABLE = "IngressPipeImpl.acl";
-    private static final String CLONE_TO_CPU = "IngressPipeImpl.clone_to_cpu";
+    private static final String ACL_TABLE = "MyIngress.acl";
+    private static final String CLONE_TO_CPU = "MyIngress.clone_to_cpu";
 
     private final Logger log = getLogger(getClass());
 
@@ -77,7 +77,6 @@ public class PipelinerImpl extends AbstractHandlerBehaviour implements Pipeliner
 
     @Override
     public void forward(ForwardingObjective obj) {
-        /*
         if (obj.treatment() == null) {
             obj.context().ifPresent(c -> c.onError(obj, ObjectiveError.UNSUPPORTED));
         }
@@ -136,7 +135,7 @@ public class PipelinerImpl extends AbstractHandlerBehaviour implements Pipeliner
                 log.warn("Unknown operation {}", obj.op());
         }
 
-        obj.context().ifPresent(c -> c.onSuccess(obj));*/
+        obj.context().ifPresent(c -> c.onSuccess(obj));
     }
 
     @Override
