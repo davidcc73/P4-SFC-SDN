@@ -69,7 +69,7 @@ public class L2BridgingComponent {
 
     private static final int DEFAULT_BROADCAST_GROUP_ID = 255;            //all hosts
     private static final String all_hosts_mcas_address = "ff:ff:ff:ff:ff:ff";
-    private static final String full_ethernet_mask = "ff:ff:ff:ff:ff:ff";
+    private static final int ethernet_full_mask_length = 48;
 
     private final DeviceListener deviceListener = new InternalDeviceListener();
     private final HostListener hostListener = new InternalHostListener();
@@ -194,10 +194,10 @@ public class L2BridgingComponent {
 
         //Broadcast to all hosts, including ARP pkt
         final PiCriterion macBroadcastCriterion = PiCriterion.builder()
-                .matchTernary(
+                .matchLpm(
                         PiMatchFieldId.of("hdr.ethernet.dstAddr"),
                         MacAddress.valueOf(all_hosts_mcas_address).toBytes(),
-                        MacAddress.valueOf(full_ethernet_mask).toBytes())
+                        ethernet_full_mask_length)
                 .build();
 
         // Action: set multicast group id (the same used )

@@ -200,18 +200,31 @@ public class Ipv4RoutingComponent{
         Builder builder = PiAction.builder().withId(PiActionId.of(action));
         PiCriterion.Builder builder_match = PiCriterion.builder();
 
+        byte[] key;
+        int prefix;
+
         log.info("Adding Config rule to {}...", deviceId);
 
         //-------------------------------------Match
         if(fields_keys != null && keys != null) {
-            if(criteria.equals("LPM")) {                 //only to match 1 IPv4 
-                IpAddress ip = IpAddress.valueOf(keys[0]);
-                int prefix = Integer.valueOf(keys[1]);
+            if(criteria.equals("LPM")) {
+                if(keys[0].contains(":")){                 //only to match 1 MAC 
+                    MacAddress mac = MacAddress.valueOf(keys[0]);
+                    key = mac.toBytes();
+                }
+                else if(keys[0].contains(".")){            //only to match 1 IPv4
+                    IpAddress ip = IpAddress.valueOf(keys[0]);
+                    key = ip.toOctets();
+                }
+                else{
+                    return "Given key is not IP nor MAC" + keys[0];
+                }
+                prefix = Integer.valueOf(keys[1]);
                 builder_match = builder_match
-                    .matchLpm(
-                        PiMatchFieldId.of(fields_keys[0]),
-                        ip.toOctets(),
-                        prefix);
+                        .matchLpm(
+                            PiMatchFieldId.of(fields_keys[0]),
+                            key,
+                            prefix);
             } else if(criteria.equals("EXACT")) {        //only to match x Integers
                 for(int i = 0; i < fields_keys.length; i++) {
                     builder_match = builder_match
