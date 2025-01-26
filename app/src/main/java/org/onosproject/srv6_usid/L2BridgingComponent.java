@@ -192,6 +192,7 @@ public class L2BridgingComponent {
 
         log.info("Adding L2 multicast rules on {}...", deviceId);
 
+        //Broadcast to all hosts, including ARP pkt
         final PiCriterion macBroadcastCriterion = PiCriterion.builder()
                 .matchTernary(
                         PiMatchFieldId.of("hdr.ethernet.dstAddr"),
@@ -213,7 +214,7 @@ public class L2BridgingComponent {
         final FlowRule rule1 = Utils.buildFlowRule(
                 deviceId, appId, tableId,
                 macBroadcastCriterion, setMcastGroupAction);
-
+                
         // Insert rules.
         flowRuleService.applyFlowRules(rule1);
     }
