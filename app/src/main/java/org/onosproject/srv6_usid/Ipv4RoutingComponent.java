@@ -20,7 +20,12 @@ import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.mastership.MastershipService;
+import org.onosproject.net.Link;
+import org.onosproject.net.AnnotationKeys;
+import org.onosproject.net.Annotations;
+import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
+import org.onosproject.net.PortNumber;
 import org.onosproject.net.config.NetworkConfigService;
 import org.onosproject.net.device.DeviceEvent;
 import org.onosproject.net.device.DeviceListener;
@@ -45,7 +50,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +58,13 @@ import java.net.UnknownHostException;
 
 import com.google.common.collect.Lists;
 
+import java.util.Set;
+import java.util.stream.StreamSupport;
+import java.util.List;
+
+import org.onosproject.srv6_usid.common.Utils;
 import static org.onosproject.srv6_usid.AppConstants.INITIAL_SETUP_DELAY;
 
-import java.util.List;
 
 /**
  * App component that configures devices to provide IPv4 routing capabilities
@@ -144,17 +152,36 @@ public class Ipv4RoutingComponent{
     }
 
     /**
-     * Sets up the "My Station" table for the given device using the
-     * myStationMac address found in the config.
+     * Creates a flow rule for the L2 table mapping the given next hop MAC to
+     * the given output port.
      * <p>
-     * This method will be called at component activation for each device
-     * (switch) known by ONOS, and every time a new device-added event is
-     * captured by the InternalDeviceListener defined below.
+     * This is called by the routing policy methods below to establish L2-based
+     * forwarding inside the fabric, e.g., when deviceId is a leaf switch and
+     * nextHopMac is the one of a core switch.
      *
-     * @param deviceId the device ID
+     * @param deviceId   the device
+     * @param nexthopMac the next hop (destination) mac
+     * @param outPort    the output port
      */
-    private void setUpMyStationTable(DeviceId deviceId) {
-        log.info("Detected device: {}...", deviceId);
+    private FlowRule createL2NextHopRule(DeviceId deviceId, MacAddress nexthopMac,
+                                         PortNumber outPort) {   //maps next MAC to Out Port
+
+        final String tableId = "MyIngress.unicast";
+        final PiCriterion match = PiCriterion.builder()
+                .matchExact(PiMatchFieldId.of("hdr.ethernet.dstAddr"),
+                            nexthopMac.toBytes())
+                .build();
+
+
+        final PiAction action = PiAction.builder()
+                .withId(PiActionId.of("MyIngress.set_egress_port"))
+                .withParameter(new PiActionParam(
+                        PiActionParamId.of("port"),
+                        outPort.toLong()))
+                .build();
+
+        return Utils.buildFlowRule(
+                deviceId, appId, tableId, match, action);
     }
 
     /**
@@ -266,7 +293,6 @@ public class Ipv4RoutingComponent{
 
         @Override
         public void event(LinkEvent event) {    //see isRelevant() explanation
-            /*
             DeviceId srcDev = event.subject().src().deviceId();
             DeviceId dstDev = event.subject().dst().deviceId();
 
@@ -274,17 +300,17 @@ public class Ipv4RoutingComponent{
             if (mastershipService.isLocalMaster(srcDev)) {
                 mainComponent.getExecutorService().execute(() -> {
                     log.info("{} event! Configuring {}... linkSrc={}, linkDst={}",
-                            event.type(), srcDev, srcDev, dstDev);
+                             event.type(), srcDev, srcDev, dstDev);
                     setUpL2NextHopRules(srcDev);
                 });
             }
             if (mastershipService.isLocalMaster(dstDev)) {
                 mainComponent.getExecutorService().execute(() -> {
                     log.info("{} event! Configuring {}... linkSrc={}, linkDst={}",
-                            event.type(), dstDev, srcDev, dstDev);
+                             event.type(), dstDev, srcDev, dstDev);
                     setUpL2NextHopRules(dstDev);
                 });
-            }*/
+            }
         }
     }
 
@@ -315,11 +341,49 @@ public class Ipv4RoutingComponent{
             mainComponent.getExecutorService().execute(() -> {
                 DeviceId deviceId = event.subject().id();
                 log.info("{} event! device id={}", event.type(), deviceId);
-                setUpMyStationTable(deviceId);
             });
         }
     }
 
+    //--------------------------------------------------------------------------
+    // ROUTING POLICY METHODS
+    //
+    // Called by event listeners, these methods implement the actual routing
+    // policy, responsible of computing paths and creating ECMP groups.
+    //--------------------------------------------------------------------------
+
+    /**
+     * Set up L2 nexthop rules of a device to providing forwarding inside the
+     * fabric
+     *
+     * @param deviceId the device ID
+     */
+    private void setUpL2NextHopRules(DeviceId deviceId) {
+
+        Set<Link> egressLinks = linkService.getDeviceEgressLinks(deviceId);
+
+        for (Link link : egressLinks) {
+            // For each other switch directly connected to this.
+            final DeviceId nextHopDevice = link.dst().deviceId();
+            // Get port of this device connecting to next hop.
+            final PortNumber outPort = link.src().port();
+            // Get next hop MAC address.
+            final MacAddress nextHopMac = getDeviceMac(nextHopDevice);
+
+            if (nextHopMac == null) {
+                log.warn("Could not find MAC address for next hop device {}", nextHopDevice);
+            } else {
+                // Create L2 forwarding rule or handle the next hop information as needed.
+                final FlowRule nextHopRule = createL2NextHopRule(deviceId, nextHopMac, outPort);
+        
+                flowRuleService.applyFlowRules(nextHopRule);
+
+                log.info("Device {} has next hop {} via port {} with MAC {}",
+                        deviceId, nextHopDevice, outPort, nextHopMac);
+
+            }
+        }
+    }
 
     //--------------------------------------------------------------------------
     // UTILITY METHODS
@@ -331,15 +395,32 @@ public class Ipv4RoutingComponent{
      */
     private synchronized void setUpAllDevices() {       //acivated at this component boot
         // Set up host routes
-        /*
-        stream(deviceService.getAvailableDevices())
+        StreamSupport.stream(deviceService.getAvailableDevices().spliterator(), false)   //not sure if correct
                 .map(Device::id)
                 .filter(mastershipService::isLocalMaster)
                 .forEach(deviceId -> {
                     log.info("*** IPV4 ROUTING - Starting initial set up for {}...", deviceId);
-                    setUpMyStationTable(deviceId);
                     setUpL2NextHopRules(deviceId);
-                });       */ 
+                });
+    }
+
+    /**
+     * Retrieves the MAC address of a device using the ONOS topology knowledge.
+     *
+     * @param deviceId the ID of the next hop device.
+     * @return the MAC address of the device or null if not found.
+     */
+    private MacAddress getDeviceMac(DeviceId deviceId) {
+        Device device = deviceService.getDevice(deviceId);
+        if (device != null) {
+            Annotations annotations = device.annotations();
+            String macStr = annotations.value(AnnotationKeys.MANAGEMENT_ADDRESS);
+            if (macStr != null) {
+                return MacAddress.valueOf(macStr);
+            }
+        }
+        log.warn("Device not found.");
+        return null;
     }
 
 }

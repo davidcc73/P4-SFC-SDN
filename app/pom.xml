@@ -143,19 +143,6 @@
             <scope>provided</scope>
         </dependency>
 
-         <!--New for JGraph-->
-        <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-core</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.jheaps/jheaps -->
-        <dependency>
-            <groupId>org.jheaps</groupId>
-            <artifactId>jheaps</artifactId>
-            <version>0.14</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -170,8 +157,6 @@
                         </Karaf-Commands>
                         <Export-Package>
                             org.onosproject.srv6_usid.*,
-                            org.jgrapht.*, 
-                            org.jheaps.*,
                             org.uc.*,
                             org.helper.*
                         </Export-Package>
