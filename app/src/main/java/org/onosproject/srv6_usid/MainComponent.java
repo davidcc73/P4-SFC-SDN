@@ -85,7 +85,7 @@ public class MainComponent {
         compCfgService.preSetProperty("org.onosproject.net.group.impl.GroupManager",
                                       "fallbackGroupPollFrequency", "3", false);
         compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
-                                      "requestIpv4", "true", false);
+                                      "requestArp", "true", false);             //Use ARP to discover hosts
 
         log.info("Started");
     }
