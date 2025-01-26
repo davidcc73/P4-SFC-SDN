@@ -77,6 +77,7 @@ public class InterpreterImpl extends AbstractHandlerBehaviour
                     .put(Criterion.Type.IPV4_DST, "hdr.ipv4.dstAddr")
                     .put(Criterion.Type.IP_PROTO, "meta.ip_proto")
                     .put(Criterion.Type.ICMPV4_TYPE, "meta.icmp_type")
+                    .put(Criterion.Type.ICMPV6_TYPE, "meta.icmp_type")
                     .build();
 
     /**

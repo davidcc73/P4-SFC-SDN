@@ -6,7 +6,10 @@ import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
 import org.onosproject.net.Device;
+import org.onosproject.net.DeviceId;
+import org.onosproject.net.config.ConfigFactory;
 import org.onosproject.net.config.NetworkConfigRegistry;
+import org.onosproject.net.config.basics.SubjectFactories;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
@@ -78,11 +81,11 @@ public class MainComponent {
         waitPreviousCleanup();
 
         compCfgService.preSetProperty("org.onosproject.net.flow.impl.FlowRuleManager",
-                                    "fallbackFlowPollFrequency", "4", false);
+                                      "fallbackFlowPollFrequency", "4", false);
         compCfgService.preSetProperty("org.onosproject.net.group.impl.GroupManager",
-                                    "fallbackGroupPollFrequency", "3", false);
-        //compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
-                                    //"requestIpv6ND", "true", false);
+                                      "fallbackGroupPollFrequency", "3", false);
+        compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
+                                      "requestIpv4", "true", false);
 
         log.info("Started");
     }
@@ -165,8 +168,8 @@ public class MainComponent {
             }
 
             log.info("Waiting to remove flows and groups from " +
-                            "previous execution of {}...",
-                    appId.name());
+                             "previous execution of {}...",
+                     appId.name());
 
             sleep(CLEAN_UP_DELAY);
 

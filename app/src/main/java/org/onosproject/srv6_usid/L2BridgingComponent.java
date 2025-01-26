@@ -67,7 +67,7 @@ public class L2BridgingComponent {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private static final int DEFAULT_BROADCAST_GROUP_ID = 1;            //all hosts
+    private static final int DEFAULT_BROADCAST_GROUP_ID = 255;            //all hosts
     private static final String all_hosts_mcas_address = "ff:ff:ff:ff:ff:ff";
     private static final String full_ethernet_mask = "ff:ff:ff:ff:ff:ff";
 

@@ -109,7 +109,7 @@ public final class PipeconfLoader {
         }
 
         log.info("Found {} outdated drivers for pipeconf '{}', removing...",
-                driverProvidersToRemove.size(), PIPECONF_ID);
+                 driverProvidersToRemove.size(), PIPECONF_ID);
 
         driverProvidersToRemove.forEach(driverAdminService::unregisterProvider);
     }

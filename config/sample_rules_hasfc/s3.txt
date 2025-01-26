@@ -34,7 +34,7 @@ table_add device:s3 MyIngress.multicaster NoAction EXACT "1" "1" "" ""
 #hosts: all
 #set by ONOS
 #hosts: h2, h4
-table_add device:s3 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "2"
+table_add device:s3 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "1"
 
 ## map DSCP -> multicast_ip_dst
 table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "51" "mac ip" "FF:FF:FF:FF:FF:FF 224.255.255.255"
