@@ -255,18 +255,18 @@ control MyIngress(inout headers hdr,
             }
         }
         
-        //--------------------------------- L3+L2 Forwarding (IP -> Set the egress_spec)---------------------------------
+        //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------
         if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
             log_msg("Trying to change pkt to multicast");
             multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
         }
 
         if(ipv4_lpm.apply().hit){  // Unicast Forwarding L3: dst IP -> dst ethernet
-            unicast.apply();       // L2: dst ethernet -> ports
+            unicast.apply();       // Forwarding L2: dst ethernet -> ports
         }
         else{
             log_msg("Unicast failed. Trying Multicast");
-            if(!multicast.apply().hit){   // Multicast Forwarding (based on the dstAddr, sets mcast_grp)
+            if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
                 log_msg("Multicast failed, droping pkt");
                 drop();                   // can not do uni or multicast, just drop
             }
@@ -276,10 +276,3 @@ control MyIngress(inout headers hdr,
 
 
 #endif
-
-
-// pacote ja vem com unicast addrs, at s3 depending on the DSCP we change to the addr of the group we want, fazer a decisao antes do desencapsualmento estara sempre a 0
-//set group multicast e seus ports em cada switch pelo net.cfg
-//DSCP (nó especial, manipula para passar a ser multicast) -> DST ADDR ETH/IP    -> MULTICAST GROUP e PORT   esta ultima transição é feita pelo proprio straum (n consigo fazer manualmente por ONOS) 
-//o mais correto seria ter o ONOS  a fazer os grupos multicast e a dizer ao switch qual o porto associado a cada grupo de forma automatica e escalavel
-//no noss cenario com o ONSO a so fazer push de regras antigas, so vamos ate aos addresses multicast e depois mapeamos diretamente para os portos de forma manual e estatica
