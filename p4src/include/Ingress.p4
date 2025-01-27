@@ -214,20 +214,18 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        if(hdr.ethernet.etherType == ETHERTYPE_LLDP){
-            log_msg("DETETEI NA INGRESS PKT LLDP");
+        //---------------------------------------------------------------------------LLDP SUpport
+        if (hdr.packet_out.isValid()) {
+            standard_metadata.egress_spec = hdr.packet_out.egress_port;
+            hdr.packet_out.setInvalid();
+            exit;
         }
-        if(hdr.ethernet.etherType == ETHERTYPE_ARP){
-            log_msg("DETETEI NA INGRESS PKT ARP");
-        }
+
+        acl.apply();            //Pkt may be cloned to CPU
+        //---------------------------------------------------------------------------
+
         // ICMP pkts are being parsed and treated as regular ipv4
         meta.dscp_at_ingress = hdr.ipv4.dscp;
-
-        //---------------Clone to CPU
-        acl.apply();
-        if(hdr.ethernet.etherType == 0x88cc){
-            clone_to_cpu();
-        }
         
         //---------------SFC
         if (hdr.ipv4.dscp != 0){

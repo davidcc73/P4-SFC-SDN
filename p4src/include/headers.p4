@@ -110,6 +110,8 @@ struct headers {
     ipv4_t ipv4;
     tcp_t tcp;
     udp_t udp;
+
+    packet_out_header_t packet_out;
 }
 
 

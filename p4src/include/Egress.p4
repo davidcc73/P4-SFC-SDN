@@ -12,13 +12,6 @@ control MyEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     apply { 
-
-        if(hdr.ethernet.etherType == ETHERTYPE_LLDP){
-            log_msg("DETETEI NA ENGRESS PKT LLDP");
-        }
-        if(hdr.ethernet.etherType == ETHERTYPE_ARP){
-            log_msg("DETETEI NA EGRESS PKT ARP");
-        }
         //-----------------Restore packet standard_metadata from clones
         if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_CLONE){
             if(meta.perserv_CPU_meta.to_CPU == true) {
