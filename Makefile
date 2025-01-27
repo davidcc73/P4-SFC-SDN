@@ -81,6 +81,7 @@ clean:
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/target
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/src/main/resources/bmv2.json
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/src/main/resources/p4info.txt
+	-$(NGSDN_TUTORIAL_SUDO) rm -rf tmp
 
 p4-build: p4src/main.p4
 	$(info *** Building P4 program...)
