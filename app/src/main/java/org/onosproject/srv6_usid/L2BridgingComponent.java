@@ -370,9 +370,8 @@ public class L2BridgingComponent {
         //   ]
         // }
 
-        // The ports were configured in a way that each leaf will broadcast into a spine switch, 
-        // and the spine switches will circulate the packets through their outer links (still between spines) 
-        // with exception of the link between switchs 9 and 14, to avoid a broadcasting loop.
+        // The ports were configured in a way that each switch will circulate the packets through their outer links
+        // with exception of 1, to avoid a broadcasting loop.
         // The broadcast ports were configured so that each link works on both directions.
 
         return interfaceService.getInterfaces().stream()            //gets all interfaces

@@ -76,7 +76,7 @@ public class MainComponent {
                     return new Srv6DeviceConfig();
                 }
             };
-            
+
     private ApplicationId appId;
 
     // For the sake of simplicity and to facilitate reading logs, use a
