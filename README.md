@@ -23,7 +23,7 @@ This repository is structured as follows: <br/>
 
 The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, the 2 must coincide if intended to expand the ONOS functions in the future.
 
-To prevent Broadcast Loops, the interfaces defined under `ports` at `config/netcfg.json`, contains the ports to be used by each switch to do bradcast/multicast to all ententies, they are defined to use all link in each direction, exclude the inner most links in the topology, and to prevent a loop, also the link between s2 and s3.
+To prevent Broadcast Loops, the interfaces defined under `ports` at `config/netcfg.json`, contains the ports to be used by each switch to do bradcast/multicast to all entities, they are defined to use all link in each direction, exclude the inner most links in the topology, and to prevent a loop, also the link between s2 and s3.
 
 Our Topology:
 
