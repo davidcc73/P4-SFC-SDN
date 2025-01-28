@@ -224,6 +224,12 @@ control MyIngress(inout headers hdr,
         acl.apply();            //Pkt may be cloned to CPU
         //---------------------------------------------------------------------------
 
+        if(hdr.ethernet.etherType == ETHERTYPE_LLDP && hdr.ethernet.dstAddr == 1652522221582){
+            log_msg("It's an LLDP multicast packet, not meant to be forwarded");
+            mark_to_drop(standard_metadata);
+            return;
+        }
+
         // ICMP pkts are being parsed and treated as regular ipv4
         meta.dscp_at_ingress = hdr.ipv4.dscp;
         
@@ -255,7 +261,7 @@ control MyIngress(inout headers hdr,
             }
         }
         
-        //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------
+        //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------       
         if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
             log_msg("Trying to change pkt to multicast");
             multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
