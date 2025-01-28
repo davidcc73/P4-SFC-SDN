@@ -130,7 +130,7 @@ control MyIngress(inout headers hdr,
     }
     table unicast {
         key = {
-            hdr.ethernet.dstAddr: lpm;
+            hdr.ethernet.dstAddr: exact;
         }
         actions = {
             set_egress_port;

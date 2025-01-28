@@ -78,6 +78,7 @@ reset: stop
 
 clean:
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf p4src/build
+	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/bin
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/target
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/src/main/resources/bmv2.json
 	-$(NGSDN_TUTORIAL_SUDO) rm -rf app/src/main/resources/p4info.txt

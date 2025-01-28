@@ -17,8 +17,10 @@
 package org.onosproject.srv6_usid;
 
 import com.google.common.collect.Lists;
+
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
+import org.onlab.util.ItemNotFoundException;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.mastership.MastershipService;
 import org.onosproject.net.AnnotationKeys;
@@ -51,9 +53,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.onosproject.srv6_usid.common.Srv6DeviceConfig;
 import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Optional;
 import java.util.List;
 import java.util.Set;
 import java.net.InetAddress;
@@ -378,7 +382,7 @@ public class Ipv4RoutingComponent{
             // Get port of this device connecting to next hop.
             final PortNumber outPort = link.src().port();
             // Get next hop MAC address.
-            final MacAddress nextHopMac = getDeviceMac(nextHopDevice);
+            final MacAddress nextHopMac = getMyStationMac(nextHopDevice);
 
             if (nextHopMac == null) {
                 log.warn("Could not find MAC address for next hop device {}", nextHopDevice);
@@ -415,22 +419,41 @@ public class Ipv4RoutingComponent{
     }
 
     /**
-     * Retrieves the MAC address of a device using the ONOS topology knowledge.
+     * Returns the MAC address configured in the "myStationMac" property of the
+     * given device config.
      *
-     * @param deviceId the ID of the next hop device.
-     * @return the MAC address of the device or null if not found.
+     * @param deviceId the device ID
+     * @return MyStation MAC address
      */
-    private MacAddress getDeviceMac(DeviceId deviceId) {
-        Device device = deviceService.getDevice(deviceId);
-        if (device != null) {
-            Annotations annotations = device.annotations();
-            String macStr = annotations.value(AnnotationKeys.MANAGEMENT_ADDRESS);
-            if (macStr != null) {
-                return MacAddress.valueOf(macStr);
-            }
-        }
-        log.warn("Device not found.");
-        return null;
+    private MacAddress getMyStationMac(DeviceId deviceId) {
+        return getDeviceConfig(deviceId)
+                .map(Srv6DeviceConfig::myStationMac)
+                .orElseThrow(() -> new ItemNotFoundException(
+                        "Missing myStationMac config for " + deviceId));
+    }/**
+     * Returns the IP address configured in the "subNetIP" property of the
+     * given device config.
+     *
+     * @param deviceId the device ID
+     * @return MyStation MAC address
+     */
+    private IpAddress getMySubNetIP(DeviceId deviceId) {
+        return getDeviceConfig(deviceId)
+                .map(Srv6DeviceConfig::mySubNetIP)
+                .orElseThrow(() -> new ItemNotFoundException(
+                        "Missing mySubNetIP config for " + deviceId));
+    }
+
+    /**
+     * Returns the Srv6 config object for the given device.
+     *
+     * @param deviceId the device ID
+     * @return Srv6  device config
+     */
+    private Optional<Srv6DeviceConfig> getDeviceConfig(DeviceId deviceId) {
+        Srv6DeviceConfig config = networkConfigService.getConfig(
+                deviceId, Srv6DeviceConfig.class);
+        return Optional.ofNullable(config);
     }
 
 }

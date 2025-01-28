@@ -5,6 +5,10 @@
         "managementAddress": "grpc://localhost:50001?device_id=1",
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
+      },
+      "srv6DeviceConfig": {
+        "myStationMac": "00:00:00:00:10:01",
+        "subNetIP": "10.0.1.0"
       }
     },
     "device:s2": {
@@ -12,6 +16,10 @@
         "managementAddress": "grpc://localhost:50002?device_id=1",
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
+      },
+      "srv6DeviceConfig": {
+        "myStationMac": "00:00:00:00:20:01",
+        "subNetIP": "10.0.2.0"
       }
     },
     "device:s3": {
@@ -19,6 +27,10 @@
         "managementAddress": "grpc://localhost:50003?device_id=1",
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
+      },
+      "srv6DeviceConfig": {
+        "myStationMac": "00:00:00:00:30:01",
+        "subNetIP": "10.0.3.0"
       }
     },
     "device:s4": {
@@ -26,6 +38,10 @@
         "managementAddress": "grpc://localhost:50004?device_id=1",
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
+      },
+      "srv6DeviceConfig": {
+        "myStationMac": "00:00:00:00:40:01",
+        "subNetIP": "10.0.4.0"
       }
     },
     "device:s5": {
@@ -33,6 +49,10 @@
         "managementAddress": "grpc://localhost:50005?device_id=1",
         "driver": "stratum-bmv2",
         "pipeconf": "org.p4.srv6_usid"
+      },
+      "srv6DeviceConfig": {
+        "myStationMac": "00:00:00:00:50:01",
+        "subNetIP": "10.0.5.0"
       }
     }
   },
@@ -106,14 +126,6 @@
         }
       ]
     },
-    "device:s2/3": {
-      "interfaces": [
-        {
-          "name": "s2/3",
-          "ips": ["10.0.2.3/24"]
-        }
-      ]
-    },
     "device:s2/4": {
       "interfaces": [
         {
@@ -140,14 +152,6 @@
         {
           "name": "s3/2",
           "ips": ["10.0.3.2/24"]
-        }
-      ]
-    },
-    "device:s3/3": {
-      "interfaces": [
-        {
-          "name": "s3/3",
-          "ips": ["10.0.3.3/24"]
         }
       ]
     },

@@ -6,7 +6,10 @@ import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
 import org.onosproject.net.Device;
+import org.onosproject.net.DeviceId;
+import org.onosproject.net.config.ConfigFactory;
 import org.onosproject.net.config.NetworkConfigRegistry;
+import org.onosproject.net.config.basics.SubjectFactories;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
@@ -17,6 +20,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.onosproject.srv6_usid.common.Srv6DeviceConfig;
 import org.onosproject.srv6_usid.pipeconf.PipeconfLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +68,15 @@ public class MainComponent {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private ComponentConfigService compCfgService;
 
+    private final ConfigFactory<DeviceId, Srv6DeviceConfig> srv6ConfigFactory =
+            new ConfigFactory<DeviceId, Srv6DeviceConfig>(
+                    SubjectFactories.DEVICE_SUBJECT_FACTORY, Srv6DeviceConfig.class, Srv6DeviceConfig.CONFIG_KEY) {
+                @Override
+                public Srv6DeviceConfig createConfig() {
+                    return new Srv6DeviceConfig();
+                }
+            };
+            
     private ApplicationId appId;
 
     // For the sake of simplicity and to facilitate reading logs, use a
@@ -84,12 +97,13 @@ public class MainComponent {
         compCfgService.preSetProperty("org.onosproject.provider.host.impl.HostLocationProvider",
                                       "requestArp", "true", false);             //Use ARP to discover hosts
 
+        configRegistry.registerConfigFactory(srv6ConfigFactory);
         log.info("Started");
     }
-
+    
     @Deactivate
     protected void deactivate() {
-
+        configRegistry.unregisterConfigFactory(srv6ConfigFactory);
         cleanUp();
 
         log.info("Stopped");
