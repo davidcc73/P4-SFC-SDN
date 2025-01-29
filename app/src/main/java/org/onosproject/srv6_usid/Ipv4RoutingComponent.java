@@ -23,8 +23,6 @@ import org.onlab.packet.MacAddress;
 import org.onlab.util.ItemNotFoundException;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.mastership.MastershipService;
-import org.onosproject.net.AnnotationKeys;
-import org.onosproject.net.Annotations;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Link;
@@ -62,8 +60,6 @@ import java.util.List;
 import java.util.Set;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-
 
 import java.util.stream.StreamSupport;
 
@@ -222,12 +218,23 @@ public class Ipv4RoutingComponent{
                             PiMatchFieldId.of(fields_keys[0]),
                             key,
                             prefix);
-            } else if(criteria.equals("EXACT")) {        //only to match x Integers
+
+            } else if(criteria.equals("EXACT")) {               //only to match x Integers or Macs
                 for(int i = 0; i < fields_keys.length; i++) {
-                    builder_match = builder_match
-                        .matchExact(
-                            PiMatchFieldId.of(fields_keys[i]),
-                            Integer.valueOf(keys[i]));
+                    if(keys[i].contains(":")){                  //either mac
+                        MacAddress mac = MacAddress.valueOf(keys[i]);
+                        key = mac.toBytes();
+                        builder_match = builder_match
+                            .matchExact(
+                                PiMatchFieldId.of(fields_keys[i]),
+                                key);
+                    }
+                    else{                                       // or integer   
+                        builder_match = builder_match
+                            .matchExact(
+                                PiMatchFieldId.of(fields_keys[i]),
+                                Integer.valueOf(keys[i]));
+                    }
                 }
             }   
         }

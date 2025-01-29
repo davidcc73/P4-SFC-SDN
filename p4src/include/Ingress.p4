@@ -98,6 +98,7 @@ control MyIngress(inout headers hdr,
     }
 
     action sfc_forward(egressSpec_t port) {
+        log_msg("SFC Forwarding to port:{}", {port});
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }

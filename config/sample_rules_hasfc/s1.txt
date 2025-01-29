@@ -11,6 +11,17 @@ table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstA
 table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr" "00:00:00:00:50:01"
 
 
+
+#L2 Forwarding (For some reason ONOS is failling to do this alone)
+#Mine
+table_add device:s1 MyIngress.unicast MyIngress.set_egress_port EXACT "hdr.ethernet.dstAddr" "00:00:00:00:01:01" "port" "1"
+table_add device:s1 MyIngress.unicast MyIngress.set_egress_port EXACT "hdr.ethernet.dstAddr" "00:00:00:00:01:02" "port" "20"
+
+
+
+
+
+
 #SFC Processing (refers to current node)
 table_add device:s1 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "1" "fireWall" "0"
 
