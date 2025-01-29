@@ -225,14 +225,14 @@ control MyIngress(inout headers hdr,
 
         acl.apply();            //Pkt may be cloned to CPU
 
-        if(hdr.ethernet.etherType == ETHERTYPE_LLDP && hdr.ethernet.dstAddr == 1652522221582){
-            log_msg("It's an LLDP multicast packet, not meant to be forwarded");
+        if(hdr.ethernet.etherType == ETHERTYPE_LLDP || hdr.ethernet.etherType == ETHERTYPE_LLDP_extra){
+            log_msg("It's an LLDP packet, not meant to be forwarded");
             mark_to_drop(standard_metadata);
             return;
         }
         //---------------------------------------------------------------------------
 
-        if (hdr.ipv4.ttl == 0){          
+        if (hdr.ipv4.isValid() && hdr.ipv4.ttl == 0){          
             log_msg("TTL expired");
             mark_to_drop(standard_metadata);
             return;

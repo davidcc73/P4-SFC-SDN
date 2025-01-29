@@ -73,6 +73,19 @@ class DynamicTopo(Topo):
 
                 self.addLink(id_host, id_switch, port1 = 0, port2 = port_switch, cls=TCLink)
 
+def disable_ipv6(net):
+    """ Disable IPv6 on all hosts and switches """
+    for host in net.hosts:
+        host.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+        host.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+        host.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
+
+    for switch in net.switches:
+        switch.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+        switch.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+        switch.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
+
+    print("IPv6 disabled on all nodes.")
 
 
 def main(args):
@@ -87,6 +100,7 @@ def main(args):
     net = Mininet(topo=topo, controller=None)
     net.addController(controller)
     net.start()
+    disable_ipv6(net)
 
 
     while True:
