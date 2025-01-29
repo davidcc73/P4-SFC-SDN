@@ -320,7 +320,6 @@ public class L2BridgingComponent {
                 case HOST_REMOVED:
                 case HOST_UPDATED:
                 case HOST_MOVED:
-                    break;
                 default:
                     // Ignore other events.
                     // Food for thoughts: how to support host moved/removed?

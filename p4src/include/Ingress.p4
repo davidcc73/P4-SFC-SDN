@@ -127,6 +127,7 @@ control MyIngress(inout headers hdr,
 
     action set_egress_port(egressSpec_t port) {          //set the egress port, using the dst mac address
         standard_metadata.egress_spec = port;
+        log_msg("Egress port set to:{}", {port});   
     }
     table unicast {
         key = {
@@ -230,7 +231,7 @@ control MyIngress(inout headers hdr,
         }
         //---------------------------------------------------------------------------
 
-        if(hdr.ipv4.isValid() && hdr.ipv4.ttl == 0){          
+        if (hdr.ipv4.ttl == 0){          
             log_msg("TTL expired");
             mark_to_drop(standard_metadata);
             return;
@@ -275,11 +276,15 @@ control MyIngress(inout headers hdr,
             multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
         }
 
-        if(ipv4_lpm.apply().hit){  // Unicast Forwarding L3: dst IP -> dst ethernet
-            unicast.apply();       // Forwarding L2: dst ethernet -> ports
+        if(ipv4_lpm.apply().hit){  // IPv4 Forwarding L3: dst IP -> dst ethernet
+            log_msg("IPv4_LPM hit");
+            if(!unicast.apply().hit){        // Unicast Forwarding L2: dst ethernet -> ports
+                log_msg("Unicast failed. droping pkt");
+                drop();                        
+            }
         }
         else{
-            log_msg("Unicast failed. Trying Multicast");
+            log_msg("IPv4_LPM failed. Trying Multicast");
             if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
                 log_msg("Multicast failed, droping pkt");
                 drop();                   // can not do uni or multicast, just drop

@@ -18,7 +18,7 @@ def get_if_with_zero():
         exit(1)
 
 def handle_pkt(pkt):
-    print("got a packet")
+    print("Got an IPv4 packet")
     pkt.show2()
     sys.stdout.flush()
 
@@ -34,9 +34,10 @@ def main():
     mac_addr = get_if_hwaddr(iface)
     
     # Filter out packets with the source MAC address matching the host's MAC address (i.e., sent packets)
-    bpf_filter = f"not ether src {mac_addr}"
+    # and only capture IPv4 packets
+    bpf_filter = f"not ether src {mac_addr} and ip"
 
-    print(f"Sniffing on {iface}, ignoring packets sent from {mac_addr}")
+    print(f"Sniffing on {iface}, ignoring packets sent from {mac_addr}, capturing only IPv4 packets")
     sys.stdout.flush()
     
     sniff(iface=iface, prn=lambda x: handle_pkt(x), filter=bpf_filter)
