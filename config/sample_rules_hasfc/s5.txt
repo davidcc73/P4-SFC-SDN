@@ -46,13 +46,3 @@ table_add device:s5 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "
 
 table_add device:s5 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "51" "id sc sf1 sf2 sf3 sf4" "51 2 2 3 0 0"
 table_add device:s5 MyIngress.sfc_classifier MyIngress.sfc_encapsulation EXACT "hdr.ipv4.dscp" "52" "id sc sf1 sf2 sf3 sf4" "52 2 2 3 0 0"
-
-################ Multicast
-#### mark node as multicaster
-table_add device:s5 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
-
-#### map multicast_ip_dst -> mcast_group
-#hosts: all
-#set by ONOS
-#hosts: h2, h4
-table_add device:s5 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "1"

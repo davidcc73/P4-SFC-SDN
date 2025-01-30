@@ -1,0 +1,11 @@
+# table_add device table action criteria fields key_fields keys args_fields args
+
+################ Multicast
+#### mark node as multicaster
+table_add device:s1 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
+
+#### map multicast_ip_dst -> mcast_group
+#hosts: all
+#set by ONOS
+#hosts: h2, h4
+table_add device:s1 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "1"

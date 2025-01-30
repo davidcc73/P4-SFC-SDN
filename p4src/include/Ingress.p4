@@ -216,7 +216,7 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        //---------------------------------------------------------------------------LLDP Support
+        //---------------------------------------------------------------------------ACL Support
         if (hdr.packet_out.isValid()) {
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();

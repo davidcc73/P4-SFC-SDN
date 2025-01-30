@@ -38,14 +38,3 @@ table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "" ""
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "" ""
 table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "" ""
-
-
-################ Multicast
-#### mark node as multicaster
-table_add device:s2 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
-
-#### map multicast_ip_dst -> mcast_group
-#hosts: all
-#set by ONOS
-#hosts: h2, h4
-table_add device:s2 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "1"
