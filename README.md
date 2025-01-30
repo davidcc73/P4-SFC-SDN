@@ -206,6 +206,7 @@ source /config/sample_rules_hasfc/s1.txt
 source /config/sample_rules_hasfc/s2.txt
 source /config/sample_rules_hasfc/s3.txt
 source /config/sample_rules_hasfc/s4.txt
+source /config/sample_rules_hasfc/s5.txt
 ```
 
 

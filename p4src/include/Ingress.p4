@@ -216,20 +216,19 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        //---------------------------------------------------------------------------LLDP SUpport
+        //---------------------------------------------------------------------------LLDP Support
         if (hdr.packet_out.isValid()) {
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();
             exit;
         }
 
-        acl.apply();            //Pkt may be cloned to CPU
-
-        if(hdr.ethernet.etherType == ETHERTYPE_LLDP || hdr.ethernet.etherType == ETHERTYPE_LLDP_extra){
-            log_msg("It's an LLDP packet, not meant to be forwarded");
-            mark_to_drop(standard_metadata);
+        if(acl.apply().hit){          //Forward back to the CPU and its done
+            log_msg("ACL hit, end of processing");
             return;
         }
+
+    
         //---------------------------------------------------------------------------
 
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl == 0){          
@@ -238,6 +237,8 @@ control MyIngress(inout headers hdr,
             return;
         }
 
+
+        //TODO: ADD ARP support FOR REAL DINAMIC HOSTS DISCOVERY (not just static ARP entries, maybe part of the why ONOS is not detecting the hosts)
 
 
         // ICMP pkts are being parsed and treated as regular ipv4
