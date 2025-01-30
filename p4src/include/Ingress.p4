@@ -240,7 +240,7 @@ control MyIngress(inout headers hdr,
         //TODO: ADD ARP support FOR REAL DINAMIC HOSTS DISCOVERY (not just static ARP entries, maybe part of the why ONOS is not detecting the hosts)
 
 
-        // ICMP pkts are being parsed and treated as regular ipv4
+        // ICMP pkts are being parsed and treated as regular ipv4 
         meta.dscp_at_ingress = hdr.ipv4.dscp;
         
         //---------------SFC
