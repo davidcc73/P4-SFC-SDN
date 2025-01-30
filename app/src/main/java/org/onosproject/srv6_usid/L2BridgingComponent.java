@@ -141,20 +141,22 @@ public class L2BridgingComponent {
      * @param deviceId the device to set up
      */
     private void setUpDevice(DeviceId deviceId) {
-        insertMulticastGroup(deviceId);
-        insertMulticastFlowRules(deviceId);
+        insertManagementMulticastGroup(deviceId);
+        insertManagementMulticastFlowRules(deviceId);
     }
 
     /**
-     * Inserts an ALL group in the ONOS core to replicate packets on all host. 
-     * This group will be used to broadcast all ARP/NDP requests.
+     * Inserts an ALL ports from a device (at netcfg.json), to the
+     * management mcast group to replicate packets to all network elements. 
+     * This group will be used to broadcast, while avoiding loops 
+     * (responsability of the ports defined at netcfg.json).
      * <p>
      * ALL groups in ONOS are equivalent to P4Runtime packet replication engine
      * (PRE) Multicast groups.
      *
      * @param deviceId the device where to install the group
      */
-    private void insertMulticastGroup(DeviceId deviceId) {
+    private void insertManagementMulticastGroup(DeviceId deviceId) {
 
         // Replicate packets where we know hosts are attached.
         Set<PortNumber> ports = getHostFacingPorts(deviceId);
@@ -185,10 +187,13 @@ public class L2BridgingComponent {
      * This method will be called at component activation for each device
      * (switch) known by ONOS, and every time a new device-added event is
      * captured by the InternalDeviceListener defined below.
+     * 
+     * ALL IT DOES CAN BE REPLICATED BY A TABLE RULE INSERTION FUNCTION
+     * AS, LIKE THE CLI COMMAND "table_add"
      *
      * @param deviceId device ID where to install the rules
      */
-    private void insertMulticastFlowRules(DeviceId deviceId) {
+    private void insertManagementMulticastFlowRules(DeviceId deviceId) {
 
         log.info("Adding L2 multicast rules on {}...", deviceId);
 

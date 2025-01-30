@@ -437,7 +437,9 @@ public class Ipv4RoutingComponent{
                 .map(Srv6DeviceConfig::myStationMac)
                 .orElseThrow(() -> new ItemNotFoundException(
                         "Missing myStationMac config for " + deviceId));
-    }/**
+    }
+    
+    /**
      * Returns the IP address configured in the "subNetIP" property of the
      * given device config.
      *
