@@ -148,8 +148,7 @@ public class L2BridgingComponent {
     /**
      * Inserts an ALL ports from a device (at netcfg.json), to the
      * management mcast group to replicate packets to all network elements. 
-     * This group will be used to broadcast, while avoiding loops 
-     * (responsability of the ports defined at netcfg.json).
+     * This multicast group will be used to do broadcasts
      * <p>
      * ALL groups in ONOS are equivalent to P4Runtime packet replication engine
      * (PRE) Multicast groups.

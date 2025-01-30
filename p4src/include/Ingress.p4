@@ -217,14 +217,13 @@ control MyIngress(inout headers hdr,
 
     apply {
         //---------------------------------------------------------------------------ACL Support
-        if (hdr.packet_out.isValid()) {
-            standard_metadata.egress_spec = hdr.packet_out.egress_port;
+        if (hdr.packet_out.isValid()) {     //Came from the CPU, meant to be boradcasted
+            log_msg("Packet from CPU");
             hdr.packet_out.setInvalid();
-            exit;
         }
-
-        if(acl.apply().hit){          //Forward back to the CPU and its done
-            log_msg("ACL hit, end of processing");
+        else if(acl.apply().hit){          //Not from CPU and its acl pkt
+            log_msg("ACL hit, cloned to CPU, end of processing");
+            mark_to_drop(standard_metadata);
             return;
         }
 
