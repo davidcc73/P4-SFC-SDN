@@ -23,8 +23,6 @@ This repository is structured as follows: <br/>
 
 The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, the 2 must coincide if intended to expand the ONOS functions in the future.
 
-To prevent Broadcast Loops, the interfaces defined under `ports` at `config/netcfg.json`, contains the ports to be used by each switch to do bradcast/multicast to all entities, they are defined to use all link in each direction, exclude the inner most links in the topology, and to prevent a loop, also the link between s2 and s3.
-
 Our Topology:
 
 ![Topology](images/topology.drawio.png "Topology")
@@ -148,9 +146,40 @@ These two files are symlinked inside the `app/src/main/resources/` folder and us
 
 
 ## Firewall
-The node s2 is defined to act as a L3 firewall, it reads the packet's `dstAddr` and drops if it does not match any of the IPs on its L3 firewall table, the IPs in the table are the ones from all the hosts in the topology.
+The node s2 is defined to act as a L3 firewall, it reads the packet's `IPv4.dstAddr` and drops if it does not match any of the IPs on its L3 firewall table, the IPs in the table are the ones from all the hosts in the topology.
 
 The table entries with the IPs, are given to the switch via its configuration file.
+
+## Multicaster
+The node s3 is defined to act as a Multicaster, if the packet has no more `SFC` header (either from s3 being its last node and decapsulated it or the packet did not have it on arrival), s3 reads the packet's `IPv4.DSCP` and if it matches one of the configured values, the packet will be manipulated to go from a unicast to a multicast one, to which both s3 and the other switches will read its `ethernet.dstAddr` to determine to which multicast group it belongs, and forward it accordingly.
+
+<strong>Currently Programmed Multicast Conversion:</strong>
+
+| DSCP  | new DST MAC Address| new DST IP Address |
+|-------|--------------------|--------------------|
+|51     |01:00:5E:00:00:01   |239.1.1.1           |
+|52     |01:00:5E:00:00:02   |239.1.1.2           |
+
+
+## Multicasting/Broadcast
+By default all links at `config/netcfg.json`, are added to a multicast group `255` used for broadcasting, its up for the P4 code to prevent loops, like it currently does with `LLDP` broadcast packets.
+
+All the remaining multicast configurations are done via cli commands, and are located at directory `config/rules_mcast`
+
+The remaining groups are set mannually via the commands `mcast_port_add` in which a device will associate its given ports to a multicast group. The ports were defined to take the possible shortest path from the `multicaster` node to the destination hosts.
+
+Each node detects the multicast packet by reading its `ethernet.dstAddr` and associating it to a group.
+
+<strong>Currently Programmed Multicast Groups and their Ports per device:</strong>
+
+|Group\Node|s1  |s2|s3   |s4|s5|
+|----------|----|--|-----|--|--|
+|1         |1,20|--|1,2,4|1 |20|
+|2         |20  |--|1,2  |1 |--|
+|255       |All|All|All|All|All|
+
+
+
 
 
 ## SFC
@@ -176,7 +205,9 @@ At decapsulation, DSCP is set to 0, to avoid re-encapsulation at the nodes that 
 | 14    | s5 -> s4        |
 | 15    | s2 -> s3 -> s1  |
 | 16    | s2 -> s1        |
-| Others| None            |
+| 51    | s2 -> s3 (ends SFC, converts to multicast) -> hosts: all                |
+| 52        | s2 -> s3 (ends SFC, converts to multicast) -> hosts: h2, h4          |
+| Others    | None        |
 
 
 
@@ -209,6 +240,7 @@ source /config/sample_rules_hasfc/s4.txt
 source /config/sample_rules_hasfc/s5.txt
 
 
+# Push Mcast rules to each switch  
 source /config/rules_mcast/s1.txt 
 source /config/rules_mcast/s2.txt
 source /config/rules_mcast/s3.txt
