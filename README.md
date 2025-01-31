@@ -110,7 +110,7 @@ P4 Logs are located at `tmp/switchID/stratum_bmv2.log`, can be created by doing:
 | `onos-ui`         | Opens the ONOS web UI in a browser (`http://localhost:8181/onos/ui`)  |
 | `mn-cli`          | Attaches to the Mininet CLI (detachable with Ctrl-D) |
 | `mn-log`          | Follows the logs of the Mininet container |
-| `clean`           | Cleans up build artifacts (P4 and ONOS app builds) |
+| `clean`           | Cleans up logs and build artifacts (P4 and ONOS app builds) |
 | `app-build`       | Calls in sequence `p4-build` `_copy_p4c_out` `_mvn_package`   |
 | `p4-build`        | Compiles the P4 program and generates the P4Runtime and BMv2 JSON files |
 | `_copy_p4c_out`   | Copies the compiled P4 artifacts to the ONOS app resources directory   |
