@@ -51,6 +51,7 @@ import org.onosproject.srv6_usid.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,8 @@ import static org.onosproject.srv6_usid.AppConstants.INITIAL_SETUP_DELAY;
  */
 @Component(
         immediate = true,
-        enabled = true
+        enabled = true,
+        service = L2BridgingComponent.class
 )
 public class L2BridgingComponent {
 
@@ -146,6 +148,83 @@ public class L2BridgingComponent {
     }
 
     /**
+     * Creates a flow rule to match packets with a given MAC address and masl length and
+     * forward them to a multicast group.
+     *
+     * 
+     * ALL IT DOES CAN BE REPLICATED BY A TABLE RULE INSERTION FUNCTION
+     * AS, LIKE THE CLI COMMAND "table_add"
+     *
+     * @param deviceId the device where to install the rule
+     * @param mcast_group the multicast group to which the packets are forwarded
+     * @param mac_key the MAC address to match
+     * @param mask_length the mask length to apply to the MAC address
+     */
+    private void createMcastTableRule(DeviceId deviceId, int mcast_group, String mac_key, int mask_length){
+
+        //Broadcast to all hosts, including ARP pkt
+        final PiCriterion macBroadcastCriterion = PiCriterion.builder()
+        .matchLpm(
+                PiMatchFieldId.of("hdr.ethernet.dstAddr"),
+                MacAddress.valueOf(mac_key).toBytes(),
+                mask_length)
+        .build();
+
+        // Action: set multicast group id (the same used )
+        final PiAction setMcastGroupAction = PiAction.builder()
+                .withId(PiActionId.of("MyIngress.set_multicast_group"))
+                .withParameter(new PiActionParam(
+                        PiActionParamId.of("gid"),
+                        mcast_group))
+                .build();
+
+        //  Build 1 flow rule.
+        final String tableId = "MyIngress.multicast";
+
+        final FlowRule rule1 = Utils.buildFlowRule(
+                deviceId, appId, tableId,
+                macBroadcastCriterion, setMcastGroupAction);
+                
+        // Insert rules.
+        flowRuleService.applyFlowRules(rule1);
+    }
+
+    /**
+     * In a given device, creates the multicast group, and ports to said group.
+     * 
+     * IF GROUP ALREADY EXISTS, NO CHANGES CAN BE MADE TO IT, NO ERROR MSG WILL BE RETURNED FOR THIS CASE 
+     * 
+     * @param deviceId the device where to install the group, if not existing already
+     * @param mcast_group the multicast group to which the ports are added
+     * @param ports the ports to be added to the multicast group
+     */
+    public String addMcastGroupAndPorts(DeviceId deviceId, int mcast_group, int[] ports_arrya) {
+
+        // Replicate packets to given ports at ports_arrya
+        Set<PortNumber> ports = new HashSet<>();
+        for (int port : ports_arrya) {
+            ports.add(PortNumber.portNumber(port));
+        }
+
+        if (ports.isEmpty()) {
+            log.warn("Device {} No valid port number given", deviceId);
+            return "No valid port number given";
+        }
+
+        log.info("Adding L2 multicast group with {} ports on {}...",
+                    ports.size(), deviceId);
+
+        // Forge group object.
+        final GroupDescription multicastGroup = Utils.buildMulticastGroup(
+                appId, deviceId, mcast_group, ports);
+
+        // Insert.
+        groupService.addGroup(multicastGroup);
+
+        return null;
+    }
+
+    /**
      * Inserts an ALL ports from a device (at netcfg.json), to the
      * management mcast group to replicate packets to all network elements. 
      * This multicast group will be used to do broadcasts
@@ -187,40 +266,11 @@ public class L2BridgingComponent {
      * (switch) known by ONOS, and every time a new device-added event is
      * captured by the InternalDeviceListener defined below.
      * 
-     * ALL IT DOES CAN BE REPLICATED BY A TABLE RULE INSERTION FUNCTION
-     * AS, LIKE THE CLI COMMAND "table_add"
-     *
      * @param deviceId device ID where to install the rules
      */
     private void insertManagementMulticastFlowRules(DeviceId deviceId) {
-
         log.info("Adding L2 multicast rules on {}...", deviceId);
-
-        //Broadcast to all hosts, including ARP pkt
-        final PiCriterion macBroadcastCriterion = PiCriterion.builder()
-                .matchLpm(
-                        PiMatchFieldId.of("hdr.ethernet.dstAddr"),
-                        MacAddress.valueOf(all_hosts_mcas_address).toBytes(),
-                        ethernet_full_mask_length)
-                .build();
-
-        // Action: set multicast group id (the same used )
-        final PiAction setMcastGroupAction = PiAction.builder()
-                .withId(PiActionId.of("MyIngress.set_multicast_group"))
-                .withParameter(new PiActionParam(
-                        PiActionParamId.of("gid"),
-                        DEFAULT_BROADCAST_GROUP_ID))
-                .build();
-
-        //  Build 1 flow rule.
-        final String tableId = "MyIngress.multicast";
-
-        final FlowRule rule1 = Utils.buildFlowRule(
-                deviceId, appId, tableId,
-                macBroadcastCriterion, setMcastGroupAction);
-                
-        // Insert rules.
-        flowRuleService.applyFlowRules(rule1);
+        createMcastTableRule(deviceId, DEFAULT_BROADCAST_GROUP_ID, all_hosts_mcas_address, ethernet_full_mask_length);
     }
 
     /**

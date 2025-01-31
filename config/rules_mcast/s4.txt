@@ -4,8 +4,18 @@
 #### mark node as multicaster
 table_add device:s4 MyIngress.multicaster NoAction EXACT "1" "0" "" ""
 
-#### map multicast_ip_dst -> mcast_group
-#hosts: all
-#set by ONOS
+#### map multicast_mac_dst -> mcast_group
+#hosts: all hosts
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:01 48" "gid" "1"
 #hosts: h2, h4
-table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "FF:FF:FF:FF:FF:FE 48" "gid" "1"
+table_add device:s4 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:02 48" "gid" "2"
+
+
+
+# mcast_port_add device mcast_group ports
+
+#### map  Mcast_groups -> ports
+#mcast = 1
+mcast_port_add device:s4 1 "1"
+#mcast = 2
+mcast_port_add device:s4 2 "1"

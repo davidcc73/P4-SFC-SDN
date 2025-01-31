@@ -18,9 +18,10 @@ def get_if_with_zero():
         exit(1)
 
 def handle_pkt(pkt):
-    print("Got an IPv4 packet")
-    pkt.show2()
-    sys.stdout.flush()
+    if pkt.haslayer("IP"):
+        print("Got an incoming IPv4 packet")
+        pkt.show2()
+        sys.stdout.flush()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -30,17 +31,13 @@ def main():
     # Use the argument if provided, otherwise find interface ending in '0'
     iface = args.if2 if args.if2 else get_if_with_zero()
     
-    # Get the MAC address of the chosen interface
-    mac_addr = get_if_hwaddr(iface)
-    
-    # Filter out packets with the source MAC address matching the host's MAC address (i.e., sent packets)
-    # and only capture IPv4 packets
-    bpf_filter = f"not ether src {mac_addr} and ip"
+    # Capture only incoming IPv4 packets
+    bpf_filter = "ip and inbound"
 
-    print(f"Sniffing on {iface}, ignoring packets sent from {mac_addr}, capturing only IPv4 packets")
+    print(f"Sniffing on {iface}, capturing only incoming IPv4 packets")
     sys.stdout.flush()
     
-    sniff(iface=iface, prn=lambda x: handle_pkt(x), filter=bpf_filter)
+    sniff(iface=iface, prn=handle_pkt, filter=bpf_filter)
 
 if __name__ == '__main__':
     main()
