@@ -4,6 +4,7 @@
 #include "headers.p4"
 #include "define.p4"
 
+#include "INT/int_source.p4"
 
 
 /*************************************************************************
@@ -290,6 +291,33 @@ control MyIngress(inout headers hdr,
                 log_msg("Multicast failed, droping pkt");
                 drop();                   // can not do uni or multicast, just drop
             }
+        }
+
+        //-----------------INT processing portion        
+        if(hdr.udp.isValid() || hdr.tcp.isValid()) {        //just track higer level connections. set if current hop is source or sink to the packet
+            process_int_source_sink.apply(hdr, meta, standard_metadata);
+        }
+        
+        if (meta.int_meta.source == true) {       //(source) INSERT INT INSTRUCTIONS HEADER
+            log_msg("I am INT source for this packet origin, checking flow");
+            hdr.intl4_shim.setInvalid(); 
+            
+
+            process_int_source.apply(hdr, meta, standard_metadata);     
+            if(hdr.int_header.isValid()){
+                log_msg("packet flow monitored");
+            }
+        }
+
+        if (meta.int_meta.sink == true && hdr.int_header.isValid()) { //(sink) and the INT header is valid
+            // clone packet for Telemetry Report Collector
+            log_msg("I am sink of this packet and i will clone it");
+            //------------Prepare info for report
+            meta.perserv_meta.ingress_port = standard_metadata.ingress_port;      
+            meta.perserv_meta.deq_qdepth = standard_metadata.deq_qdepth;
+            meta.perserv_meta.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
+
+            clone_preserving_field_list(CloneType.I2E, REPORT_MIRROR_SESSION_ID, CLONE_FL_1);
         }
     }
 }
