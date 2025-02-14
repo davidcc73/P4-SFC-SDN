@@ -1,0 +1,39 @@
+#                   pipeline         control                 table                   key     action                      cmp_field_on_p4                         cmp_criteria
+
+#table MyEgress.process_int_transit.tb_int_inst_0003
+
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x0     int_set_header_0003_i0      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x1     int_set_header_0003_i1      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x2     int_set_header_0003_i2      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x3     int_set_header_0003_i3      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x4     int_set_header_0003_i4      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x5     int_set_header_0003_i5      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x6     int_set_header_0003_i6      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x7     int_set_header_0003_i7      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x8     int_set_header_0003_i8      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0x9     int_set_header_0003_i9      hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xA     int_set_header_0003_i10     hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xB     int_set_header_0003_i11     hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xC     int_set_header_0003_i12     hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xD     int_set_header_0003_i13     hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xE     int_set_header_0003_i14     hdr.int_header.instruction_mask_0003    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0003        0xF     int_set_header_0003_i15     hdr.int_header.instruction_mask_0003    exact
+
+#table MyEgress.process_int_transit.tb_int_inst_0407
+
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x0     int_set_header_0407_i0      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x1     int_set_header_0407_i1      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x2     int_set_header_0407_i2      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x3     int_set_header_0407_i3      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x4     int_set_header_0407_i4      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x5     int_set_header_0407_i5      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x6     int_set_header_0407_i6      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x7     int_set_header_0407_i7      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x8     int_set_header_0407_i8      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0x9     int_set_header_0407_i9      hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xA     int_set_header_0407_i10     hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xB     int_set_header_0407_i11     hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xC     int_set_header_0407_i12     hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xD     int_set_header_0407_i13     hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xE     int_set_header_0407_i14     hdr.int_header.instruction_mask_0407    exact
+INT_Transit-insert  MyEgress  process_int_transit     tb_int_inst_0407        0xF     int_set_header_0407_i15     hdr.int_header.instruction_mask_0407    exact

@@ -31,8 +31,88 @@ Our Topology:
 
 # Setup
 
-For the developemnt of this project we used Ubuntu LTS 22.04, so the presented commands are meant to it.
+For the developemnt of this project we used Ubuntu LTS 22.04, and LTS 24.04, so the presented commands are meant to it.
 Any Linux Distro capable of installing the needed programs should work fine.
+
+### Install Docker Engine
+For Ubuntu the process is different from other distros, so it's recommened to follow the official instruction [here](https://docs.docker.com/engine/install/ubuntu/).
+
+### Install Dependencies
+In any location run:
+
+```bash
+sudo apt-get install sshpass     #install sshpass to be able to use the make commands
+sudo apt install python3-pip   
+sudo pip3 install scapy          #send/process packets
+sudo apt install mininet         #install mininet at host (makes clean ups easier)
+sudo pip3 install numpy          #to do MCDA
+sudo pip3 install openpyxl       #to export raw CSV results to excel
+sudo pip3 install paramiko       #for the INT Analyzer
+sudo pip install networkx        #to visualize the network flows in the topology in real-time
+sudo pip install matplotlib      #to visualize the network flows in the topology in real-time
+```
+In the root of the project run:
+```bash
+#Install our container's dependencies
+sudo make deps                   
+```
+
+### Install InfluxDB
+We used InfluxDB v.1.8. The installation process can be seen [here](https://docs.influxdata.com/influxdb/v1/introduction/install/).
+
+```bash
+#A client for Python to interact with InfluxDB.
+sudo pip3 install influxdb    
+
+#enable influxdb to start on boot
+sudo systemctl enable influxdb  
+```
+
+Create the int database
+```bash
+#connect to InfluxDB
+influx
+
+#create the DB for the INT telemetry
+influx> create database int
+
+#(optional) Check if the DB was created 
+influx> use int
+```
+
+
+### Install Grafana
+The installation process can be seen [here](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/#install-from-apt-repository), we used "Install from APT repository".
+
+
+After installing, run:
+
+```bash
+#start grafana now
+sudo systemctl start grafana-server 
+
+#enable grafana-server to start on boot
+sudo systemctl enable grafana-server
+```
+
+The Web Interface can be accessed at http://localhost:3000/<br/>
+username: admin<br/>
+password: admin
+
+
+#### Connect to InfluxDB
+
+Go to Connections > Data sources, select InfluxDB and use the default url: http://localhost:8086<br/>
+Select the database int<br/>
+usernmae: admin<br/>
+password: admin<br/>
+Test and if all is ok, you will see the message of success
+
+#### Import Dashboard
+After configuring the data source, copy it's uID (unique ID), that can be seen at the URL after "/datasources/edit/"
+and paste it at the file "INT/grafana/INT statistics.json" at all variables "uid", replace the old value.
+
+Go to Home > Dashboards > Import dashboard and upload the Grafana Dashboard .json "INT/grafana/INT statistics.json"
 
 ### Install Docker Engine
 For Ubuntu the process is different from other distros, so it's recommened to follow the official instruction [here](https://docs.docker.com/engine/install/ubuntu/).
