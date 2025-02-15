@@ -58,7 +58,7 @@ class DynamicTopo(Topo):
                 
                 self.addLink(id_switch0, id_switch1, cls=TCLink, port1 = port_switch0, port2 = port_switch1)
                 
-            else:
+            else: #switch and host
                 if element0.startswith("h"):
                     host = element0
                     switch = element1
@@ -69,9 +69,10 @@ class DynamicTopo(Topo):
                 id_switch = switch.split("-")[0]
                 port_switch = int(switch.split("p")[1])
 
-                id_host = host
+                id_host = host.split("-")[0]
+                port_host = int(host.split("p")[1])
 
-                self.addLink(id_host, id_switch, port1 = 0, port2 = port_switch, cls=TCLink)
+                self.addLink(id_host, id_switch, port1 = port_host, port2 = port_switch, cls=TCLink)
 
 def disable_ipv6(net):
     """ Disable IPv6 on all hosts and switches """

@@ -1,8 +1,10 @@
 /.vscode
 /tmp
+/INT/results/
 app/target/
 resources/
 
+*.log
 *.class
 *.pyc
 
