@@ -227,8 +227,6 @@ control MyIngress(inout headers hdr,
             mark_to_drop(standard_metadata);
             return;
         }
-
-    
         //---------------------------------------------------------------------------
 
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl == 0){          
