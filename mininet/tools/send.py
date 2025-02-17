@@ -6,7 +6,7 @@ import socket
 import random
 import struct
 import time  # Add time module for sleep
-from scapy.all import sendp, get_if_list, get_if_hwaddr
+from scapy.all import sendp, get_if_list, get_if_hwaddr, get_if_addr
 from scapy.all import Ether, IP, TCP, UDP
 
 args = None
@@ -39,7 +39,7 @@ def check_header_size():
 
     return header_size
 
-def send_packet(args, pkt_ETHE, payload_space, iface, addr):
+def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
 
     global my_IP
     results = {
@@ -48,7 +48,7 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr):
     }
 
     #prev_timestamp = None
-    l3_layer = IP(dst=addr, tos=args.dscp << 2)
+    l3_layer = IP(src=src_ip, dst=addr, tos=args.dscp << 2)
 
     # Construct l4 layer, TCP or UDP
     if args.l4 == 'tcp':
@@ -126,9 +126,6 @@ def parse_args():
                         type=int, action="store", required=False,
                         default=1)
     
-    #parser.add_argument('--ip_src', help='src ip',
-    #                    type=str, action="store", required=True)
-    
     parser.add_argument('--dst_ip', help='dst ip',
                         type=str, action="store", required=True)
     
@@ -177,17 +174,19 @@ def main():
     addr = socket.gethostbyname(args.dst_ip)
     interval = args.i
     iface = get_if()
+    src_ip = get_if_addr(iface)
+    src_mac = get_if_hwaddr(iface)
 
-    print("Sending packets on interface {} to {} every {} seconds".format(iface, addr, interval))
+    print("Sending packets on interface {} (IP: {}, MAC: {}) to {} every {} seconds".format(iface, src_ip, src_mac, addr, interval))
     
-    dst_mac = 'ff:ff:ff:ff:ff:ff'
-    pkt = Ether(src=get_if_hwaddr(iface), dst=dst_mac)
+    dst_mac = '00:00:00:00:00:01'           #dummy value, currently no support for ARP and get the real MAC address of the destination
+    pkt = Ether(src=src_mac, dst=dst_mac)
 
     header_size = check_header_size()
 
     payload_space = args.s - header_size
 
-    results = send_packet(args, pkt, payload_space, iface, addr)
+    results = send_packet(args, pkt, payload_space, iface, addr, src_ip)
 
     #if args.export is not None:
         # Export results
