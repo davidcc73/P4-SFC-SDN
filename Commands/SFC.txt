@@ -3,16 +3,16 @@
 use "xterm h1" to open a terminal for h1 and the same for th eother ones
 
 
-h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 0  --l4 udp  --port 443  --m INTH1  --s 262  --c 1000  --i 1
-h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 2  --l4 udp  --port 443  --m INTH1  --s 262  --c 1000  --i 0.1 
+h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 0  --l4 udp  --sport 49153  --dport 443  --m INTH1  --s 262  --c 1000  --i 1
+h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 2  --l4 udp  --sport 49154  --dport 443  --m INTH1  --s 262  --c 1000  --i 0.1 
 
-h3 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 3  --l4 udp  --port 443  --m INTH1  --s 420  --c 1000  --i 0.1
-h3 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 10 --l4 udp  --port 443  --m INTH1  --s 874  --c 1000  --i 0.1
+h3 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 3  --l4 udp  --sport 49155  --dport 443  --m INTH1  --s 420  --c 1000  --i 0.1
+h3 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 10 --l4 udp  --sport 49156  --dport 443  --m INTH1  --s 874  --c 1000  --i 0.1
 
 
 #SFC + Multicast
-h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 51  --l4 udp --port 443  --m INTH1  --s 483  --c 1000  --i 0.1
-h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 52  --l4 udp --port 443  --m INTH1  --s 483  --c 1000  --i 0.1
+h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 51  --l4 udp --sport 49157  --dport 443  --m INTH1  --s 483  --c 1000  --i 0.1
+h1 python3 /mininet/tools/send.py  --dst_ip h2  --dscp 52  --l4 udp --sport 49158  --dport 443  --m INTH1  --s 483  --c 1000  --i 0.1
 
 
 
@@ -26,7 +26,7 @@ python3 /mininet/tools/receive.py
 python3 /INT/receive/receive.py --duration 10
 
 
-#That exports results
-h1 python3 /INT/send/send.py --ip_dst 10.0.2.2  --l4 udp --port 443 --m INTH1 --dscp 0  --s 262 --c 100 --i 0.001 --export LOW_raw_results.csv --me h1 --iteration 1 
+#-------------------------------That exports results
+h1 python3 /INT/send/send.py --ip_dst 10.0.2.2  --l4 udp --sport 49158  --dport 443  --m INTH1 --dscp 0  --s 262 --c 100 --i 0.001 --export LOW_raw_results.csv --me h1 --iteration 1 
 
 h2 python3 /INT/receive/receive.py --export LOW_raw_results.csv --me h2 --iteration 1  --duration 50

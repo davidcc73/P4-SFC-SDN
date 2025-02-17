@@ -52,9 +52,9 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
 
     # Construct l4 layer, TCP or UDP
     if args.l4 == 'tcp':
-        l4_layer = TCP(dport=args.port, sport=random.randint(49152, 65535))
+        l4_layer = TCP(sport=args.sport, dport=args.dport)
     elif args.l4 == 'udp':
-        l4_layer = UDP(dport=int(args.port), sport=random.randint(49152, 65535))
+        l4_layer = UDP(sport=args.sport, dport=args.dport)
 
     Base_pkt = pkt_ETHE / l3_layer / l4_layer 
     my_IP = Base_pkt[IP].src
@@ -129,7 +129,10 @@ def parse_args():
     parser.add_argument('--dst_ip', help='dst ip',
                         type=str, action="store", required=True)
     
-    parser.add_argument('--port', help="dest port", type=int,
+    parser.add_argument('--sport', help="src port", type=int,
+                        action="store", required=True)
+    
+    parser.add_argument('--dport', help="dest port", type=int,
                         action="store", required=True)
     
     parser.add_argument('--l4', help="layer 4 proto (tcp or udp)",

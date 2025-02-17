@@ -6,7 +6,7 @@ import sys
 import os
 import argparse
 import threading
-from scapy.all import sniff, get_if_hwaddr, TCP, UDP
+from scapy.all import sniff, get_if_hwaddr, TCP, UDP, IP
 
 
 # Global variables to count packets and store sequence numbers
@@ -42,17 +42,21 @@ def process_packet(pkt):            #process pkts in queue
     global packet_TCP_UDP_count, sequence_numbers, results #, last_packet_time
     packet_TCP_UDP_count += 1
 
-    #print("got a TCP/UDP packet")
+    print("got a TCP/UDP packet")
 
+    '''
     print("Original packet received:")
     pkt.show2()
     sys.stdout.flush()
-    
     '''
+
     #store flow info of the packet, and when was first packet received if not already stored
     if "flow" not in results:
-        results["flow"] = (pkt[IP].src, pkt[IP].dst, pkt[IP].fl)
         results["first_packet_time"] = pkt.time
+        if UDP in pkt:
+            results["flow"] = (pkt[IP].src, pkt[IP].dst, pkt[UDP].sport, pkt[UDP].dport)
+        elif TCP in pkt:
+            results["flow"] = (pkt[IP].src, pkt[IP].dst, pkt[TCP].sport, pkt[TCP].dport)
     
 
     #----------Extract and print the message from the packet
@@ -68,7 +72,6 @@ def process_packet(pkt):            #process pkts in queue
         print(f"Packet Sequence Number: {seq_number} Packet Message: {message}")
     except ValueError:
         print(f"Error splitting payload: {payload}")
-    '''
     
     sys.stdout.flush()
 
@@ -137,9 +140,10 @@ def export_results():
                 #Prepare CSV line
                 src_ip = results["flow"][0]
                 dst_ip = results["flow"][1]
-                flow_label = results["flow"][2]
+                sport = results["flow"][2]
+                dport = results["flow"][3]
                 first_packet_time = results["first_packet_time"]
-                line = [args.iteration, src_ip, dst_ip, flow_label, "receiver", packet_TCP_UDP_count, first_packet_time, len(out_of_order_packets), out_of_order_packets]
+                line = [args.iteration, src_ip, dst_ip, sport, dport, "receiver", packet_TCP_UDP_count, first_packet_time, len(out_of_order_packets), out_of_order_packets]
 
                 # Write data
                 writer.writerow(line)
