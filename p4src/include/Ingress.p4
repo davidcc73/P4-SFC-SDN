@@ -218,9 +218,15 @@ control MyIngress(inout headers hdr,
 
     apply {
         //---------------------------------------------------------------------------ACL Support
-        if (hdr.packet_out.isValid()) {     //Came from the CPU, meant to be boradcasted
-            log_msg("Packet from CPU");
+        if(hdr.ethernet.etherType == ETHERTYPE_LLDP && hdr.ethernet.dstAddr == 1652522221582){  //LLDP multicast packet with dst ethernet (01:80:c2:00:00:0e), meant only for this switch, so do not forward it
+            log_msg("It's an LLDP multicast packet destined to this switch, not meant to be forwarded");
+            return;
+        }
+        if (hdr.packet_out.isValid()) {     //Came from the CPU, meant to be forwarded to the port defined in it
+            log_msg("Packet from CPU, forwarding it to port:{}", {hdr.packet_out.egress_port});
+            standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();
+            exit;                           //it can probably also be return;
         }
         else if(acl.apply().hit){          //Not from CPU and its acl pkt
             log_msg("ACL hit, cloned to CPU, end of processing");
@@ -285,6 +291,7 @@ control MyIngress(inout headers hdr,
         }
         else{
             log_msg("IPv4_LPM failed. Trying Multicast");
+            log_msg("hdr.ethernet.dstAddr:{}", {hdr.ethernet.dstAddr});
             if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
                 log_msg("Multicast failed, droping pkt");
                 drop();                   // can not do uni or multicast, just drop
@@ -300,7 +307,6 @@ control MyIngress(inout headers hdr,
             log_msg("I am INT source for this packet origin, checking flow");
             hdr.intl4_shim.setInvalid(); 
             
-
             process_int_source.apply(hdr, meta, standard_metadata);     
             if(hdr.int_header.isValid()){
                 log_msg("packet flow monitored");

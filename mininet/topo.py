@@ -39,7 +39,10 @@ class DynamicTopo(Topo):
             MAC_GW = host_info["MAC_GW"]
         
             # Add hosts
-            host = self.addHost(host_id, mac=host_info['mac'], ip=host_info['ip'], ip_gw = IP_GW)
+            if IP_GW == "Empty":
+                host = self.addHost(host_id, mac=host_info['mac'], ip=host_info['ip'])
+            else:
+                host = self.addHost(host_id, mac=host_info['mac'], ip=host_info['ip'], ip_gw = IP_GW)
         
         
         # Add links current host-switch, possible  combinations ["h1", "s1-p1" ], ["s1-p2", "s2-p1"]
