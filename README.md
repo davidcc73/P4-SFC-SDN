@@ -112,6 +112,15 @@ and paste it at the file "INT/grafana/INT statistics.json" at all variables "uid
 
 Go to Home > Dashboards > Import dashboard and upload the Grafana Dashboard .json "INT/grafana/INT statistics.json"
 
+### Wireshark (Optional)
+To help dissecting INT reports, install wirehsark plugin located at "util/wireshark/P4INT_report_IPV4.lua"<br/>
+into <br/>"/usr/lib/x86_64-linux-gnu/wireshark/plugins/"
+
+It's limited to a fixed number of hops, but is easy to modify to a different number and to new report's fields.
+
+Some data is displeyed incorrectly, trust the one printed by the INT collector.
+
+
 ### Install Docker Engine
 For Ubuntu the process is different from other distros, so it's recommened to follow the official instruction [here](https://docs.docker.com/engine/install/ubuntu/).
 

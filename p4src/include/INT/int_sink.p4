@@ -6,7 +6,7 @@ control process_int_sink (inout headers hdr,
 
     action int_sink() {
         // restore original headers
-       
+
         //INT specification says that the Traffic classe field should be restored, it was used to signal the usage of INT
         hdr.ipv4.dscp = hdr.intl4_shim.udp_tcp_ip_dscp;
         
@@ -64,6 +64,9 @@ control process_int_report (inout headers hdr,
                                     ip4Addr_t src_ip,
                                     ip4Addr_t mon_ip, 
                                     l4_port_t mon_port) {
+        bit<8> used_protocol = 0;
+        bit<8> used_protocol_len = 0;
+        
         // INT Raport structure
         // [Eth][IPv4][UDP][INT RAPORT HDR][ETH][IPv4][UDP/TCP][INT HDR][INT DATA]
         //Report Ethernet Header
@@ -72,13 +75,19 @@ control process_int_report (inout headers hdr,
         hdr.report_ethernet.srcAddr = src_mac;
         hdr.report_ethernet.etherType = TYPE_IPV4;
 
+        if(hdr.udp.isValid()){
+            used_protocol = TYPE_UDP;
+            used_protocol_len = UDP_HEADER_LEN; 
+        }
+        else if(hdr.tcp.isValid()){     //if option flags are used the size will vary, only assuming basic size
+            used_protocol = TYPE_TCP;
+            used_protocol_len = TCP_HEADER_MIN_LEN;
+        }
 
-        bit<8> used_protocol_len = 0;
-             if(hdr.udp.isValid()){used_protocol_len = UDP_HEADER_LEN;}
-        else if(hdr.tcp.isValid()){used_protocol_len = TCP_HEADER_MIN_LEN;}   //if option flags are used the size will vary
         //Report IPV4 Header
         hdr.report_ipv4.setValid();
         hdr.report_ipv4.version = IP_VERSION_4;
+        hdr.report_ipv4.ihl = IPV4_IHL_MIN;
         hdr.report_ipv4.dscp = 6w0;
         hdr.report_ipv4.ecn = 2w0;
         //hdr.report_ipv4.flow_label = 20w0;     //20w0 here is just a placeholder
@@ -93,8 +102,11 @@ control process_int_report (inout headers hdr,
                                         (bit<16>) used_protocol_len +                                //it will vary depending on the used protocol and options
                                         INT_SHIM_HEADER_SIZE + (((bit<16>) hdr.intl4_shim.len) * 4); //convert from word to bytes
 
-        hdr.report_ipv4.protocol = TYPE_UDP;        // a 32-bit unsigned number with hex value 11 (UDP)
+        hdr.report_ipv4.identification = 0;
+        hdr.report_ipv4.flags = 0;
+        hdr.report_ipv4.fragOffset = 0;
         hdr.report_ipv4.ttl = REPORT_HDR_HOP_LIMIT;
+        hdr.report_ipv4.protocol = used_protocol;
         hdr.report_ipv4.srcAddr = src_ip;
         hdr.report_ipv4.dstAddr = mon_ip;
 
@@ -104,15 +116,14 @@ control process_int_report (inout headers hdr,
 
         //Report UDP Header
         hdr.report_udp.setValid();
-        hdr.report_udp.checksum = 1;            //placeholder value
         hdr.report_udp.srcPort = 1234;
         hdr.report_udp.dstPort = mon_port;
         hdr.report_udp.len = (bit<16>) UDP_HEADER_LEN + 
-                                 (bit<16>) REPORT_GROUP_HEADER_LEN +
-                                 (bit<16>) REPORT_INDIVIDUAL_HEADER_LEN +
-                                 (bit<16>) ETH_HEADER_LEN + 
-                                 (bit<16>) IPV4_MIN_HEAD_LEN + 
-                                 (bit<16>) used_protocol_len +
+                                (bit<16>) REPORT_GROUP_HEADER_LEN +
+                                (bit<16>) REPORT_INDIVIDUAL_HEADER_LEN +
+                                (bit<16>) ETH_HEADER_LEN + 
+                                (bit<16>) IPV4_MIN_HEAD_LEN + 
+                                (bit<16>) used_protocol_len +
                                  INT_SHIM_HEADER_SIZE + (((bit<16>) hdr.intl4_shim.len) * 4);
         
         hdr.report_group_header.setValid();
@@ -135,7 +146,6 @@ control process_int_report (inout headers hdr,
         hdr.report_individual_header.rsvd = 0;
 
         /* Individual report inner contents */
-
         hdr.report_individual_header.rep_md_bits = 0;
         hdr.report_individual_header.domain_specific_id = 0;
         hdr.report_individual_header.domain_specific_md_bits = 0;

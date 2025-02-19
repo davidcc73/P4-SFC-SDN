@@ -4,7 +4,8 @@
 const bit<8> ETH_HEADER_LEN = 14;
 const bit<8> TCP_HEADER_MIN_LEN = 20;   //minimun length is 20 bytes
 const bit<8> UDP_HEADER_LEN = 8;
-const bit<8> IPV4_MIN_HEAD_LEN = 20;
+const bit<8> IPV4_MIN_HEAD_LEN = 20;    //minimun length is 20 bytes
+#define IPV4_IHL_MIN 4w5                //value for the ipv4's ihl field 
 
 const bit<8> TYPE_TCP = 0x06;
 const bit<8> TYPE_UDP = 0x11;
