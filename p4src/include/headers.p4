@@ -230,9 +230,10 @@ const bit<8> DROP_REPORT_HEADER_LEN = 12;
 
 //---------------------------------------------------------------------------------
 
-struct metadata {
+struct metadata {                           //clones still have access to the metadata from their "parent" packet
     bit<1> l3_firewall;                     //flag to mark if the current node is a l3_firewall
-    bool is_multicast;                      //id multicast pkts
+    bool is_multicast;                      //identify current pkt is multicast
+    bool is_multicaster;                    //identify current switch as multicaster
     bit<6> dscp_at_ingress;                 //needed because after decapsulation the DSCP is set to 0 so the pkt is not recapsulated by a switch with hosts
     bit<8> ip_proto;
     bit<8> icmp_type;
@@ -241,6 +242,7 @@ struct metadata {
     preserving_metadata_CPU_t perserv_CPU_meta; //to migrate from clone3() to clone_preserving() in the clone_to_CPU scenario
 
     bool ipv4_update;                           //(OPTIONAL not in use) flag to mark ipv4 header change, leading to the update checksum or not
+    bool sfc_forwarded;
     
     int_metadata_t int_meta;                    //used by INT
     preserving_metadata_t perserv_meta;         //used by INT

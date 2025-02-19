@@ -53,7 +53,7 @@ control process_int_source (inout headers hdr,
         hdr.intl4_shim.npt = 0;                                 // next protocol type: 0
         hdr.intl4_shim.len = INT_HEADER_WORD;                   // This is 3 from 0xC (INT_TOTAL_HEADER_SIZE >> 2)
         hdr.intl4_shim.udp_tcp_ip_dscp = hdr.ipv4.dscp;        
-        hdr.intl4_shim.udp_tcp_ip_dscp = 0;                     
+        hdr.intl4_shim.udp_tcp_ip = 0;                     
         
         // insert INT header
         hdr.int_header.setValid();

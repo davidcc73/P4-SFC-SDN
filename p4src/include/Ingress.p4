@@ -59,12 +59,15 @@ control MyIngress(inout headers hdr,
     action sfc_decapsulation() {
         log_msg("Doing SFC Decapsulation");
         hdr.ethernet.etherType = TYPE_IPV4;
-        hdr.ipv4.dscp = 0;                     //avoids re-encapsulations on nodes that can encapsulate
         hdr.sfc.setInvalid();
         hdr.sfc_chain[0].setInvalid();
         hdr.sfc_chain[1].setInvalid();
         hdr.sfc_chain[2].setInvalid();
         hdr.sfc_chain[3].setInvalid();
+    
+        //avoids re-encapsulations on nodes that can encapsulate
+        if(hdr.int_header.isValid()){   hdr.intl4_shim.udp_tcp_ip_dscp = 0;}
+        else{                           hdr.ipv4.dscp = 0;}
     }
 
     action sfc_encapsulation(bit<8> id, bit<8> sc, bit<9> sf1, bit<9> sf2,bit<9> sf3, bit<9> sf4) {
@@ -102,6 +105,7 @@ control MyIngress(inout headers hdr,
         log_msg("SFC Forwarding to port:{}", {port});
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        meta.sfc_forwarded = true;
     }
     table sfc_egress { // overlay forwarding
         key = {
@@ -246,10 +250,13 @@ control MyIngress(inout headers hdr,
 
 
         // ICMP pkts are being parsed and treated as regular ipv4 
-        meta.dscp_at_ingress = hdr.ipv4.dscp;
+
+        //Get the OG pkt DSCP pre decapsulation
+        if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;}
+        else{                         meta.dscp_at_ingress = hdr.ipv4.dscp;                 }
         
         //---------------SFC
-        if (hdr.ipv4.dscp != 0){
+        if (meta.dscp_at_ingress != 0){
         
             // SFC packets (dscp > 0)
             if (!hdr.sfc.isValid()){        // intial stage?
@@ -269,34 +276,37 @@ control MyIngress(inout headers hdr,
             if (hdr.sfc.sc != 0){           //L2 Forwarding using SFC
                 log_msg("Trying SFC forwarding");
                 sfc_egress.apply();         // Overlay forwarding
-                return;
             }
             else{                           // SFC ends
                 sfc_decapsulation();        // Decaps the packet    
             }
         }
         
-        //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------       
-        if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
-            log_msg("Trying to change pkt to multicast");
-            multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+        //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------
+        if(meta.sfc_forwarded == false){
+            if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
+                log_msg("Trying to change pkt to multicast");
+                meta.is_multicaster = true;
+                multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+            }
+
+            if(ipv4_lpm.apply().hit){  // IPv4 Forwarding L3: dst IP -> dst ethernet
+                log_msg("IPv4_LPM hit");
+                if(!unicast.apply().hit){        // Unicast Forwarding L2: dst ethernet -> ports
+                    log_msg("Unicast failed. droping pkt");
+                    drop();                        
+                }
+            }
+            else{
+                log_msg("IPv4_LPM failed. Trying Multicast");
+                log_msg("hdr.ethernet.dstAddr:{}", {hdr.ethernet.dstAddr});
+                if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
+                    log_msg("Multicast failed, droping pkt");
+                    drop();                   // can not do uni or multicast, just drop
+                }
+            }
         }
 
-        if(ipv4_lpm.apply().hit){  // IPv4 Forwarding L3: dst IP -> dst ethernet
-            log_msg("IPv4_LPM hit");
-            if(!unicast.apply().hit){        // Unicast Forwarding L2: dst ethernet -> ports
-                log_msg("Unicast failed. droping pkt");
-                drop();                        
-            }
-        }
-        else{
-            log_msg("IPv4_LPM failed. Trying Multicast");
-            log_msg("hdr.ethernet.dstAddr:{}", {hdr.ethernet.dstAddr});
-            if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
-                log_msg("Multicast failed, droping pkt");
-                drop();                   // can not do uni or multicast, just drop
-            }
-        }
 
         //-----------------INT processing portion        
         if(hdr.udp.isValid() || hdr.tcp.isValid()) {        //just track higer level connections. set if current hop is source or sink to the packet
@@ -313,7 +323,11 @@ control MyIngress(inout headers hdr,
             }
         }
 
-        if (meta.int_meta.sink == true && hdr.int_header.isValid()) { //(sink) and the INT header is valid
+        if (hdr.int_header.isValid() && (         //(sink) and the INT header is valid
+                meta.int_meta.sink == true ||     //being sink the pkt is going to host directly now
+                (meta.is_multicaster == false && standard_metadata.mcast_grp != 0) //being sink the pkt is going to direct host port 
+            )                                                                      //hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology) and no multicast from host supported overall
+        ) {
             // clone packet for Telemetry Report Collector
             log_msg("I am sink of this packet and i will clone it");
             //------------Prepare info for report
