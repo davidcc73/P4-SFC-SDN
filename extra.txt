@@ -1,0 +1,63 @@
+sudo make deps
+
+
+
+sudo make stop     
+sudo mn -c         
+sudo make clean    
+
+xhost +               
+sudo make start      
+sudo make app-build   
+
+
+
+make app-reload       
+make netcfg
+
+
+
+
+
+
+# Push Table entries to each switch          
+source /config/sample_rules_hasfc/s1.txt 
+source /config/sample_rules_hasfc/s2.txt
+source /config/sample_rules_hasfc/s3.txt
+source /config/sample_rules_hasfc/s4.txt
+source /config/sample_rules_hasfc/s5.txt
+
+
+# Push Mcast rules to each switch  
+source /config/rules_mcast/s1.txt 
+source /config/rules_mcast/s2.txt
+source /config/rules_mcast/s3.txt
+source /config/rules_mcast/s4.txt
+source /config/rules_mcast/s5.txt
+
+
+# Push INT rules to each switch
+INT_Role-set
+source /config/INT_Tables/INT_Transit_config.txt  
+
+
+
+
+
+sudo python3 INT/receive/collector_influxdb.py
+
+sudo python3 INT/visualizer/visualizer.py
+
+
+
+
+WRITE ON README:
+
+por cada pkt multicast enviado, será gerado 1 report por cada switch sink que ele chegar
+hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology) and no multicast from host supported overall
+quando multicast para x nos no mesmo switch, so 1 report é criado, ter isso em conta no nº de pacotes que a DB diz que existem!!!!!
+
+explicar grafna defeitoso ports passam a keys e n ha mais flow label, creditos ao tiago
+
+
+//Note: after decapsulation, the OG DSCP becomes 0, fo abter that, the priority foR the next switches will alyways be BEST EFFORT. SET TO 0 TO AVOID RECAPSULATIONS AT edge switches (future pkt sink)

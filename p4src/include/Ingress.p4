@@ -221,6 +221,8 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
+        // ICMP pkts are being parsed and treated as regular ipv4 
+
         //---------------------------------------------------------------------------ACL Support
         if(hdr.ethernet.etherType == ETHERTYPE_LLDP && hdr.ethernet.dstAddr == 1652522221582){  //LLDP multicast packet with dst ethernet (01:80:c2:00:00:0e), meant only for this switch, so do not forward it
             log_msg("It's an LLDP multicast packet destined to this switch, not meant to be forwarded");
@@ -245,15 +247,18 @@ control MyIngress(inout headers hdr,
             return;
         }
 
+        //---------------------------------------------------------------------------Set packet priority, meta.dscp_at_ingress is 0 by default which means priority 0 (best effort)
+        //Get the OG pkt DSCP pre decapsulation
+        if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;} //when INT is used, the OG DSCP value is in the shim header
+        else{                         meta.dscp_at_ingress = hdr.ipv4.dscp;                 } //Note: after decapsulation, the OG DSCP becomes 0
+
+        standard_metadata.priority = meta.dscp_at_ingress[5:3];
+        if(standard_metadata.priority != 0){log_msg("Packet priority changed to:{}", {standard_metadata.priority});}
+        //---------------------------------------------------------------------------
+
 
         //TODO: ADD ARP support FOR REAL DINAMIC HOSTS DISCOVERY (not just static ARP entries, maybe part of the why ONOS is not detecting the hosts)
 
-
-        // ICMP pkts are being parsed and treated as regular ipv4 
-
-        //Get the OG pkt DSCP pre decapsulation
-        if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;}
-        else{                         meta.dscp_at_ingress = hdr.ipv4.dscp;                 }
         
         //---------------SFC
         if (meta.dscp_at_ingress != 0){
