@@ -140,6 +140,20 @@ sudo make deps
 
 # Implementation
 
+## Visualizer
+Python script that visually represents our topology and distinguishs between paths taken by the currently circulating flows, including multicasting, we use the `Networkx` library. 
+
+The topology structure is manually configured before running the script. 
+
+It retrieves from the database the last 1 second of entries from table `flow_stats`, one entry per packet, every 0.5 seconds the topology representation is updated, and if a flow does not have an entry in the period of 0.1 seconds it's considered as finished and its path is no longer draw.
+
+The script represents:<br/>
+
+* The existing connections between nodes.
+* Associates 1 color to each data flow.
+* Creates numbered and colored arrows between nodes, to specify their direction.
+* Path changes.
+
 
 ## Mininet
 

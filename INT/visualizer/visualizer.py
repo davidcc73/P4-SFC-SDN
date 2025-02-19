@@ -56,23 +56,24 @@ def update_graph(G, new_data, edge_update_time):
     unique_flows = set()
     
     for point in new_data:
-        flow_label = point['flow_label']
+        src_port = point['src_port']
+        dst_port = point['dst_port']
         src_ip = point['src_ip']
         dst_ip = point['dst_ip']
         
-        flow_identifier = f"{flow_label}_{src_ip}_{dst_ip}"  # Create a unique identifier for each flow
+        flow_identifier = f"{src_port}_{dst_port}_{src_ip}_{dst_ip}"  # Create a unique identifier for each flow
         unique_flows.add(flow_identifier)
     
     for flow_identifier in unique_flows:
-        flow_label, src_ip, dst_ip = flow_identifier.split('_')
+        src_ip, dst_port, src_ip, dst_ip = flow_identifier.split('_')
         
         flow_color = assign_color(flow_identifier)  # Assign a color to the flow
         flow_id = assign_flow_id(flow_identifier)   # Assign an ID to the flow
         
-        print("\nFlow ID:", flow_id, "Label:", flow_label, "Source IP:", src_ip, "Destination IP:", dst_ip, "Color:", flow_color)
+        print("\nFlow ID:", flow_id, "Source Port:", src_port, "Destination Port:", dst_port, "Source IP:", src_ip, "Destination IP:", dst_ip, "Color:", flow_color)
         
         # Find paths for the specific flow
-        paths = [point['path'] for point in new_data if point['flow_label'] == flow_label and point['src_ip'] == src_ip and point['dst_ip'] == dst_ip]
+        paths = [point['path'] for point in new_data if point['src_port'] == src_port and point['dst_port'] == dst_port and point['src_ip'] == src_ip and point['dst_ip'] == dst_ip]
         
         # Reset the edge indices for this flow
         edge_flow_indices[flow_identifier] = {}
@@ -135,9 +136,9 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
     # Create a legend for flows
     legend_elements = []
     for flow_identifier, color in path_colors.items():
-            flow_label, src_ip, dst_ip = flow_identifier.split('_')
+            src_port, dst_port, src_ip, dst_ip = flow_identifier.split('_')
             flow_id = flow_ids[flow_identifier]  # Get the assigned ID for this flow
-            legend_label = f"Flow {flow_id}:({src_ip} -> {dst_ip}) Label {flow_label}"
+            legend_label = f"Flow {flow_id}:({src_ip} -> {dst_ip}) ({src_port} -> {dst_port})"
             legend_elements.append(Patch(facecolor=color, edgecolor='black', label=legend_label))
 
     # Adjust figure layout to accommodate the legend on the left
@@ -154,24 +155,21 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
 
 # Inicialização do gráfico
 G = nx.MultiDiGraph()
-G.add_nodes_from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+G.add_nodes_from([1, 2, 3, 4, 5])
 G.add_edges_from([
-    (1, 4), (1, 9), (2, 3), (2, 14), (9, 4), (9, 10), (9, 13), (9, 14), (14, 10), (14, 3), (14, 13), 
-    (4, 5), (4, 10), (3, 13), (3, 6), (10, 5), (10, 11), (10, 12), (10, 13), (13, 11), (13, 12), (13, 6),
-    (5, 8), (5, 11), (6, 7), (6, 12), (11, 12), (11, 8), (12, 7), (8, 7), (4, 1), (9, 1), (3, 2), (14, 2), 
-    (4, 9), (10, 9), (13, 9), (14, 9), (10, 14), (3, 14), (13, 14), (5, 4), (10, 4), (13, 3), (6, 3), (5, 10), 
-    (11, 10), (12, 10), (13, 10), (11, 13), (12, 13), (6, 13), (8, 5), (11, 5), (7, 6), (12, 6), (12, 11), 
-    (8, 11), (7, 12), (7, 8)
+    (1, 2), (1, 3), (1, 4), (1, 5),
+    (2, 1), (2, 3), (2, 4), (2, 5),
+    (3, 1), (3, 2), (3, 4), (3, 5),
+    (4, 1), (4, 2), (4, 3), (4, 5),
+    (5, 1), (5, 2), (5, 3), (5, 4)
 ])
 
 edge_colors = {}
 edge_update_time = {edge: datetime.min for edge in G.edges()}  # Inicializa o tempo da última atualização com datetime.min
 
 pos = {
-    1: (0, 3), 9: (2, 3), 14: (4, 3), 2: (6, 3), 
-    4: (0, 2), 10: (2, 2), 13: (4, 2), 3: (6, 2),
-    5: (0, 1), 11: (2, 1), 12: (4, 1), 6: (6, 1),
-    8: (1, 0), 7: (5, 0)}
+    1: (1, 0), 2: (2, 6), 3: (4, 6), 4: (5, 0), 5: (3, -2)}
+
 
 # Criar figura para o gráfico sem trazer para frente
 plt.figure(figsize=(12, 8))
@@ -179,7 +177,7 @@ plt.ion()  # Turn on interactive mode
 
 # Simulação de leitura contínua de dados
 while True:
-    query = 'SELECT path, flow_label, src_ip, dst_ip from "flow_stats" WHERE time > now() - 1s'
+    query = 'SELECT path, src_port, dst_port, src_ip, dst_ip from "flow_stats" WHERE time > now() - 1s'
     result = influx_client.query(query)
     points = result.get_points()
     new_data = list(points)
