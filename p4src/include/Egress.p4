@@ -50,7 +50,10 @@ control MyEgress(inout headers hdr,
                 log_msg("creating INT report");
                 process_int_report.apply(hdr, meta, standard_metadata);
 
-            }else if (meta.int_meta.sink == true) {                           //restore packet to original state
+            }else if (meta.int_meta.sink == true ||     //being sink the pkt is going to host directly now, restore it
+                     (meta.is_multicaster == false && standard_metadata.mcast_grp != 0) //not being sink the pkt is going to direct host port 
+                                                                                        //hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology) and no multicast from host supported overall
+            ) {                           //restore packet to original state
                 log_msg("restoring packet to original state");
                 process_int_sink.apply(hdr, meta, standard_metadata);
             }

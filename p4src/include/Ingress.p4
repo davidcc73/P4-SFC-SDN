@@ -325,7 +325,7 @@ control MyIngress(inout headers hdr,
 
         if (hdr.int_header.isValid() && (         //(sink) and the INT header is valid
                 meta.int_meta.sink == true ||     //being sink the pkt is going to host directly now
-                (meta.is_multicaster == false && standard_metadata.mcast_grp != 0) //being sink the pkt is going to direct host port 
+                (meta.is_multicaster == false && standard_metadata.mcast_grp != 0) //not being sink the pkt is going to direct host port 
             )                                                                      //hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology) and no multicast from host supported overall
         ) {
             // clone packet for Telemetry Report Collector
