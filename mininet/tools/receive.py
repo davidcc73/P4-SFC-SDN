@@ -42,7 +42,7 @@ def process_packet(pkt):            #process pkts in queue
     global packet_TCP_UDP_count, sequence_numbers, results #, last_packet_time
     packet_TCP_UDP_count += 1
 
-    print("got a TCP/UDP packet")
+    #print("got a TCP/UDP packet")
 
     '''
     print("Original packet received:")
@@ -69,7 +69,7 @@ def process_packet(pkt):            #process pkts in queue
         seq_number, message = payload.split('-', 1)
         seq_number = int(seq_number)  # Ensure the sequence number is an integer
         sequence_numbers.append(seq_number)
-        print(f"Packet Sequence Number: {seq_number} Packet Message: {message}")
+        print(f"Packet Sequence Number: {seq_number}") # Packet Message: {message}")
     except ValueError:
         print(f"Error splitting payload: {payload}")
     
@@ -134,7 +134,7 @@ def export_results():
                 
                 # If file does not exist, write the header row
                 if not file_exists:
-                    header = ["Iteration", "IP Source", "IP Destination", "Flow Label", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
+                    header = ["Iteration", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
                     writer.writerow(header)
 
                 #Prepare CSV line
@@ -200,7 +200,7 @@ def main():
     processor_thread.join()
 
     # Call terminate explicitly after the timeout
-    #terminate()
+    terminate()
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import argparse
+import csv
 from datetime import datetime
+import fcntl
+import os
 import sys
 import socket
 import random
@@ -10,6 +13,9 @@ from scapy.all import sendp, get_if_list, get_if_hwaddr, get_if_addr
 from scapy.all import Ether, IP, TCP, UDP
 
 args = None
+
+# Define the directory path inside the container
+result_directory = "/INT/results"
 
 def get_if():
     ifs = get_if_list()
@@ -92,13 +98,14 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
             print(f"Interval since last packet: {interval:.6f} seconds, thr expected: {args.i:.6f} seconds")
         '''
 
-        pkt.show2()
+        #pkt.show2()
 
         pre_timestamp = datetime.now()
         try:
             # Send the constructed packet
-            sendp(pkt, iface=iface, inter=0, loop=0, verbose=True)
+            sendp(pkt, iface=iface, inter=0, loop=0, verbose=False)
             #sendpfast(pkt, iface=iface, file_cache=True, pps=0, loop=0)
+            print(f"Packet {i + 1} sent successfully")
         except Exception as e:
             results['failed_packets'] += 1
             print(f"Packet {i + 1} failed to send: {e}")
@@ -116,6 +123,54 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
         time.sleep(t)
     
     return results
+
+def export_results(results):
+    # Write in the CSV file a line with the following format: 
+    global args, result_directory
+    num_packets_successefuly_sent = args.c - results['failed_packets']
+
+    os.makedirs(result_directory, exist_ok=True)
+
+    # Define the filename
+    filename_results = args.export
+    lock_filename = f"LOCK_{filename_results}"
+    
+    # Combine the directory path and filename
+    full_path_results = os.path.join(result_directory, filename_results)
+    full_path_LOCK = os.path.join(result_directory, lock_filename)
+    
+    
+    # Open the lock file
+    with open(full_path_LOCK, 'w') as lock_file:
+        try:
+            # Acquire an exclusive lock on the lock file
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+            
+            # Check if the results file exists
+            file_exists = os.path.exists(full_path_results)
+
+            # Open the results file for appending
+            print("Exporting results to", full_path_results)
+            with open(full_path_results, mode='a', newline='') as file:
+                # Create a CSV writer object
+                writer = csv.writer(file)
+                
+                # If file does not exist, write the header row
+                if not file_exists:
+                    header = ["Iteration", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
+                    writer.writerow(header)
+                
+                # Prepare the data line
+                timestamp_first_sent = results['first_timestamp']
+                line = [args.iteration, my_IP, args.dst_ip, args.sport, args.dport, "sender", num_packets_successefuly_sent, timestamp_first_sent]
+                
+                # Write data
+                writer.writerow(line)
+                
+        finally:
+            # Release the lock on the lock file
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
+
 
 def parse_args():
     global args
@@ -191,9 +246,9 @@ def main():
 
     results = send_packet(args, pkt, payload_space, iface, addr, src_ip)
 
-    #if args.export is not None:
+    if args.export is not None:
         # Export results
-        #export_results(results)
+        export_results(results)
 
 
 if __name__ == '__main__':

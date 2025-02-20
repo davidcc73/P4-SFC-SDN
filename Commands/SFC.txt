@@ -28,6 +28,6 @@ python3 /INT/receive/receive.py --duration 10
 
 
 #-------------------------------That exports results
-h1 python3 /INT/send/send.py --ip_dst 10.0.2.2  --l4 udp --sport 49158  --dport 443  --m INTH1 --dscp 0  --s 262 --c 100 --i 0.001 --export LOW_raw_results.csv --me h1 --iteration 1 
+h1 python3 /mininet/tools/send.py --dst_ip 10.0.2.2  --l4 udp --sport 49158  --dport 443  --m INTH1 --dscp 0  --s 262 --c 100 --i 0.001 --export HIGH-SFC_raw_results.csv --me h1 --iteration 1 
 
-h2 python3 /INT/receive/receive.py --export LOW_raw_results.csv --me h2 --iteration 1  --duration 50
+h2 python3 /mininet/tools/receive.py --export HIGH-SFC_raw_results.csv --me h2 --iteration 1  --duration 10
