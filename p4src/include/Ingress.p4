@@ -178,6 +178,7 @@ control MyIngress(inout headers hdr,
         log_msg("Multicast group set to:{}", {gid});
         standard_metadata.mcast_grp = gid;
         meta.is_multicast = true;
+        meta.became_multicast = true;
     }
     table multicast {                       // each multicast address will represent a group
         key = {
@@ -225,17 +226,17 @@ control MyIngress(inout headers hdr,
 
         //---------------------------------------------------------------------------ACL Support
         if(hdr.ethernet.etherType == ETHERTYPE_LLDP && hdr.ethernet.dstAddr == 1652522221582){  //LLDP multicast packet with dst ethernet (01:80:c2:00:00:0e), meant only for this switch, so do not forward it
-            log_msg("It's an LLDP multicast packet destined to this switch, not meant to be forwarded");
+            //log_msg("It's an LLDP multicast packet destined to this switch, not meant to be forwarded");
             return;
         }
         if (hdr.packet_out.isValid()) {     //Came from the CPU, meant to be forwarded to the port defined in it
-            log_msg("Packet from CPU, forwarding it to port:{}", {hdr.packet_out.egress_port});
+            //log_msg("Packet from CPU, forwarding it to port:{}", {hdr.packet_out.egress_port});
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();
             exit;                           //it can probably also be return;
         }
         else if(acl.apply().hit){          //Not from CPU and its acl pkt
-            log_msg("ACL hit, cloned to CPU, end of processing");
+            //log_msg("ACL hit, cloned to CPU, end of processing");
             mark_to_drop(standard_metadata);
             return;
         }
@@ -264,7 +265,7 @@ control MyIngress(inout headers hdr,
         if (meta.dscp_at_ingress != 0){
         
             // SFC packets (dscp > 0)
-            if (!hdr.sfc.isValid()){        // intial stage?
+            if (!hdr.sfc.isValid()){        // intial stage
                 sfc_classifier.apply();     // Encaps the packet
             }
 

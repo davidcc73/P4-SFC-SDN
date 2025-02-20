@@ -292,23 +292,24 @@ At decapsulation, DSCP is set to 0, to avoid re-encapsulation at the nodes that 
 
 <strong>Currently Programmed Chains:</strong>
 
-| DSCP  | Nodes to Travel to before DST |
-|-------|-----------------|
-| 1     | s1              |
-| 2     | s2              |
-| 3     | s3              |
-| 4     | s4              |
-| 5     | s5              |
-| 10    | s2 -> s3        |
-| 11    | s3 -> s2        |
-| 12    | s2 -> s3 -> s4  |
-| 13    | s2 -> s4        |
-| 14    | s5 -> s4        |
-| 15    | s2 -> s3 -> s1  |
-| 16    | s2 -> s1        |
-| 51    | s2 -> s3 (ends SFC, converts to multicast) -> hosts: all                |
-| 52        | s2 -> s3 (ends SFC, converts to multicast) -> hosts: h2, h4          |
-| Others    | None        |
+| DSCP  | IP Precedence | Nodes to Travel to before DST |
+|-------|---|-----------------|
+| 1     | 0 | s1              |
+| 2     | 0 | s2              |
+| 3     | 0 | s3              |
+| 4     | 0 | s4              |
+| 5     | 0 | s5              |
+| 10    | 1 | s2 -> s3        |
+| 11    | 1 | s3 -> s2        |
+| 12    | 1 | s2 -> s3 -> s4  |
+| 13    | 1 | s2 -> s4        |
+| 14    | 1 | s5 -> s4        |
+| 15    | 1 | s2 -> s3 -> s1  |
+| 16    | 2 | s2 -> s1        |
+| 40    | 5 | s3 (ends SFC, converts to multicast) -> hosts: h2, h4         |
+| 51    | 6 | s2 -> s3 (ends SFC, converts to multicast) -> hosts: all      |
+| 52    | 6 | s2 -> s3 (ends SFC, converts to multicast) -> hosts: h2, h4   |
+| Others    | - | None        |
 
 
 

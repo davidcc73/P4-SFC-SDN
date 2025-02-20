@@ -232,6 +232,7 @@ const bit<8> DROP_REPORT_HEADER_LEN = 12;
 
 struct metadata {                           //clones still have access to the metadata from their "parent" packet
     bit<1> l3_firewall;                     //flag to mark if the current node is a l3_firewall
+    bool became_multicast;                  //identify current pkt was changed to a multicast one in the current switch
     bool is_multicast;                      //identify current pkt is multicast
     bool is_multicaster;                    //identify current switch as multicaster
     bit<6> dscp_at_ingress;                 //needed because after decapsulation the DSCP is set to 0 so the pkt is not recapsulated by a switch with hosts

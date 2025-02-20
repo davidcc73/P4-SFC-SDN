@@ -17,7 +17,7 @@ control MyEgress(inout headers hdr,
         //-----------------Restore packet standard_metadata from clones
         if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_CLONE){
             if(meta.perserv_CPU_meta.to_CPU == true) {
-                log_msg("Detected clone meant to CPU");
+                //log_msg("Detected clone meant to CPU");
                 // restore the standard_metadata values that were perserved by the clone_preserving_field_list
                 standard_metadata.egress_port = meta.perserv_CPU_meta.egress_port;
                 standard_metadata.ingress_port = meta.perserv_CPU_meta.ingress_port;
@@ -35,7 +35,7 @@ control MyEgress(inout headers hdr,
             hdr.packet_in.setValid();
             hdr.packet_in.ingress_port = standard_metadata.ingress_port;		
         }
-        if (meta.is_multicast == true && standard_metadata.ingress_port == standard_metadata.egress_port) {   //avoid multicast loops
+        if (meta.became_multicast == false && meta.is_multicast == true && standard_metadata.ingress_port == standard_metadata.egress_port) {   //avoid multicast loops, but changed pkts must still be multicast to correct ports, even ones it came from
             mark_to_drop(standard_metadata);
             return;
         }

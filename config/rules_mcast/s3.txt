@@ -22,6 +22,8 @@ mcast_port_add device:s3 2 "1 2"
 
 
 ## map DSCP -> multicast_mac_dst and multicast_ip_dst
+table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "40" "mac ip" "01:00:5E:00:00:02 239.1.1.2"
+
 table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "51" "mac ip" "01:00:5E:00:00:01 239.1.1.1"
 table_add device:s3 MyIngress.multicast_dst_addr MyIngress.set_dst_addr EXACT "meta.dscp_at_ingress" "52" "mac ip" "01:00:5E:00:00:02 239.1.1.2"
 
