@@ -27,7 +27,7 @@ iteration_sleep  = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}       
 
 num_iterations = 1
 iteration_duration_seconds = 1 * 20  #5 minutes, the duration of each iteration of the test
-sender_receiver_gap = 0.3            #wait for the receiver to start before starting the sender
+sender_receiver_gap = 0.3            #seconds to wait for the receiver to start before starting the sender
 
 def update_times():
     global iteration_duration_seconds
