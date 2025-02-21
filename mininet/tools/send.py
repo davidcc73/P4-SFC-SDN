@@ -105,10 +105,10 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
             # Send the constructed packet
             sendp(pkt, iface=iface, inter=0, loop=0, verbose=False)
             #sendpfast(pkt, iface=iface, file_cache=True, pps=0, loop=0)
-            print(f"Packet {i + 1} sent successfully")
+            print(f"({src_ip}, {args.dst_ip}, {args.sport}, {args.dport}) Packet {i + 1} sent")
         except Exception as e:
             results['failed_packets'] += 1
-            print(f"Packet {i + 1} failed to send: {e}")
+            print(f"({src_ip}, {args.dst_ip}, {args.sport}, {args.dport}) Packet {i + 1} failed to send: {e}")
 
         pkt_sending_time = datetime.now() - pre_timestamp
         pkt_sending_time_seconds = pkt_sending_time.total_seconds()
@@ -157,12 +157,12 @@ def export_results(results):
                 
                 # If file does not exist, write the header row
                 if not file_exists:
-                    header = ["Iteration", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
+                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
                     writer.writerow(header)
                 
                 # Prepare the data line
                 timestamp_first_sent = results['first_timestamp']
-                line = [args.iteration, my_IP, args.dst_ip, args.sport, args.dport, "sender", num_packets_successefuly_sent, timestamp_first_sent]
+                line = [args.iteration, args.me, my_IP, args.dst_ip, args.sport, args.dport, "sender", num_packets_successefuly_sent, timestamp_first_sent]
                 
                 # Write data
                 writer.writerow(line)
