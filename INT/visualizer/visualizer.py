@@ -65,7 +65,7 @@ def update_graph(G, new_data, edge_update_time):
         unique_flows.add(flow_identifier)
     
     for flow_identifier in unique_flows:
-        src_ip, dst_port, src_ip, dst_ip = flow_identifier.split('_')
+        src_port, dst_port, src_ip, dst_ip = flow_identifier.split('_')
         
         flow_color = assign_color(flow_identifier)  # Assign a color to the flow
         flow_id = assign_flow_id(flow_identifier)   # Assign an ID to the flow
@@ -84,15 +84,16 @@ def update_graph(G, new_data, edge_update_time):
             for i in range(len(switches) - 1):
                 egress_switch_id = int(switches[i])
                 ingress_switch_id = int(switches[i + 1])
-                edge = (egress_switch_id, ingress_switch_id, flow_identifier)  # Include flow identifier in the edge
+                edge = (egress_switch_id, ingress_switch_id)  # Remove flow identifier from the edge
                 
-                if edge not in edge_colors:
-                    edge_colors[edge] = flow_color
+                # Store the color of the edge
+                edge_colors[edge] = flow_color
+                
                 if flow_identifier not in edge_flow_indices:
                     edge_flow_indices[flow_identifier] = {}
                 if edge not in edge_flow_indices[flow_identifier]:
                     edge_flow_indices[flow_identifier][edge] = len(edge_flow_indices[flow_identifier]) + 1  # Assign a unique index per flow
-                # print('Edge:', edge, 'Index:', edge_flow_indices[flow_identifier][edge])
+                
                 edge_update_time[edge] = datetime.now()  # Update the last update time
 
 # Função para visualizar o gráfico
@@ -109,7 +110,7 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
     edge_labels = {}
     max_rad = 0.33  # Maximum arc radius for edge labels
     for i, (edge, color) in enumerate(edge_colors.items()):
-        egress_switch_id, ingress_switch_id, flow_identifier = edge
+        egress_switch_id, ingress_switch_id = edge
         rad = (i % 10) * 0.05 - max_rad  # Adjust arc radius for each edge with a slightly larger range
         
         nx.draw_networkx_edges(
@@ -118,9 +119,11 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
             connectionstyle=f"arc3,rad={rad}"
         )
         
-        if flow_identifier in edge_flow_indices and edge in edge_flow_indices[flow_identifier]:
-            flow_index = edge_flow_indices[flow_identifier][edge]  # Get the flow-specific index for the edge
-            edge_labels[(egress_switch_id, ingress_switch_id, rad)] = (flow_index, color)  # Store index and color
+        if edge in edge_flow_indices:
+            for flow_identifier in edge_flow_indices:
+                if edge in edge_flow_indices[flow_identifier]:
+                    flow_index = edge_flow_indices[flow_identifier][edge]  # Get the flow-specific index for the edge
+                    edge_labels[(egress_switch_id, ingress_switch_id, rad)] = (flow_index, color)  # Store index and color
 
     # Add labels to nodes
     nx.draw_networkx_labels(G, pos, font_size=13, font_family="sans-serif")
@@ -150,9 +153,6 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
     plt.title("Network Topology Visualizer in Real-Time")
     plt.pause(0.5)  # Pause for 0.5 seconds
 
-
-
-
 # Inicialização do gráfico
 G = nx.MultiDiGraph()
 G.add_nodes_from([1, 2, 3, 4, 5])
@@ -168,8 +168,8 @@ edge_colors = {}
 edge_update_time = {edge: datetime.min for edge in G.edges()}  # Inicializa o tempo da última atualização com datetime.min
 
 pos = {
-    1: (1, 0), 2: (2, 6), 3: (4, 6), 4: (5, 0), 5: (3, -2)}
-
+    1: (1, 0), 2: (2, 6), 3: (4, 6), 4: (5, 0), 5: (3, -2)
+}
 
 # Criar figura para o gráfico sem trazer para frente
 plt.figure(figsize=(12, 8))
@@ -186,13 +186,13 @@ while True:
         update_graph(G, new_data, edge_update_time)
     
     current_time = datetime.now()
+    # Remove edges that have not been updated in the last 2 seconds
     for edge in list(edge_update_time.keys()):
-        if (current_time - edge_update_time[edge]) > timedelta(seconds=0.1):
+        if (current_time - edge_update_time[edge]) > timedelta(seconds=2):
             edge_colors.pop(edge, None)  # Remove the edge color if not updated in the last 2 seconds
+            edge_flow_indices = {k: v for k, v in edge_flow_indices.items() if edge not in v}  # Remove edge from flow indices
 
     visualize_graph(G, edge_colors, edge_flow_indices)
     print('\n-= Graph updated at:', datetime.now(), '=-')
 
-# Garantir que todos os gráficos sejam exibidos no final
-plt.ioff()
-plt.show()
+
