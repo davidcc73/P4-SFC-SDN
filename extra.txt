@@ -64,3 +64,5 @@ explicar grafna defeitoso ports passam a keys e n ha mais flow label, creditos a
 
 
 INT e SFC n sao ativados quando o ip de dst pertence ao mesmo switch
+
+na vm d etestes verificar que n ha pkts perdidos
