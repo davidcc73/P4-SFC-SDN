@@ -154,6 +154,7 @@ The script represents:<br/>
 * Creates numbered and colored arrows between nodes, to specify their direction.
 * Path changes.
 
+![Topology Visualizer](images/Topology_Visualizer.png "Topology Visualizer")
 
 ## Mininet
 
