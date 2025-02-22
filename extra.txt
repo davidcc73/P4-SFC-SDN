@@ -50,6 +50,13 @@ sudo python3 INT/visualizer/visualizer.py
 
 
 
+sudo python3 INT/process_results.py \
+--f     HIGH-NO,SFC_raw_results.csv         HIGH-SFC_raw_results.csv \
+--start 2025-02-22T18:36:39.997314+00:00    2025-02-22T18:07:43.482238+00:00 \
+--end   2025-02-22T18:37:13.946175+00:00    2025-02-22T18:08:17.368005+00:00
+
+
+
 
 WRITE ON README:
 
@@ -69,3 +76,13 @@ na vm d etestes verificar que n ha pkts perdidos
 
 
 bug do visualyzer em nao mostrar overlap na mesma direção
+
+no readme explicar a interface
+
+explicar o process_results.py
+
+
+ajusat o file sizes aos novos dscps
+resolver o DSCP og n ir para a DB caso sfc seja usado
+
+no process considero emergencia tudo com dscp superior a  > 40

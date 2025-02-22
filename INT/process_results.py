@@ -27,7 +27,7 @@ dbname='int'
 # Connect to the InfluxDB client
 client = InfluxDBClient(host=host, database=dbname)
 
-algorithms = ["SFC", "NO-SFC"]
+algorithms = None
 
 headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG Packet Loss (%)", 
                 "AVG 1º Packet Delay (nanoseconds)", 
@@ -64,8 +64,8 @@ def adjust_columns_width():
         print(f"Adjusting columns width for sheet {sheetname}")
         sheet = workbook[sheetname]
         for column_cells in sheet.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            sheet.column_dimensions[get_column_letter(column_cells[0].column)].width = length + 2
+            length = max(len(str(cell.value).strip()) for cell in column_cells)
+            sheet.column_dimensions[get_column_letter(column_cells[0].column)].width = length
     
     # Save the workbook
     workbook.save(file_path)
@@ -290,21 +290,23 @@ def set_fist_pkt_delay():
         sheet = workbook[sheet]
 
         #Set new headers as bold text
-        sheet['N1'] = "1º Packet Delay (nanoseconds)"
-        sheet['N1'].font = Font(bold=True)
+        sheet['O1'] = "1º Packet Delay (nanoseconds)"
+        sheet['O1'].font = Font(bold=True)
 
         no_formula_section = False
         
         # Set collumn L to contain a formula to be the subtraction of values of collum F of the current pair of lines
         for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=3):
+            if row[0].value == "Calculations":
+                break
 
             if row[0].value and row[0].value.startswith("Iteration -"):
                 no_formula_section = False
             if no_formula_section:
                 continue
 
-            #if cell from collumn A does not contain an IPv6 address, skip
-            if row[0].value is None or ":" not in row[0].value:
+            #if cell from collumn A does not contain an IPv4 address, skip
+            if row[0].value is None or "." not in row[0].value:
                 skip = True
                 continue
             if skip:            #not in the right line of the pair
@@ -315,7 +317,7 @@ def set_fist_pkt_delay():
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
             # The values are 2 Timestamp (seconds-Unix Epoch)
             # subtraction give seconds, we convert to nanoseconds
-            sheet[f'N{row[0].row}'] = f'=ROUND((H{row[0].row}-H{row[0].row-1})*10^9, 3)'     
+            sheet[f'O{row[0].row}'] = f'=ROUND((I{row[0].row}-I{row[0].row-1})*10^9, 3)'     
 
             skip = True
 
@@ -351,7 +353,7 @@ def set_caculations():
         sheet[f'B{last_line}'].font = Font(bold=True)
 
         # on the next line for each column, set the average of the column, ignore empty cells
-        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(I:I, "<>", I:I), 3)'
+        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(I:I, "<>", J:J), 3)'
         sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(L:L, "<>", L:L), 3)'
         sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(M:M, "<>", M:M), 3)'
         sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(N:N, "<>", N:N), 3)'
@@ -434,7 +436,7 @@ def get_flow_delays(start, end):
         SELECT MEAN("latency") 
         FROM  flow_stats WHERE time >= '{start}' 
         AND time <= '{end}' 
-        AND dscp = 46
+        AND dscp > 40
     """
     result = apply_query(query)
     if not result.raw["series"]:
@@ -446,7 +448,7 @@ def get_flow_delays(start, end):
         SELECT MEAN("latency")
         FROM  flow_stats
         WHERE time >= '{start}' AND time <= '{end}'
-        AND dscp != 46
+        AND dscp > 40
     """
 
     result = apply_query(query)
@@ -511,8 +513,8 @@ def set_Emergency_calculation():
     workbook.save(file_path)
 
 def set_Comparison_sheet():
+    global algorithms
     print("Setting the Comparison sheet")
-    test_cases = ["MEDIUM", "HIGH", "HIGH+EMERGENCY"]
 
     # Create the comparison sheet
     dir_path = os.path.join(current_directory, result_directory)
@@ -520,25 +522,24 @@ def set_Comparison_sheet():
     workbook = load_workbook(file_path)
     sheet = workbook.create_sheet(title="Comparison")
 
-
     title = "Load Test Cases"
     sheet[f'A1'] = title
     sheet[f'A1'].font = Font(bold=True)
 
-    sheet[f'A2'] = "Variation: From No-SFC to SFC"
+    sheet[f'A2'] = f"Variation: From {algorithms[0]} to {algorithms[1]}"
 
     # Empty line
     sheet.append([""])
     
     # Create a block for each test case
-    for i, test_case in enumerate(test_cases):
+    for i, algorithm in enumerate(algorithms):
         # Get max line considering the previous test cases
         max_line = sheet.max_row + 1
 
-        set_test_case_headers(sheet, test_case, max_line)
+        set_algorithm_headers(sheet, algorithm, max_line)
         set_comparasion_formulas(sheet, max_line)
         print("Seting values copy from other sheets")
-        set_copied_values(sheet, test_case, max_line)
+        set_copied_values(sheet, algorithm, max_line)
 
         # Insert 2 empty lines
         sheet.append([""])
@@ -547,6 +548,83 @@ def set_Comparison_sheet():
     # Save the workbook
     workbook.save(file_path)
 
+def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
+    global headers_lines
+    line =None
+    col = None
+
+    file_path = os.path.join(current_directory, result_directory, final_file)
+    workbook = load_workbook(file_path)
+    sheet_to_copy_from = workbook[sheet_to_copy_from_name]
+
+    variable_name = headers_lines[variable_number]
+
+    pass_1_occurance = True          #there are 2 Lines on collumn A that have the same name
+    if variable_number == 14:
+        pass_1_occurance = False 
+
+    # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
+    for row in sheet_to_copy_from.iter_rows(min_row=1, max_row=sheet_to_copy_from.max_row, min_col=1, max_col=1):
+        
+        if pass_1_occurance == False and row[0].value == "AVG 1º Packet Delay (nanoseconds)":
+            pass_1_occurance = True
+            continue
+        
+        if variable_number <= 9:
+            if row[0].value == variable_name:
+                # Get the next collumn letter of the cell that contains the variable_name
+                line = row[0].row
+                col = get_column_letter(row[0].column + 1)
+                break
+        elif variable_number ==10 or variable_number == 12:
+            if row[0].value == "Mean":
+                line = row[0].row
+                if variable_number == 10:
+                    col = get_column_letter(row[0].column + 1)
+                else:
+                    col = get_column_letter(row[0].column + 2)
+                break
+        elif variable_number == 11 or variable_number == 13:
+            if row[0].value == "Standard Deviation":
+                line = row[0].row
+                if variable_number == 11:
+                    col = get_column_letter(row[0].column + 1)
+                else:
+                    col = get_column_letter(row[0].column + 2)
+                break
+        elif variable_number == 14:
+            if row[0].value == "AVG 1º Packet Delay (nanoseconds)":
+                line = row[0].row
+                col = get_column_letter(row[0].column + 3)
+                break
+        elif variable_number == 15:
+            if row[0].value == "AVG Flow Delay (nanoseconds)":
+                line = row[0].row
+                col = get_column_letter(row[0].column + 3)
+                break
+
+    return line, col
+
+def set_copied_values(sheet, test_case, start_line):    
+    # Cycle through the variables to compare (lines)
+    for variable_number in range(num_values_to_compare_all_tests):
+        
+        # Cycle through the args.f to copy the values (columns)
+        for i in range(len(args.f)):
+            #--------------Collumn C is the second algorithm
+            #parse 1st element pre _ in args.f
+            sheet_to_copy_from_name = args.f[i].split("_")[0]
+            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number)
+
+            if line is None or column is None:
+                print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {variable_number}")
+                continue
+
+            cell_reference = f"{column}{line}"
+            formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
+            sheet[f'{get_column_letter(2 + i)}{start_line + 1 + variable_number}'] = formula
+
+
 def configure_final_file():
     set_pkt_loss()
     set_fist_pkt_delay()
@@ -554,7 +632,6 @@ def configure_final_file():
     set_INT_results()
     set_Emergency_calculation()
     set_Comparison_sheet()
-
 
 def get_byte_sum(start, end):
     # Initialize the result dictionary to store total byte counts per switch ID
@@ -675,7 +752,7 @@ def get_mean_standard_deviation(switch_data):
 
     return switch_data
 
-def set_test_case_headers(sheet, test_case, start_line):
+def set_algorithm_headers(sheet, test_case, start_line):
     global headers_lines
 
     # Set test case name in bold test
@@ -730,84 +807,6 @@ def set_comparasion_formulas(sheet, start_line):
         sheet[f'E{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 3), 0)'
         sheet[f'F{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 3), 0)'
         sheet[f'G{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - C{start_line + i}) / ABS(C{start_line + i}) * 100, 3), 0)'
-
-def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
-    global headers_lines
-    line =None
-    col = None
-
-    file_path = os.path.join(current_directory, result_directory, final_file)
-    workbook = load_workbook(file_path)
-    sheet_to_copy_from = workbook[sheet_to_copy_from_name]
-
-    variable_name = headers_lines[variable_number]
-
-    pass_1_occurance = True          #there are 2 Lines on collumn A that have the same name
-    if variable_number == 14:
-        pass_1_occurance = False 
-
-    # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
-    for row in sheet_to_copy_from.iter_rows(min_row=1, max_row=sheet_to_copy_from.max_row, min_col=1, max_col=1):
-        
-        if pass_1_occurance == False and row[0].value == "AVG 1º Packet Delay (nanoseconds)":
-            pass_1_occurance = True
-            continue
-        
-        if variable_number <= 9:
-            if row[0].value == variable_name:
-                # Get the next collumn letter of the cell that contains the variable_name
-                line = row[0].row
-                col = get_column_letter(row[0].column + 1)
-                break
-        elif variable_number ==10 or variable_number == 12:
-            if row[0].value == "Mean":
-                line = row[0].row
-                if variable_number == 10:
-                    col = get_column_letter(row[0].column + 1)
-                else:
-                    col = get_column_letter(row[0].column + 2)
-                break
-        elif variable_number == 11 or variable_number == 13:
-            if row[0].value == "Standard Deviation":
-                line = row[0].row
-                if variable_number == 11:
-                    col = get_column_letter(row[0].column + 1)
-                else:
-                    col = get_column_letter(row[0].column + 2)
-                break
-        elif variable_number == 14:
-            if row[0].value == "AVG 1º Packet Delay (nanoseconds)":
-                line = row[0].row
-                col = get_column_letter(row[0].column + 3)
-                break
-        elif variable_number == 15:
-            if row[0].value == "AVG Flow Delay (nanoseconds)":
-                line = row[0].row
-                col = get_column_letter(row[0].column + 3)
-                break
-
-    return line, col
-
-def set_copied_values(sheet, test_case, start_line):
-    global algorithms
-    
-    # Cycle through the variables to compare (lines)
-    for variable_number in range(num_values_to_compare_all_tests):
-        
-        # Cycle through the algorithms to copy the values (columns)
-        for i in range(len(algorithms)):
-            #--------------Collumn C is the second algorithm, ECMP
-            sheet_to_copy_from_name = f"{test_case}-{algorithms[i]}"
-            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number)
-
-            if line is None or column is None:
-                print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {variable_number}")
-                continue
-
-            cell_reference = f"{column}{line}"
-            formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
-            sheet[f'{get_column_letter(2 + i)}{start_line + 1 + variable_number}'] = formula
-
 
 def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data):
     # Write the results in the sheet
@@ -908,9 +907,17 @@ def parse_args():
         parser.error("The number of elements in --start and --end must be the same as the number of files")
 
 def main():
-    global args, client, results
-    
+    global args, client, results, algorithms
+
+    # In args.f get for each element between - and 1ª _
+    algorithms = [x.split("-")[1].split("_")[0] for x in args.f]
+
     check_files_exist()
+
+    # Delete the final file if it exists
+    final_file_path = os.path.join(current_directory, result_directory, final_file)
+    if os.path.isfile(final_file_path):
+        os.remove(final_file_path)
 
     # Read the CSV files
     for file_index, filename in enumerate(args.f):

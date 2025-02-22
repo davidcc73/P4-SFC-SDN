@@ -23,9 +23,9 @@ sizes     = {"Message": 262, "Audio": 420, "Video": 874, "Emergency": 483}      
 
 packet_number    = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times()
 receiver_timeout = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time receiver will wait for pkts
-iteration_sleep  = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times()
+iteration_sleep  = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time between iterations
 
-num_iterations = 1
+num_iterations = 2
 iteration_duration_seconds = 1 * 20  #5 minutes, the duration of each iteration of the test
 sender_receiver_gap = 1              #seconds to wait for the receiver to start before starting the sender
 
@@ -39,15 +39,15 @@ def update_times():
     packet_number["Video"]     = round(iteration_duration_seconds / (intervals["Video"]     + 0.1))
     packet_number["Emergency"] = round(iteration_duration_seconds / (intervals["Emergency"] + 0.1))
 
-    receiver_timeout["Message"]   = packet_number["Message"]   * intervals["Message"]   + sender_receiver_gap * 1.20
-    receiver_timeout["Audio"]     = packet_number["Audio"]     * intervals["Audio"]     + sender_receiver_gap * 1.20
-    receiver_timeout["Video"]     = packet_number["Video"]     * intervals["Video"]     + sender_receiver_gap * 1.20
-    receiver_timeout["Emergency"] = packet_number["Emergency"] * intervals["Emergency"] + sender_receiver_gap * 1.20
+    receiver_timeout["Message"]   = packet_number["Message"]   * intervals["Message"]   * 1.15  + sender_receiver_gap * 1.20
+    receiver_timeout["Audio"]     = packet_number["Audio"]     * intervals["Audio"]     * 1.15  + sender_receiver_gap * 1.20
+    receiver_timeout["Video"]     = packet_number["Video"]     * intervals["Video"]     * 1.15  + sender_receiver_gap * 1.20
+    receiver_timeout["Emergency"] = packet_number["Emergency"] * intervals["Emergency"] * 1.15  + sender_receiver_gap * 1.20
 
-    iteration_sleep["Message"]   = receiver_timeout["Message"]   * 1.03
-    iteration_sleep["Audio"]     = receiver_timeout["Audio"]     * 1.03
-    iteration_sleep["Video"]     = receiver_timeout["Video"]     * 1.03
-    iteration_sleep["Emergency"] = receiver_timeout["Emergency"] * 1.03
+    iteration_sleep["Message"]   = receiver_timeout["Message"]   * 1.25
+    iteration_sleep["Audio"]     = receiver_timeout["Audio"]     * 1.25
+    iteration_sleep["Video"]     = receiver_timeout["Video"]     * 1.25
+    iteration_sleep["Emergency"] = receiver_timeout["Emergency"] * 1.25
 
 def create_lock_file(lock_filename):
     lock_file_path = os.path.join("/INT/results", lock_filename)
@@ -242,7 +242,7 @@ def main_menu(net, choice):
         if choice2 == "1":
             routing = "SFC"
         elif choice2 == "2":
-            routing = "NO_SFC"
+            routing = "NO,SFC"
         else:
             print("Invalid choice")
             return True
