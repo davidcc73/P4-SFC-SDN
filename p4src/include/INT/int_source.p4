@@ -1,14 +1,10 @@
 /* -*- P4_16 -*- */
-control process_int_source_sink (inout headers hdr,
+control process_int_set_source (inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
     action int_set_source () {
         meta.int_meta.source = true;
-    }
-
-    action int_set_sink () {
-        meta.int_meta.sink = true;
     }
 
     table tb_set_source {
@@ -21,6 +17,19 @@ control process_int_source_sink (inout headers hdr,
         }
         const default_action = NoAction();
         size = MAX_PORTS;
+    }
+
+    apply {
+        tb_set_source.apply();
+    }
+}
+
+control process_int_set_sink (inout headers hdr,
+                inout metadata meta,
+                inout standard_metadata_t standard_metadata) {
+
+    action int_set_sink () {
+        meta.int_meta.sink = true;
     }
 
     table tb_set_sink {
@@ -36,7 +45,6 @@ control process_int_source_sink (inout headers hdr,
     }
 
     apply {
-        tb_set_source.apply();
         tb_set_sink.apply();
     }
 }

@@ -245,7 +245,7 @@ class Collector():
             else:
                 pkt_tmp = pkt_tmp.payload
 
-        # parse 6 tuple (src_ip, dst_ip, src_port, dst_port, ip_proto, flow_label)
+        # parse 7 tuple (src_ip, dst_ip, src_port, dst_port, ip_proto, src_port, dst_port)
         self.parse_flow_info(flow_info, ipv4_headers[-1], packet_sizes)  
 
 
@@ -274,8 +274,8 @@ class Collector():
                     'tags': {
                         'src_ip': str(flow_info.src_ip),
                         'dst_ip': str(flow_info.dst_ip),
-                        'src_port': flow_info.src_port,
-                        'dst_port': flow_info.dst_port
+                        'src_port': int(flow_info.src_port),
+                        'dst_port': int(flow_info.dst_port)
                     },
                     'time': metric_timestamp,
                     'fields': {
@@ -286,6 +286,7 @@ class Collector():
                         'path': '-'.join(map(str, flow_info.switch_ids[::-1]))   #store as string separated by '-' and reverse the list so letfmost were the first hops
                     }
                 })
+        print(metrics)
 
         if len(flow_info.switch_ids) > 0 and len(flow_info.egress_tstamps) > 0 and len(flow_info.hop_latencies) > 0:
             for i in range(flow_info.hop_cnt):
@@ -295,8 +296,8 @@ class Collector():
                         'switch_id': flow_info.switch_ids[i],
                         'src_ip': str(flow_info.src_ip),
                         'dst_ip': str(flow_info.dst_ip),
-                        'src_port': flow_info.src_port,
-                        'dst_port': flow_info.dst_port
+                        'src_port': int(flow_info.src_port),
+                        'dst_port': int(flow_info.dst_port)
                     },
                     'time': metric_timestamp,
                     'fields': {

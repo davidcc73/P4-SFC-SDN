@@ -37,7 +37,7 @@ def read_json(file_path):
 
 def handle_pkt(pkt,c):   #individually triggered by each sniffed packet
     print("got a TCP/UDP packet")
-    pkt.show2()         #for debugging
+    #pkt.show2()         #for debugging
     if INTREP in pkt :
         print("\n\n********* Receiving Telemetry Report ********")
         flow_info = c.parser_int_pkt(pkt, packet_sizes)
@@ -93,4 +93,13 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("An error occurred:", e)
+        # display where the error occurred
+        import traceback
+        traceback.print_exc()
+        
+
+        sys.exit(1)

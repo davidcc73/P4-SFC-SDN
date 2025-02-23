@@ -4,8 +4,8 @@ table_set_default MyEgress.process_int_transit.tb_int_insert init_metadata 5
 
 //----------------------------------------------------SINK
 
-//set up process_int_source_sink (to which ports I am a sink node, my hosts)
-table_add MyIngress.process_int_source_sink.tb_set_sink int_set_sink 20 => 
+//set up process_int_set_sink (to which ports I am a sink node, my hosts)
+table_add MyIngress.process_int_set_sink.tb_set_sink int_set_sink 20 => 
 
 
 
@@ -21,8 +21,8 @@ table_add MyEgress.process_int_report.tb_generate_report do_report_encapsulation
 
 //----------------------------------------------------SOURCE
 
-//set up process_int_source_sink (to which ports I am a source node)
-table_add MyIngress.process_int_source_sink.tb_set_source int_set_source 20 => 
+//set up process_int_set_source (to which ports I am a source node)
+table_add MyIngress.process_int_set_source.tb_set_source int_set_source 20 => 
 
 
 

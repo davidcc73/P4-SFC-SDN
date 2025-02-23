@@ -51,9 +51,16 @@ sudo python3 INT/visualizer/visualizer.py
 
 
 sudo python3 INT/process_results.py \
+--f     HIGH-SFC_raw_results.csv \
+--start 2025-02-23T18:44:45.131368+00:00 \
+--end   2025-02-23T18:45:19.067659+00:00
+
+
+
+sudo python3 INT/process_results.py \
 --f     HIGH-NO,SFC_raw_results.csv         HIGH-SFC_raw_results.csv \
---start 2025-02-22T18:36:39.997314+00:00    2025-02-22T18:07:43.482238+00:00 \
---end   2025-02-22T18:37:13.946175+00:00    2025-02-22T18:08:17.368005+00:00
+--start 2025-02-23T18:50:02.725752+00:00    2025-02-23T18:44:45.131368+00:00 \
+--end   2025-02-23T18:50:36.681155+00:00    2025-02-23T18:45:19.067659+00:00
 
 
 
@@ -86,3 +93,6 @@ ajusat o file sizes aos novos dscps
 resolver o DSCP og n ir para a DB caso sfc seja usado
 
 no process considero emergencia tudo com dscp superior a  > 40
+
+
+EXPLICAR COMO O USO DE int AGORA RETIRA A NECESSIDADE DE POR O DSCP A 0 DEPOIS DE DESENCAPSULAR O DSCP, so encapsulo para pacotes que o switch é INT source

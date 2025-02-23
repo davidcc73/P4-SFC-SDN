@@ -81,13 +81,14 @@ def get_pkt_size_dscp(flow):
     query = f"""
         SELECT dscp, size
         FROM flow_stats
-        WHERE   src_ip = '{flow[0]}'
-        AND     dst_ip = '{flow[1]}'
-        AND     src_port = '{flow[2]}'
-        AND     dst_port = '{flow[3]}'
+        WHERE   "src_ip" = '{flow[0]}'
+        AND     "dst_ip" = '{flow[1]}'
+        AND     "src_port" = '{flow[2]}'
+        AND     "dst_port" = '{flow[3]}'
         ORDER BY time DESC
         LIMIT 1
     """
+    #print(f"Query: {query}")
     
     r = apply_query(query)
 
@@ -441,7 +442,7 @@ def get_flow_delays(start, end):
         SELECT MEAN("latency") 
         FROM  flow_stats WHERE time >= '{start}' 
         AND time <= '{end}' 
-        AND dscp > 40
+        AND dscp >= 40
     """
     result = apply_query(query)
     if not result.raw["series"]:
@@ -453,7 +454,7 @@ def get_flow_delays(start, end):
         SELECT MEAN("latency")
         FROM  flow_stats
         WHERE time >= '{start}' AND time <= '{end}'
-        AND dscp > 40
+        AND dscp < 40
     """
 
     result = apply_query(query)

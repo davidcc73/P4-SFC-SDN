@@ -65,9 +65,9 @@ control MyIngress(inout headers hdr,
         hdr.sfc_chain[2].setInvalid();
         hdr.sfc_chain[3].setInvalid();
     
-        //avoids re-encapsulations on nodes that can encapsulate
-        if(hdr.int_header.isValid()){   hdr.intl4_shim.udp_tcp_ip_dscp = 0;}
-        else{                           hdr.ipv4.dscp = 0;}
+        //avoids re-encapsulations on nodes that can encapsulate, NO LONGER NEEDED WITH THE USAGE OF INT, WE CAN PREVENT IT BETTER
+        //if(hdr.int_header.isValid()){   hdr.intl4_shim.udp_tcp_ip_dscp = 0;}
+        //else{                           hdr.ipv4.dscp = 0;}
     }
 
     action sfc_encapsulation(bit<8> id, bit<8> sc, bit<9> sf1, bit<9> sf2,bit<9> sf3, bit<9> sf4) {
@@ -248,6 +248,11 @@ control MyIngress(inout headers hdr,
             return;
         }
 
+        //---------------------------------------------------------------------------Set if the current switch is a source for current packet
+         if(hdr.udp.isValid() || hdr.tcp.isValid()) {                                //just track higer level connections
+            process_int_set_source.apply(hdr, meta, standard_metadata);
+        }
+
         //---------------------------------------------------------------------------Set packet priority, meta.dscp_at_ingress is 0 by default which means priority 0 (best effort)
         //Get the OG pkt DSCP pre decapsulation
         if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;} //when INT is used, the OG DSCP value is in the shim header
@@ -265,26 +270,28 @@ control MyIngress(inout headers hdr,
         if (meta.dscp_at_ingress != 0){
         
             // SFC packets (dscp > 0)
-            if (!hdr.sfc.isValid()){        // intial stage
-                sfc_classifier.apply();     // Encaps the packet
+            if (!hdr.sfc.isValid() && meta.int_meta.source == true){        // intial stage, we only encapsulate with SFC, pkts that just entered the network from a source port (from a host)
+                sfc_classifier.apply();                                     // Encaps the packet
             }
 
-            sf_processing.apply();          // If this Sw includes SF, just do it.
-            ingressSFCCounter.count((bit<32>) hdr.sfc.id);
+            if(hdr.sfc.isValid()){              // Do actual SFC operations  
+                sf_processing.apply();          // If this Sw includes SF, just do it.
+                ingressSFCCounter.count((bit<32>) hdr.sfc.id);
 
-            if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
-                if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress_spec special value
-                    log_msg("Pkt blocked by firewall");
-                    return;                          // finish the Ingress processing
+                if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
+                    if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress_spec special value
+                        log_msg("Pkt blocked by firewall");
+                        return;                          // finish the Ingress processing
+                    }
                 }
-            }
 
-            if (hdr.sfc.sc != 0){           //L2 Forwarding using SFC
-                log_msg("Trying SFC forwarding");
-                sfc_egress.apply();         // Overlay forwarding
-            }
-            else{                           // SFC ends
-                sfc_decapsulation();        // Decaps the packet    
+                if (hdr.sfc.sc != 0){           //L2 Forwarding using SFC
+                    log_msg("Trying SFC forwarding");
+                    sfc_egress.apply();         // Overlay forwarding
+                }
+                else{                           // SFC ends
+                    sfc_decapsulation();        // Decaps the packet    
+                }
             }
         }
         
@@ -315,8 +322,9 @@ control MyIngress(inout headers hdr,
 
 
         //-----------------INT processing portion        
-        if(hdr.udp.isValid() || hdr.tcp.isValid()) {        //just track higer level connections. set if current hop is source or sink to the packet
-            process_int_source_sink.apply(hdr, meta, standard_metadata);
+        //---------------------------------------------------------------------------Set if the current switch is a source for current packet
+        if(hdr.udp.isValid() || hdr.tcp.isValid()) {                                //just track higer level connections. set if current hop is sink to the packet, at this point we can know
+            process_int_set_sink.apply(hdr, meta, standard_metadata);
         }
         
         if (meta.int_meta.source == true) {       //(source) INSERT INT INSTRUCTIONS HEADER

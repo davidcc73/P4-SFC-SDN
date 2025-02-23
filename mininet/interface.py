@@ -200,7 +200,7 @@ def high_load_test(net, routing):
         create_Messages_flow (h1, h2_dst_IP, 0,  sports[1], dport, file_results, iteration)    #DSCP 0        
         create_Audio_flow    (h4, h2_dst_IP, 10, sports[2], dport, file_results, iteration)    #DSCP 10
         create_Video_flow    (h3, h4_dst_IP, 2,  sports[3], dport, file_results, iteration)    #DSCP 2
-        create_Emergency_flow(h2, h1_dst_IP, 40, sports[4], dport, file_results, iteration)    #DSCP 51
+        create_Emergency_flow(h2, h1_dst_IP, 51, sports[4], dport, file_results, iteration)    #DSCP 51
 
         #-------------Keep the test running for a specified duration
         print(f"Waiting for {max_iteration_sleep} seconds")
