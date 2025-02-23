@@ -28,14 +28,19 @@ dbname='int'
 client = InfluxDBClient(host=host, database=dbname)
 
 algorithms = None
+test_cases = None
 
 headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG Packet Loss (%)", 
                 "AVG 1º Packet Delay (nanoseconds)", 
                 "AVG Flows Latency (nanoseconds)", "STD Flows Latency (nanoseconds)", 
                 "AVG Hop Latency (nanoseconds)", "STD Hop Latency (nanoseconds)",
+
                 "AVG of packets to each switch (%)", 
                 "Standard Deviation of packets to each switch (%)", 
-                "AVG of processed Bytes to each switch", "Standard Deviation of processed Bytes to each switch", 
+
+                "AVG of processed Bytes to each switch", 
+                "Standard Deviation of processed Bytes to each switch", 
+
                 "Variation of the AVG 1º Packet Delay between (No)Emergency Flows (%)",
                 "Variation of the AVG Flow Delay between (No)Emergency Flows (%)"]
 
@@ -513,7 +518,7 @@ def set_Emergency_calculation():
     workbook.save(file_path)
 
 def set_Comparison_sheet():
-    global algorithms
+    global algorithms, test_cases
     print("Setting the Comparison sheet")
 
     # Create the comparison sheet
@@ -532,14 +537,13 @@ def set_Comparison_sheet():
     sheet.append([""])
     
     # Create a block for each test case
-    for i, algorithm in enumerate(algorithms):
+    for test_case in test_cases:
         # Get max line considering the previous test cases
         max_line = sheet.max_row + 1
 
-        set_algorithm_headers(sheet, algorithm, max_line)
+        set_algorithm_headers(sheet, test_case, max_line)
         set_comparasion_formulas(sheet, max_line)
-        print("Seting values copy from other sheets")
-        set_copied_values(sheet, algorithm, max_line)
+        set_copied_values(sheet, test_case, max_line)
 
         # Insert 2 empty lines
         sheet.append([""])
@@ -547,6 +551,28 @@ def set_Comparison_sheet():
 
     # Save the workbook
     workbook.save(file_path)
+
+def set_copied_values(sheet, test_case, start_line):    
+    print("Seting values copy from other sheets")
+    
+    # Cycle through the variables to compare (lines)
+    for variable_number in range(num_values_to_compare_all_tests):
+        
+        # Cycle through the args.f to copy the values (columns)
+        for i in range(len(args.f)):
+            
+            #--------------Collumn C is the second algorithm
+            #parse 1st element pre _ in args.f
+            sheet_to_copy_from_name = args.f[i].split("_")[0]
+            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number)
+
+            if line is None or column is None:
+                print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {variable_number}")
+                continue
+
+            cell_reference = f"{column}{line}"
+            formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
+            sheet[f'{get_column_letter(2 + i)}{start_line + variable_number + 1}'] = formula
 
 def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
     global headers_lines
@@ -560,7 +586,7 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
     variable_name = headers_lines[variable_number]
 
     pass_1_occurance = True          #there are 2 Lines on collumn A that have the same name
-    if variable_number == 14:
+    if variable_number == 12:
         pass_1_occurance = False 
 
     # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
@@ -570,60 +596,40 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
             pass_1_occurance = True
             continue
         
-        if variable_number <= 9:
+        if variable_number <= 7:
             if row[0].value == variable_name:
                 # Get the next collumn letter of the cell that contains the variable_name
                 line = row[0].row
                 col = get_column_letter(row[0].column + 1)
                 break
-        elif variable_number ==10 or variable_number == 12:
+        elif variable_number == 8 or variable_number == 10:
             if row[0].value == "Mean":
                 line = row[0].row
-                if variable_number == 10:
+                if variable_number == 8:
                     col = get_column_letter(row[0].column + 1)
                 else:
                     col = get_column_letter(row[0].column + 2)
                 break
-        elif variable_number == 11 or variable_number == 13:
+        elif variable_number == 9 or variable_number == 11:
             if row[0].value == "Standard Deviation":
                 line = row[0].row
-                if variable_number == 11:
+                if variable_number == 9:
                     col = get_column_letter(row[0].column + 1)
                 else:
                     col = get_column_letter(row[0].column + 2)
                 break
-        elif variable_number == 14:
+        elif variable_number == 12:
             if row[0].value == "AVG 1º Packet Delay (nanoseconds)":
                 line = row[0].row
                 col = get_column_letter(row[0].column + 3)
                 break
-        elif variable_number == 15:
+        elif variable_number == 13:
             if row[0].value == "AVG Flow Delay (nanoseconds)":
                 line = row[0].row
                 col = get_column_letter(row[0].column + 3)
                 break
 
     return line, col
-
-def set_copied_values(sheet, test_case, start_line):    
-    # Cycle through the variables to compare (lines)
-    for variable_number in range(num_values_to_compare_all_tests):
-        
-        # Cycle through the args.f to copy the values (columns)
-        for i in range(len(args.f)):
-            #--------------Collumn C is the second algorithm
-            #parse 1st element pre _ in args.f
-            sheet_to_copy_from_name = args.f[i].split("_")[0]
-            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number)
-
-            if line is None or column is None:
-                print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {variable_number}")
-                continue
-
-            cell_reference = f"{column}{line}"
-            formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
-            sheet[f'{get_column_letter(2 + i)}{start_line + 1 + variable_number}'] = formula
-
 
 def configure_final_file():
     set_pkt_loss()
@@ -761,8 +767,8 @@ def set_algorithm_headers(sheet, test_case, start_line):
     sheet[f'A{start_line}'].font = Font(bold=True)
 
     # Set the collumn names
-    sheet[f'B{start_line}'] = "No-SFC"
-    sheet[f'C{start_line}'] = "SFC"
+    sheet[f'B{start_line}'] = algorithms[0]
+    sheet[f'C{start_line}'] = algorithms[1]
     sheet[f'D{start_line}'] = "Variation (%)"
 
     # Set collumn names in bold text
@@ -784,6 +790,7 @@ def set_algorithm_headers(sheet, test_case, start_line):
     sheet[f'A{start_line + 11}'] = headers_lines[10]
     sheet[f'A{start_line + 12}'] = headers_lines[11]
     sheet[f'A{start_line + 13}'] = headers_lines[12]
+    sheet[f'A{start_line + 14}'] = headers_lines[13]
 
 
     # Set lines names in bold text
@@ -800,13 +807,13 @@ def set_algorithm_headers(sheet, test_case, start_line):
     sheet[f'A{start_line + 11}'].font = Font(bold=True)
     sheet[f'A{start_line + 12}'].font = Font(bold=True)
     sheet[f'A{start_line + 13}'].font = Font(bold=True)
+    sheet[f'A{start_line + 14}'].font = Font(bold=True)
 
 def set_comparasion_formulas(sheet, start_line):
     # Set the formulas to compare the results between the test cases
     for i in range(1, num_values_to_compare_all_tests + 1):
-        sheet[f'E{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 3), 0)'
-        sheet[f'F{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 3), 0)'
-        sheet[f'G{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - C{start_line + i}) / ABS(C{start_line + i}) * 100, 3), 0)'
+        #print(sheet[f'A{start_line + i}'].value)
+        sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
 
 def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data):
     # Write the results in the sheet
@@ -907,10 +914,27 @@ def parse_args():
         parser.error("The number of elements in --start and --end must be the same as the number of files")
 
 def main():
-    global args, client, results, algorithms
+    global args, client, results, algorithms, test_cases
 
     # In args.f get for each element between - and 1ª _
-    algorithms = [x.split("-")[1].split("_")[0] for x in args.f]
+    # No duplicated algorithms values
+    seen = set()
+    algorithms = []
+    for x in args.f:
+        key = x.split("-")[1].split("_")[0]
+        if key not in seen:
+            seen.add(key)
+            algorithms.append(key)
+
+    # No duplicated test_cases values
+    seen = set()
+    test_cases = []
+    for x in args.f:
+        key = x.split("-")[0]
+        if key not in seen:
+            seen.add(key)
+            test_cases.append(key)
+
 
     check_files_exist()
 
@@ -930,7 +954,6 @@ def main():
     adjust_columns_width()
     
     client.close()
-
 
 if __name__ == "__main__":
     parse_args()
