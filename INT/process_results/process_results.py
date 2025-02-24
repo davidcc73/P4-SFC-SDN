@@ -112,7 +112,7 @@ def get_pkt_size_dscp(flow):
     r = apply_query(query)
 
     if r.raw["series"] == []:
-        print(f"Flow {flow} not found in the DB, probably multicast related")
+        print(f"At get_pkt_size_dscp() Flow {flow} not found in the DB, probably multicast related")
         return -1, -1
 
     dscp = r.raw["series"][0]["values"][0][1]

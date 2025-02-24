@@ -38,11 +38,9 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
-    action sf_action(bit<1> fireWall) { // Firewall, NAT, etc... SW can be SF
+    action sf_action() { // Firewall, NAT, etc... SW can be SF
         hdr.sfc.sc = hdr.sfc.sc - 1; // decrease chain tracker/length
         hdr.sfc_chain.pop_front(1); // Remove used SF
-        
-        meta.l3_firewall = fireWall;       // Flag current node as being Firewall or not
     }
     table sf_processing {
         key = {
@@ -117,6 +115,21 @@ control MyIngress(inout headers hdr,
         }
         size = 1024;
         default_action = drop();
+    }
+
+    action set_as_firewall() {      // mark current node as firewall       
+        meta.l3_firewall = 1;       // Flag current node as being Firewall or not
+    }
+    table is_it_firewall {
+        key = {
+            1w1: exact;    //dummy key of value 1            
+        }
+        actions = {
+            set_as_firewall;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
     }
 
     table l3_fireWall {
@@ -265,7 +278,15 @@ control MyIngress(inout headers hdr,
 
         //TODO: ADD ARP support FOR REAL DINAMIC HOSTS DISCOVERY (not just static ARP entries, maybe part of the why ONOS is not detecting the hosts)
 
-        
+
+        //---------------------------------------------------------------------------Firewall
+        is_it_firewall.apply();                  //see if current switch is a firewall
+        if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
+            if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress_spec special value
+                log_msg("Pkt blocked by firewall");
+                return;                          // finish the Ingress processing
+            }
+        }
         //---------------SFC
         if (meta.dscp_at_ingress != 0){
         
@@ -277,13 +298,6 @@ control MyIngress(inout headers hdr,
             if(hdr.sfc.isValid()){              // Do actual SFC operations  
                 sf_processing.apply();          // If this Sw includes SF, just do it.
                 ingressSFCCounter.count((bit<32>) hdr.sfc.id);
-
-                if(meta.l3_firewall == 1){               // If this node is a l3_fireWall, do it
-                    if(!l3_fireWall.apply().hit){        // the packet is marked to be droped, just do not do l2_forwarding, beacuse we should not change the egress_spec special value
-                        log_msg("Pkt blocked by firewall");
-                        return;                          // finish the Ingress processing
-                    }
-                }
 
                 if (hdr.sfc.sc != 0){           //L2 Forwarding using SFC
                     log_msg("Trying SFC forwarding");

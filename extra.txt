@@ -50,17 +50,19 @@ sudo python3 INT/visualizer/visualizer.py
 
 
 
+#####PRE TESTS DELET ALL ELEMETS AT THE RESULTS DIRECTORY JUST TO BE SURE
+
 sudo python3 INT/process_results/process_results.py \
 --f     HIGH-SFC_raw_results.csv \
---start 2025-02-24T18:40:30.954223+00:00 \
---end   2025-02-24T18:41:04.732872+00:00
+--start 2025-02-24T23:12:17.219249+00:00 \
+--end   2025-02-24T23:12:43.509148+00:00
 
 
 
 sudo python3 INT/process_results/process_results.py \
 --f     HIGH-NO,SFC_raw_results.csv         HIGH-SFC_raw_results.csv \
---start 2025-02-24T18:43:14.001149+00:00    2025-02-24T18:40:30.954223+00:00 \
---end   2025-02-24T18:43:43.649774+00:00    2025-02-24T18:41:04.732872+00:00
+--start 2025-02-24T23:11:38.860744+00:00    2025-02-24T23:12:17.219249+00:00 \
+--end   2025-02-24T23:12:05.155197+00:00    2025-02-24T23:12:43.509148+00:00
 
 
 

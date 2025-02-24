@@ -19,7 +19,7 @@ table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstA
 
 
 #SFC Processing (refers to current node)
-table_add device:s3 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "3" "fireWall" "0"
+table_add device:s3 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "3" "" ""
 
 
 #SFC Forwarding (Has SFC Header, but the current SFC value is not for us, ONE ENTRY PER POSSIBLE SFC VALUE)

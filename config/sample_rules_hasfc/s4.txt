@@ -20,7 +20,7 @@ table_add device:s4 MyIngress.unicast MyIngress.set_egress_port EXACT "hdr.ether
 
 
 #SFC Processing (refers to current node)
-table_add device:s4 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "4" "fireWall" "0"
+table_add device:s4 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "4" "" ""
 
 
 #SFC Forwarding (Has SFC Header, but the current SFC value is not for us, ONE ENTRY PER POSSIBLE SFC VALUE)
