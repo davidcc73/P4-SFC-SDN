@@ -125,6 +125,7 @@ def get_pkt_size_dscp(flow):
 
 def check_multicast_IP_DSCP(current_dst_IP, dscp):
     global DSCP_IPs
+    dscp = str(dscp)
     # read key dscp and return the value, the new multicast IP, if no match return current_dst_IP
     try:
         new_dst_IP = DSCP_IPs[str(dscp)]
@@ -141,7 +142,7 @@ def read_raw_results(row):
     Is = row[6]
     number_of_packets = int(row[7])
     first_packet_time = row[8]
-    dscp = row[11]
+    dscp = int(row[11])
     values_end_points = {}
     values_end_points["num_pkt"] = number_of_packets
     values_end_points["time"] = float(first_packet_time)
@@ -390,10 +391,10 @@ def set_caculations():
         sheet[f'B{last_line}'].font = Font(bold=True)
 
         # on the next line for each column, set the average of the column, ignore empty cells
-        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(I:I, "<>", J:J), 3)'
-        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(L:L, "<>", L:L), 3)'
-        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(M:M, "<>", M:M), 3)'
-        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(N:N, "<>", N:N), 3)'
+        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(J:J, "<>", J:J), 3)'
+        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(M:M, "<>", M:M), 3)'
+        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(N:N, "<>", N:N), 3)'
+        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(O:O, "<>", O:O), 3)'
 
 
 
@@ -542,11 +543,11 @@ def set_Emergency_calculation():
         row_range = max_line - 1  # Rows before the max line
 
         # Set the formula for the Non-Emergency Flows
-        sheet[f'B{max_line + 3}'] = f'=IF(SUMIF(D1:D{row_range}, "<>46", N1:N{row_range}) = 0, "none", SUMIF(D1:D{row_range}, "<>46", N1:N{row_range}))'
+        sheet[f'B{max_line + 3}'] = f'=SUMIF(E1:E{row_range}, "<40" , O1:O{row_range})'  
         sheet[f'B{max_line + 4}'] = avg_non_emergency_flows_delay
 
         # Set the formula for the Emergency Flows
-        sheet[f'C{max_line + 3}'] = f'=IF(SUMIF(D1:D{row_range}, 46, N1:N{row_range}) = 0, "none", SUMIF(D1:D{row_range}, 46, N1:N{row_range}))'
+        sheet[f'C{max_line + 3}'] = f'=SUMIF(E1:E{row_range}, ">=40", O1:O{row_range})'
         sheet[f'C{max_line + 4}'] = avg_emergency_flows_delay
 
         #Set comparasion formulas, for the AVG 1º Packet Delay and AVG Flow Delay in percentage
