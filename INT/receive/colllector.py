@@ -286,7 +286,6 @@ class Collector():
                         'path': '-'.join(map(str, flow_info.switch_ids[::-1]))   #store as string separated by '-' and reverse the list so letfmost were the first hops
                     }
                 })
-        print(metrics)
 
         if len(flow_info.switch_ids) > 0 and len(flow_info.egress_tstamps) > 0 and len(flow_info.hop_latencies) > 0:
             for i in range(flow_info.hop_cnt):

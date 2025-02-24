@@ -216,6 +216,8 @@ def extract_Is_values(line, iteration, flow, Is):
             for extra in Is_value:
                 line = line + list(extra.values())
         else:
+            if key == "num_hosts":          #skip the num_hosts for final file
+                continue
             line = line + [Is_value]
 
     return line

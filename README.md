@@ -59,7 +59,7 @@ We used InfluxDB v.1.8. The installation process can be seen [here](https://docs
 
 ```bash
 #A client for Python to interact with InfluxDB.
-sudo pip3 install influxdb    
+sudo apt install python3-influxdb -y
 
 #enable influxdb to start on boot
 sudo systemctl enable influxdb  

@@ -39,15 +39,15 @@ def update_times():
     packet_number["Video"]     = round(iteration_duration_seconds / (intervals["Video"]     + 0.1))
     packet_number["Emergency"] = round(iteration_duration_seconds / (intervals["Emergency"] + 0.1))
 
-    receiver_timeout["Message"]   = packet_number["Message"]   * intervals["Message"]   * 1.15  + sender_receiver_gap * 1.20
-    receiver_timeout["Audio"]     = packet_number["Audio"]     * intervals["Audio"]     * 1.15  + sender_receiver_gap * 1.20
-    receiver_timeout["Video"]     = packet_number["Video"]     * intervals["Video"]     * 1.15  + sender_receiver_gap * 1.20
-    receiver_timeout["Emergency"] = packet_number["Emergency"] * intervals["Emergency"] * 1.15  + sender_receiver_gap * 1.20
+    receiver_timeout["Message"]   = packet_number["Message"]   * intervals["Message"]   * 1.05  + sender_receiver_gap * 1.05
+    receiver_timeout["Audio"]     = packet_number["Audio"]     * intervals["Audio"]     * 1.05  + sender_receiver_gap * 1.05
+    receiver_timeout["Video"]     = packet_number["Video"]     * intervals["Video"]     * 1.05  + sender_receiver_gap * 1.05
+    receiver_timeout["Emergency"] = packet_number["Emergency"] * intervals["Emergency"] * 1.05  + sender_receiver_gap * 1.05
 
-    iteration_sleep["Message"]   = receiver_timeout["Message"]   * 1.25
-    iteration_sleep["Audio"]     = receiver_timeout["Audio"]     * 1.25
-    iteration_sleep["Video"]     = receiver_timeout["Video"]     * 1.25
-    iteration_sleep["Emergency"] = receiver_timeout["Emergency"] * 1.25
+    iteration_sleep["Message"]   = receiver_timeout["Message"]   * 1.05
+    iteration_sleep["Audio"]     = receiver_timeout["Audio"]     * 1.05
+    iteration_sleep["Video"]     = receiver_timeout["Video"]     * 1.05
+    iteration_sleep["Emergency"] = receiver_timeout["Emergency"] * 1.05
 
 def create_lock_file(lock_filename):
     lock_file_path = os.path.join("/INT/results", lock_filename)

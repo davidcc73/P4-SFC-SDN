@@ -52,15 +52,15 @@ sudo python3 INT/visualizer/visualizer.py
 
 sudo python3 INT/process_results/process_results.py \
 --f     HIGH-SFC_raw_results.csv \
---start 2025-02-24T13:53:59.292857+00:00 \
---end   2025-02-24T13:54:33.181870+00:00
+--start 2025-02-24T18:40:30.954223+00:00 \
+--end   2025-02-24T18:41:04.732872+00:00
 
 
 
 sudo python3 INT/process_results/process_results.py \
 --f     HIGH-NO,SFC_raw_results.csv         HIGH-SFC_raw_results.csv \
---start 2025-02-24T13:55:15.374034+00:00    2025-02-24T13:53:59.292857+00:00 \
---end   2025-02-24T13:55:49.243823+00:00    2025-02-24T13:54:33.181870+00:00
+--start 2025-02-24T18:43:14.001149+00:00    2025-02-24T18:40:30.954223+00:00 \
+--end   2025-02-24T18:43:43.649774+00:00    2025-02-24T18:41:04.732872+00:00
 
 
 
