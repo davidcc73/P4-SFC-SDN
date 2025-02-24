@@ -60,7 +60,8 @@ def process_packet(pkt):  # Process packets in queue
             flows_metrics[flow_key] = {
                 "packet_count": 0,
                 "sequence_numbers": [],
-                "first_packet_time": pkt.time
+                "first_packet_time": pkt.time,
+                "DSCP": pkt[IP].tos >> 2
             }
         
         # Increment the packet count for this flow
@@ -130,7 +131,7 @@ def export_results():
                 
                 # If file does not exist, write the header row
                 if not file_exists:
-                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets"]
+                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets", "DSCP"]
                     writer.writerow(header)
 
                 with flows_lock:  # Ensure only one thread modifies flows_metrics at a time
@@ -139,7 +140,7 @@ def export_results():
                         first_packet_time = metrics["first_packet_time"]
                         out_of_order_packets = sorted(set(range(1, max(metrics["sequence_numbers"], default=1) + 1)) - set(metrics["sequence_numbers"]))
                         
-                        line = [args.iteration, args.me, src_ip, dst_ip, sport, dport, "receiver", metrics["packet_count"], first_packet_time, len(out_of_order_packets), out_of_order_packets]
+                        line = [args.iteration, args.me, src_ip, dst_ip, sport, dport, "receiver", metrics["packet_count"], first_packet_time, len(out_of_order_packets), out_of_order_packets, metrics["DSCP"]]
                         
                         # Write data
                         writer.writerow(line)

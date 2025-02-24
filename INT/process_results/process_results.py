@@ -1,6 +1,7 @@
 import argparse
 from cmath import sqrt
 import csv
+import json
 import os
 import sys
 import ast
@@ -15,6 +16,10 @@ from openpyxl.styles import Font
 result_directory = "results"
 final_file = "final_results.xlsx"
 current_directory = os.path.dirname(os.path.abspath(__file__)) 
+
+parent_path = os.path.abspath(os.path.join(current_directory, ".."))
+results_path = os.path.join(parent_path, result_directory) 
+final_file_path = os.path.join(results_path, final_file) 
 
 args = None
 results = {}
@@ -46,6 +51,22 @@ headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG
 
 num_values_to_compare_all_tests = len(headers_lines)
 
+# Dynamically determine the directory of the script and construct the file path
+script_dir = os.path.dirname(os.path.realpath(__file__))
+filename_with_sizes = os.path.join(script_dir, "multicast_DSCP.json")
+DSCP_IPs = None
+
+def read_json(file_path):
+    """
+    Reads a JSON file and returns its content as a dictionary.
+    
+    :param file_path: Path to the JSON file.
+    :return: Dictionary containing the JSON data.
+    """
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
+
 def apply_query(query):
     global client
     try:
@@ -58,11 +79,9 @@ def apply_query(query):
     return result
 
 def adjust_columns_width():
-    global final_file
+    global final_file_path
     #open the workbook
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
 
     # Adjust column widths to fit the text
     for sheetname in workbook.sheetnames:
@@ -73,7 +92,7 @@ def adjust_columns_width():
             sheet.column_dimensions[get_column_letter(column_cells[0].column)].width = length
     
     # Save the workbook
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def get_pkt_size_dscp(flow):
     #reads the INT DB and sets the pkt size and DSCP collumns
@@ -104,6 +123,16 @@ def get_pkt_size_dscp(flow):
 
     return dscp, size
 
+def check_multicast_IP_DSCP(current_dst_IP, dscp):
+    global DSCP_IPs
+    # read key dscp and return the value, the new multicast IP, if no match return current_dst_IP
+    try:
+        new_dst_IP = DSCP_IPs[str(dscp)]
+    except:
+        new_dst_IP = current_dst_IP
+
+    return new_dst_IP
+
 def read_raw_results(row):
     global results
     iteration = row[0]
@@ -112,9 +141,14 @@ def read_raw_results(row):
     Is = row[6]
     number_of_packets = int(row[7])
     first_packet_time = row[8]
+    dscp = row[11]
     values_end_points = {}
     values_end_points["num_pkt"] = number_of_packets
     values_end_points["time"] = float(first_packet_time)
+
+    if Is == "sender":   #check if its one of the pkts converted to a multicast pkt (we compare the DSCP, with a json matching it to new multicast IP)
+        real_dst_ip = check_multicast_IP_DSCP(row[3], dscp)
+        flow = (row[2], real_dst_ip, int(row[4]), int(row[5]))
 
     if Is == "receiver":
         number_out_of_order_packets = int(row[9])
@@ -125,7 +159,7 @@ def read_raw_results(row):
 
         values_end_points["extra"] = [extra1, extra2]
 
-    dscp, pkt_size = get_pkt_size_dscp(flow)            #Get the flows info
+    not_needed_anymore, pkt_size = get_pkt_size_dscp(flow)            #Get the flows info
     values_flow = {Is: values_end_points, "DSCP": dscp, "Packet Size": pkt_size}
 
     # Check if the iteration is already in the results dictionary
@@ -141,10 +175,10 @@ def read_raw_results(row):
             results[iteration][flow][Is] = values_end_points
 
 def read_csv_files(filename):
+    global results_path
     first_row = True
 
-    res_path = os.path.join(current_directory, result_directory) 
-    file_path = os.path.join(res_path, filename)
+    file_path = os.path.join(results_path, filename)
     
     print(f"Reading files: {filename}")
     with open(file_path, 'r', newline='') as csvfile:
@@ -172,14 +206,12 @@ def extract_Is_values(line, iteration, flow, Is):
     return line
 
 def export_results(OG_file):
-    global results
+    global results, results_path
     # Get the sheet name from filename before (_)
     sheet_name = OG_file.split("_")[0]
-
-    dir_path = os.path.join(current_directory, result_directory)
     
     # Check if the file exists
-    file_path = os.path.join(dir_path, final_file)
+    file_path = os.path.join(results_path, final_file)
     if os.path.exists(file_path):
         # Load the existing workbook
         workbook = load_workbook(file_path)
@@ -241,10 +273,10 @@ def export_results(OG_file):
     workbook.save(file_path)
 
 def set_pkt_loss():
+    global results_path, final_file_path
+
     # Configure each sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
 
     # Set formula for each sheet
     for sheet in workbook.sheetnames:
@@ -283,13 +315,13 @@ def set_pkt_loss():
             skip = True
 
     # Save the workbook
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def set_fist_pkt_delay():
+    global final_file_path
+
     # Configure each sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
     
     # Set formula for each sheet
     for sheet in workbook.sheetnames:
@@ -328,13 +360,12 @@ def set_fist_pkt_delay():
             skip = True
 
     # Save the workbook
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def set_caculations():
+    global final_file_path
     # Configure each sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
 
     # Set formula for each sheet
     for sheet in workbook.sheetnames:
@@ -367,18 +398,22 @@ def set_caculations():
 
 
     # Save the workbook
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def set_INT_results():
+    global final_file_path
     # For each sheet and respectice file, see the time interval given, get the values from the DB, and set the values in the sheet
         
     # Configure each sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
 
     # Get nº each sheet
     for i, sheet in enumerate(workbook.sheetnames):
+
+        #can i can not exceed the number of args.f (last one is comparasions)
+        if i >= len(args.f):
+            break
+
         print(f"Processing sheet {sheet}, index {i}")
         sheet = workbook[sheet]
 
@@ -434,7 +469,7 @@ def set_INT_results():
         #pprint("AVG_hop_latency: ", AVG_hop_latency)
         #pprint("switch_data: ", switch_data)
 
-        write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data)
+        write_INT_results(final_file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data)
 
 def get_flow_delays(start, end):
     # Get the average delay of emergency and non-emergency flows
@@ -466,12 +501,15 @@ def get_flow_delays(start, end):
     return avg_emergency_flows_delay, avg_non_emergency_flows_delay 
 
 def set_Emergency_calculation():
+    global final_file_path
     # Configure each sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
 
     for i, sheet in enumerate(workbook.sheetnames):
+        #can i can not exceed the number of args.f (last one is comparasions)
+        if i >= len(args.f):
+            break
+
         sheet = workbook[sheet]
 
         # Set new headers
@@ -516,16 +554,14 @@ def set_Emergency_calculation():
         sheet[f'D{max_line + 4}'] = f'=IFERROR(ROUND((C{max_line + 4} - B{max_line + 4})/ABS(B{max_line + 4}) * 100, 3), "none")'
 
 
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def set_Comparison_sheet():
-    global algorithms, test_cases
+    global algorithms, test_cases, final_file_path
     print("Setting the Comparison sheet")
 
     # Create the comparison sheet
-    dir_path = os.path.join(current_directory, result_directory)
-    file_path = os.path.join(dir_path, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
     sheet = workbook.create_sheet(title="Comparison")
 
     title = "Load Test Cases"
@@ -551,7 +587,7 @@ def set_Comparison_sheet():
         sheet.append([""])
 
     # Save the workbook
-    workbook.save(file_path)
+    workbook.save(final_file_path)
 
 def set_copied_values(sheet, test_case, start_line):    
     print("Seting values copy from other sheets")
@@ -576,12 +612,11 @@ def set_copied_values(sheet, test_case, start_line):
             sheet[f'{get_column_letter(2 + i)}{start_line + variable_number + 1}'] = formula
 
 def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
-    global headers_lines
+    global headers_lines, final_file_path
     line =None
     col = None
 
-    file_path = os.path.join(current_directory, result_directory, final_file)
-    workbook = load_workbook(file_path)
+    workbook = load_workbook(final_file_path)
     sheet_to_copy_from = workbook[sheet_to_copy_from_name]
 
     variable_name = headers_lines[variable_number]
@@ -879,15 +914,15 @@ def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_l
 
 
 def check_files_exist():
+    global results_path
     # Check if the directory/files exist
-    full_res_path = os.path.join(current_directory, result_directory) 
 
-    if not os.path.isdir(full_res_path):  # Correct condition to check if the directory does not exist
+    if not os.path.isdir(results_path):  # Correct condition to check if the directory does not exist
         print(f"Directory {result_directory} does not exist.")
         sys.exit(1)
 
     for filename in args.f:
-        file_path = os.path.join(full_res_path, filename)
+        file_path = os.path.join(results_path, filename)
         # Check if the file exists
         if not os.path.isfile(file_path):
             print(f"File {filename} not found in {file_path}")
@@ -915,7 +950,7 @@ def parse_args():
         parser.error("The number of elements in --start and --end must be the same as the number of files")
 
 def main():
-    global args, client, results, algorithms, test_cases
+    global args, client, results, algorithms, test_cases, DSCP_IPs, final_file_path
 
     # In args.f get for each element between - and 1ª _
     # No duplicated algorithms values
@@ -936,11 +971,12 @@ def main():
             seen.add(key)
             test_cases.append(key)
 
+    DSCP_IPs = read_json(filename_with_sizes)
+    print("Packet DSCP Multicast IPs read:\n",DSCP_IPs)
 
     check_files_exist()
 
     # Delete the final file if it exists
-    final_file_path = os.path.join(current_directory, result_directory, final_file)
     if os.path.isfile(final_file_path):
         os.remove(final_file_path)
 
