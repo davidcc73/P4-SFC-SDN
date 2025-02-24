@@ -146,6 +146,7 @@ def read_raw_results(row):
     values_end_points = {}
     values_end_points["num_pkt"] = number_of_packets
     values_end_points["time"] = float(first_packet_time)
+    values_end_points["num_hosts"] = 1
 
     if Is == "sender":   #check if its one of the pkts converted to a multicast pkt (we compare the DSCP, with a json matching it to new multicast IP)
         real_dst_ip = check_multicast_IP_DSCP(row[3], dscp)
@@ -173,7 +174,20 @@ def read_raw_results(row):
             results[iteration][flow] = values_flow
         else:
             # Add currect Is to the flow
-            results[iteration][flow][Is] = values_end_points
+            #Just add if sender or receiver no receiver there yet
+            if Is == "sender" or (Is == "receiver" and "receiver" not in results[iteration][flow]):      
+                results[iteration][flow][Is] = values_end_points
+
+            else:                           #If multiple receivers, acommudate for that with averages amd concatenations
+                old_number_hosts = results[iteration][flow][Is]["num_hosts"]
+                results[iteration][flow][Is]["time"]    = (results[iteration][flow][Is]["time"]    * old_number_hosts + values_end_points["time"]   ) / (old_number_hosts + 1)
+                results[iteration][flow][Is]["num_pkt"] = (results[iteration][flow][Is]["num_pkt"] * old_number_hosts + values_end_points["num_pkt"]) / (old_number_hosts + 1)
+
+                results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] = (results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] * old_number_hosts + number_out_of_order_packets) / (old_number_hosts + 1)
+                results[iteration][flow][Is]["extra"][1]["out_of_order_pkt"]    += out_of_order_packets
+
+                results[iteration][flow][Is]["num_hosts"] = old_number_hosts + 1
+
 
 def read_csv_files(filename):
     global results_path
