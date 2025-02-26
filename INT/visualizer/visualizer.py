@@ -33,6 +33,19 @@ flow_ids = {}
 # Variável para rastrear o próximo ID disponível
 next_flow_id = 1
 
+pos = None
+pos_labels = ()  # Posições dos rótulos dos nós
+edge_colors = {}
+
+# Add custom labels to nodes
+custom_labels = {
+    1: 'SFC Encapsulation',
+    2: 'Firewall',
+    3: 'Multicaster',
+    4: 'SFC Encapsulation',
+    5: 'SFC Encapsulation'
+}
+
 # Função para atribuir uma cor a um fluxo
 def assign_color(flow_identifier):
     if flow_identifier not in path_colors:
@@ -53,6 +66,8 @@ def assign_flow_id(flow_identifier):
 
 # Função para atualizar o gráfico
 def update_graph(G, new_data, edge_update_time):
+    global edge_colors
+    
     unique_flows = set()
     
     for point in new_data:
@@ -96,8 +111,9 @@ def update_graph(G, new_data, edge_update_time):
                 
                 edge_update_time[edge] = datetime.now()  # Update the last update time
 
-# Função para visualizar o gráfico
-def visualize_graph(G, edge_colors, edge_flow_indices):
+# Function to visualize the graph with custom labels next to nodes
+def visualize_graph(G, edge_flow_indices):
+    global custom_labels, edge_colors
     plt.clf()  # Clear the current figure
 
     # Draw all nodes
@@ -125,16 +141,21 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
                     flow_index = edge_flow_indices[flow_identifier][edge]  # Get the flow-specific index for the edge
                     edge_labels[(egress_switch_id, ingress_switch_id, rad)] = (flow_index, color)  # Store index and color
 
-    # Add labels to nodes
-    nx.draw_networkx_labels(G, pos, font_size=13, font_family="sans-serif")
+    # Draw node labels with smaller font size and adjusted position
+    nx.draw_networkx_labels(G, pos, font_size=13, font_family="sans-serif", font_weight='light')
 
-    # Add labels to edges
+    # Add custom labels to nodes with adjusted position and smaller font size
+    for node, label in custom_labels.items():
+        label_pos = pos_labels[node]
+        plt.text(label_pos[0], label_pos[1], label, fontsize=7, color='black', ha='center', va='center')
+
+    # Add labels to edges with smaller text and adjusted position
     for (egress_switch_id, ingress_switch_id, rad), (label, flow_color) in edge_labels.items():
         label_pos = (
             pos[egress_switch_id][0] * 0.75 + pos[ingress_switch_id][0] * 0.25, 
             pos[egress_switch_id][1] * 0.75 + pos[ingress_switch_id][1] * 0.25 + rad * 0.2
         )
-        plt.text(label_pos[0], label_pos[1], label, fontsize=10, color=flow_color, ha='center', va='center')
+        plt.text(label_pos[0], label_pos[1], label, fontsize=8, color=flow_color, ha='center', va='center')
 
     # Create a legend for flows
     legend_elements = []
@@ -153,46 +174,54 @@ def visualize_graph(G, edge_colors, edge_flow_indices):
     plt.title("Network Topology Visualizer in Real-Time")
     plt.pause(0.5)  # Pause for 0.5 seconds
 
-# Inicialização do gráfico
-G = nx.MultiDiGraph()
-G.add_nodes_from([1, 2, 3, 4, 5])
-G.add_edges_from([
-    (1, 2), (1, 3), (1, 4), (1, 5),
-    (2, 1), (2, 3), (2, 4), (2, 5),
-    (3, 1), (3, 2), (3, 4), (3, 5),
-    (4, 1), (4, 2), (4, 3), (4, 5),
-    (5, 1), (5, 2), (5, 3), (5, 4)
-])
 
-edge_colors = {}
-edge_update_time = {edge: datetime.min for edge in G.edges()}  # Inicializa o tempo da última atualização com datetime.min
+def main():
+    global edge_flow_indices, pos, pos_labels, edge_colors
 
-pos = {
-    1: (1, 0), 2: (2, 6), 3: (4, 6), 4: (5, 0), 5: (3, -2)
-}
+    # Inicialização do gráfico
+    G = nx.MultiDiGraph()
+    G.add_nodes_from([1, 2, 3, 4, 5])
+    G.add_edges_from([ 
+        (1, 2), (1, 3), (1, 4), (1, 5),
+        (2, 1), (2, 3), (2, 4), (2, 5),
+        (3, 1), (3, 2), (3, 4), (3, 5),
+        (4, 1), (4, 2), (4, 3), (4, 5),
+        (5, 1), (5, 2), (5, 3), (5, 4)
+    ])
 
-# Criar figura para o gráfico sem trazer para frente
-plt.figure(figsize=(12, 8))
-plt.ion()  # Turn on interactive mode
+    edge_update_time = {edge: datetime.min for edge in G.edges()}  # Inicializa o tempo da última atualização com datetime.min
 
-# Simulação de leitura contínua de dados
-while True:
-    query = 'SELECT path, src_port, dst_port, src_ip, dst_ip from "flow_stats" WHERE time > now() - 1s'
-    result = influx_client.query(query)
-    points = result.get_points()
-    new_data = list(points)
+    pos = {
+        1: (1, 0), 2: (2, 6), 3: (4, 6), 4: (5, 0), 5: (3, -2)
+    }
 
-    if new_data:
-        update_graph(G, new_data, edge_update_time)
-    
-    current_time = datetime.now()
-    # Remove edges that have not been updated in the last 2 seconds
-    for edge in list(edge_update_time.keys()):
-        if (current_time - edge_update_time[edge]) > timedelta(seconds=2):
-            edge_colors.pop(edge, None)  # Remove the edge color if not updated in the last 2 seconds
-            edge_flow_indices = {k: v for k, v in edge_flow_indices.items() if edge not in v}  # Remove edge from flow indices
+    pos_labels = {
+        1: (1, -0.8), 2: (2, 6.6), 3: (4, 6.6), 4: (5, -0.8), 5: (3, -2.65)
+    }
 
-    visualize_graph(G, edge_colors, edge_flow_indices)
-    print('\n-= Graph updated at:', datetime.now(), '=-')
+    # Criar figura para o gráfico sem trazer para frente
+    plt.figure(figsize=(8, 4))
+    plt.ion()  # Turn on interactive mode
 
+    # Simulação de leitura contínua de dados
+    while True:
+        query = 'SELECT path, src_port, dst_port, src_ip, dst_ip from "flow_stats" WHERE time > now() - 1s'
+        result = influx_client.query(query)
+        points = result.get_points()
+        new_data = list(points)
 
+        if new_data:
+            update_graph(G, new_data, edge_update_time)
+        
+        current_time = datetime.now()
+        # Remove edges that have not been updated in the last 2 seconds
+        for edge in list(edge_update_time.keys()):
+            if (current_time - edge_update_time[edge]) > timedelta(seconds=2):
+                edge_colors.pop(edge, None)  # Remove the edge color if not updated in the last 2 seconds
+                edge_flow_indices = {k: v for k, v in edge_flow_indices.items() if edge not in v}  # Remove edge from flow indices
+
+        visualize_graph(G, edge_flow_indices)
+        print('\n-= Graph updated at:', datetime.now(), '=-')
+
+if __name__ == "__main__":
+    main()
