@@ -39,11 +39,11 @@ edge_colors = {}
 
 # Add custom labels to nodes
 custom_labels = {
-    1: 'SFC Encapsulation',
+    1: 'SFC Classifier',
     2: 'Firewall',
     3: 'Multicaster',
-    4: 'SFC Encapsulation',
-    5: 'SFC Encapsulation'
+    4: 'SFC Classifier',
+    5: 'SFC Classifier'
 }
 
 # Função para atribuir uma cor a um fluxo
