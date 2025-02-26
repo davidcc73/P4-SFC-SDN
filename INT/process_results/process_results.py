@@ -4,10 +4,26 @@ import json
 import os
 import sys
 
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-import constants, export
+
+import constants, export, configure
+
+def adjust_columns_width():
+    #open the workbook
+    workbook = load_workbook(constants.final_file_path)
+
+    # Adjust column widths to fit the text
+    for sheetname in workbook.sheetnames:
+        print(f"Adjusting columns width for sheet {sheetname}")
+        sheet = workbook[sheetname]
+        for column_cells in sheet.columns:
+            length = max(len(str(cell.value).strip()) for cell in column_cells)
+            sheet.column_dimensions[get_column_letter(column_cells[0].column)].width = length
+    
+    # Save the workbook
+    workbook.save(constants.final_file_path)
 
 def read_json(file_path):
     """
@@ -112,7 +128,6 @@ def read_raw_results(row):
 
                 constants.results[iteration][flow][Is]["num_hosts"] = old_number_hosts + 1
 
-
 def read_csv_files(filename):
     first_row = True
 
@@ -202,8 +217,8 @@ def main():
 
         export.export_results(filename)  
     
-    export.configure_final_file()
-    export.adjust_columns_width()
+    configure.configure_final_file()
+    adjust_columns_width()
     
     constants.client.close()
 
