@@ -81,5 +81,7 @@ def export_results(OG_file):
             sheet.append(line_s)
             sheet.append(line_r)
 
+            constants.last_line_data = sheet.max_row
+
     # Save the workbook
     workbook.save(file_path)

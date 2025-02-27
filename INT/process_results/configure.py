@@ -330,7 +330,13 @@ def set_fist_pkt_delay():
     # Save the workbook
     workbook.save(constants.final_file_path)
 
-def set_caculations():
+def set_caculation_formulas(dscp):
+    if dscp == None:
+        title = "Calculations For All Flows"
+        condition = "\">0\""
+    else:
+        title = f"Calculations For Flows with DSCP = {dscp}"
+        condition = dscp
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
 
@@ -342,7 +348,7 @@ def set_caculations():
         last_line = sheet.max_row + 4
 
         #Set new headers
-        sheet[f'A{last_line}'] = "Calculations"
+        sheet[f'A{last_line}'] = title
         sheet[f'A{last_line + 1}'] = "AVG Out of Order Packets (Nº)"
         sheet[f'A{last_line + 2}'] = "AVG Packet Loss (Nº)"
         sheet[f'A{last_line + 3}'] = "AVG Packet Loss (%)"
@@ -361,19 +367,25 @@ def set_caculations():
         sheet[f'B{last_line}'].font = Font(bold=True)
 
         # on the next line for each column, set the average of the column, ignore empty cells
-        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(J1:J{last_line}, "<>", J1:J{last_line}), 2)'
-        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(M1:M{last_line}, "<>", M1:M{last_line}), 2)'
-        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(N1:N{last_line}, "<>", N1:N{last_line}), 2)'
-        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(O1:O{last_line}, "<>", O1:O{last_line}), 2)'
-        sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(L1:L{last_line}, "<>", L1:L{last_line}), 2)'
-        sheet[f'B{last_line + 6}'] = f'=ROUND(STDEVP(L1:L{last_line}), 2)'
+        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, J1:J{constants.last_line_data}), 2)'
+        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, M1:M{constants.last_line_data}), 2)'
+        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, N1:N{constants.last_line_data}), 2)'
+        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, O1:O{constants.last_line_data}), 2)'
+        sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
+        sheet[f'B{last_line + 6}'] = f'=SQRT(SUMPRODUCT((E1:E{constants.last_line_data}={condition})*(L1:L{constants.last_line_data})^2)/MAX(SUMPRODUCT((E1:E{constants.last_line_data}={condition})), 1))'
+
+
+
+
+
+
 
 
 
     # Save the workbook
     workbook.save(constants.final_file_path)
 
-def set_INT_results():
+def set_INT_results(dscp):
     # For each sheet and respectice file, see the time interval given, get the values from the DB, and set the values in the sheet
         
     # Configure each sheet
@@ -386,7 +398,7 @@ def set_INT_results():
         if i >= len(constants.args.f):
             break
 
-        print(f"Processing sheet {sheet}, index {i}")
+        print(f"Processing sheet {sheet},\t index {i},\t for dscp {dscp}")
         sheet = workbook[sheet]
 
         # Get the start and end times
@@ -442,6 +454,15 @@ def set_INT_results():
         #pprint("switch_data: ", switch_data)
 
         write_INT_results(constants.final_file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data)
+
+def set_caculation_section():
+    constants.get_all_sorted_DSCP()
+
+    set_caculation_formulas(None)
+    set_INT_results(None)
+    for dscp in constants.All_DSCP:
+        set_caculation_formulas(dscp)
+        set_INT_results(dscp)
 
 def get_flow_delays(start, end):
     # Get the average delay of emergency and non-emergency flows
@@ -509,8 +530,8 @@ def set_Emergency_calculation():
 
         avg_emergency_flows_delay, avg_non_emergency_flows_delay = get_flow_delays(start, end)
 
-        # Define the row range to consider
-        row_range = max_line - 1  # Rows before the max line
+        # Define the row range of data to consider
+        row_range = constants.last_line_data
 
         # Set the formula for the Non-Emergency Flows
         sheet[f'B{max_line + 3}'] = f'=SUMIF(E1:E{row_range}, "<40" , O1:O{row_range})'  
@@ -585,8 +606,7 @@ def set_Comparison_sheet():
 def configure_final_file():
     set_pkt_loss()
     set_fist_pkt_delay()
-    set_caculations()
-    set_INT_results()
+    set_caculation_section()
     set_Emergency_calculation()
     set_Comparison_sheet()
 
