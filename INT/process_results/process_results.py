@@ -95,11 +95,13 @@ def read_raw_results(row):
     if Is == "receiver":
         number_out_of_order_packets = int(row[9])
         out_of_order_packets = row[10]
+        avg_jitter = float(row[12])
 
         extra1 = {"num_out_of_order_pkt": number_out_of_order_packets}
         extra2 = {"out_of_order_pkt": out_of_order_packets}
+        extra3 = {"avg_jitter": avg_jitter}
 
-        values_end_points["extra"] = [extra1, extra2]
+        values_end_points["extra"] = [extra1, extra2, extra3]
 
     not_needed_anymore, pkt_size = get_pkt_size_dscp(flow)            #Get the flows info
     values_flow = {Is: values_end_points, "DSCP": dscp, "Packet Size": pkt_size}
@@ -125,6 +127,7 @@ def read_raw_results(row):
 
                 constants.results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] = (constants.results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] * old_number_hosts + number_out_of_order_packets) / (old_number_hosts + 1)
                 constants.results[iteration][flow][Is]["extra"][1]["out_of_order_pkt"]    += out_of_order_packets
+                constants.results[iteration][flow][Is]["extra"][2]["avg_jitter"]           = (constants.results[iteration][flow][Is]["extra"][2]["avg_jitter"] * old_number_hosts + avg_jitter) / (old_number_hosts + 1)
 
                 constants.results[iteration][flow][Is]["num_hosts"] = old_number_hosts + 1
 

@@ -28,6 +28,8 @@ test_cases = None
 
 headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG Packet Loss (%)", 
                 "AVG 1º Packet Delay (nanoseconds)", 
+
+                "AVG Flow Jitter (nanoseconds)", "STD Flow Jitter (nanoseconds)",
                 "AVG Flows Latency (nanoseconds)", "STD Flows Latency (nanoseconds)", 
                 "AVG Hop Latency (nanoseconds)", "STD Hop Latency (nanoseconds)",
 

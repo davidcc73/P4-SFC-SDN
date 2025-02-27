@@ -16,7 +16,7 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
     variable_name = constants.headers_lines[variable_number]
 
     pass_1_occurance = True          #there are 2 Lines on collumn A that have the same name
-    if variable_number == 12:
+    if variable_number == 14:
         pass_1_occurance = False 
 
     # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
@@ -26,34 +26,34 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
             pass_1_occurance = True
             continue
         
-        if variable_number <= 7:
+        if variable_number <= 9:
             if row[0].value == variable_name:
                 # Get the next collumn letter of the cell that contains the variable_name
                 line = row[0].row
                 col = get_column_letter(row[0].column + 1)
                 break
-        elif variable_number == 8 or variable_number == 10:
+        elif variable_number == 10 or variable_number == 12:
             if row[0].value == "Mean":
                 line = row[0].row
-                if variable_number == 8:
+                if variable_number == 10:
                     col = get_column_letter(row[0].column + 1)
                 else:
                     col = get_column_letter(row[0].column + 2)
                 break
-        elif variable_number == 9 or variable_number == 11:
+        elif variable_number == 11 or variable_number == 13:
             if row[0].value == "Standard Deviation":
                 line = row[0].row
-                if variable_number == 9:
+                if variable_number == 11:
                     col = get_column_letter(row[0].column + 1)
                 else:
                     col = get_column_letter(row[0].column + 2)
                 break
-        elif variable_number == 12:
+        elif variable_number == 14:
             if row[0].value == "AVG 1º Packet Delay (nanoseconds)":
                 line = row[0].row
                 col = get_column_letter(row[0].column + 3)
                 break
-        elif variable_number == 13:
+        elif variable_number == 15:
             if row[0].value == "AVG Flow Delay (nanoseconds)":
                 line = row[0].row
                 col = get_column_letter(row[0].column + 3)
@@ -136,7 +136,7 @@ def calculate_percentages(start, end, switch_data):
         #tuple pair: id, count
         switch_id = int(row["tags"]["switch_id"])
         switch_count = int(row["values"][0][1])
-        switch_data[switch_id]["Percentage Pkt"] = round((switch_count / total_count) * 100, 3)
+        switch_data[switch_id]["Percentage Pkt"] = round((switch_count / total_count) * 100, 2)
 
     #pprint(switch_data)
     return switch_data
@@ -173,10 +173,10 @@ def get_mean_standard_deviation(switch_data):
     #print("percentage_std_dev: ", percentage_std_dev)
     #print("byte_std_dev: ", percentage_std_dev)
     
-    switch_data["Percentage Mean"] = round(percentage_mean, 3)
-    switch_data["Byte Mean"] = round(byte_mean, 3)
-    switch_data["Percentage Standard Deviation"] = round(percentage_std_dev, 3)
-    switch_data["Byte Standard Deviation"] = round(byte_std_dev, 3)
+    switch_data["Percentage Mean"] = round(percentage_mean, 2)
+    switch_data["Byte Mean"] = round(byte_mean, 2)
+    switch_data["Percentage Standard Deviation"] = round(percentage_std_dev, 2)
+    switch_data["Byte Standard Deviation"] = round(byte_std_dev, 2)
 
     return switch_data
 
@@ -279,7 +279,7 @@ def set_pkt_loss():
             
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
             sheet[f'M{row[0].row}'] = f'=H{row[0].row-1}-H{row[0].row}'     
-            sheet[f'N{row[0].row}'] = f'=ROUND((M{row[0].row}/H{row[0].row-1})*100, 3)'
+            sheet[f'N{row[0].row}'] = f'=ROUND((M{row[0].row}/H{row[0].row-1})*100, 2)'
 
             skip = True
 
@@ -323,7 +323,7 @@ def set_fist_pkt_delay():
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
             # The values are 2 Timestamp (seconds-Unix Epoch)
             # subtraction give seconds, we convert to nanoseconds
-            sheet[f'O{row[0].row}'] = f'=ROUND((I{row[0].row}-I{row[0].row-1})*10^9, 3)'     
+            sheet[f'O{row[0].row}'] = f'=ROUND((I{row[0].row}-I{row[0].row-1})*10^9, 2)'     
 
             skip = True
 
@@ -347,6 +347,8 @@ def set_caculations():
         sheet[f'A{last_line + 2}'] = "AVG Packet Loss (Nº)"
         sheet[f'A{last_line + 3}'] = "AVG Packet Loss (%)"
         sheet[f'A{last_line + 4}'] = "AVG 1º Packet Delay (nanoseconds)"
+        sheet[f'A{last_line + 5}'] = "AVG Flow Jitter (nanoseconds)"
+        sheet[f'A{last_line + 6}'] = "STD Flow Jitter (nanoseconds)"
         sheet[f'B{last_line}'] = "Values"
 
         sheet[f'A{last_line}'].font = Font(bold=True)
@@ -354,13 +356,17 @@ def set_caculations():
         sheet[f'A{last_line + 2}'].font = Font(bold=True)
         sheet[f'A{last_line + 3}'].font = Font(bold=True)
         sheet[f'A{last_line + 4}'].font = Font(bold=True)
+        sheet[f'A{last_line + 5}'].font = Font(bold=True)
+        sheet[f'A{last_line + 6}'].font = Font(bold=True)
         sheet[f'B{last_line}'].font = Font(bold=True)
 
         # on the next line for each column, set the average of the column, ignore empty cells
-        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(J:J, "<>", J:J), 3)'
-        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(M:M, "<>", M:M), 3)'
-        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(N:N, "<>", N:N), 3)'
-        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(O:O, "<>", O:O), 3)'
+        sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(J1:J{last_line}, "<>", J1:J{last_line}), 2)'
+        sheet[f'B{last_line + 2}'] = f'=ROUND(AVERAGEIF(M1:M{last_line}, "<>", M1:M{last_line}), 2)'
+        sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(N1:N{last_line}, "<>", N1:N{last_line}), 2)'
+        sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(O1:O{last_line}, "<>", O1:O{last_line}), 2)'
+        sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(L1:L{last_line}, "<>", L1:L{last_line}), 2)'
+        sheet[f'B{last_line + 6}'] = f'=ROUND(STDEVP(L1:L{last_line}), 2)'
 
 
 
@@ -405,8 +411,8 @@ def set_INT_results():
                     WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}
                 """
         result = constants.apply_query(query)
-        AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 3)         #nanoseconds
-        STD_flows_latency = round(result.raw["series"][0]["values"][0][2], 3)
+        AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
+        STD_flows_latency = round(result.raw["series"][0]["values"][0][2], 2)
 
         ###########################################
         # We need AVG Latency for processing of ALL packets (NOT distinguishing between switches/flows) 
@@ -423,8 +429,8 @@ def set_INT_results():
                     WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}
                 """
         result = constants.apply_query(query)
-        AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 3)         #nanoseconds
-        STD_hop_latency = round(result.raw["series"][0]["values"][0][2], 3)         
+        AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
+        STD_hop_latency = round(result.raw["series"][0]["values"][0][2], 2)         
 
         # % of packets that went to each individual switch (switch_id)
         switch_data = get_byte_sum(start, end)
@@ -449,7 +455,7 @@ def get_flow_delays(start, end):
     if not result.raw["series"]:
         avg_emergency_flows_delay = "none"
     else:
-        avg_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 3)         #nanoseconds
+        avg_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
 
     query = f"""
         SELECT MEAN("latency")
@@ -462,7 +468,7 @@ def get_flow_delays(start, end):
     if not result.raw["series"]:
         avg_non_emergency_flows_delay = "none"
     else:
-        avg_non_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 3)         #nanoseconds
+        avg_non_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
 
     return avg_emergency_flows_delay, avg_non_emergency_flows_delay 
 
@@ -515,8 +521,8 @@ def set_Emergency_calculation():
         sheet[f'C{max_line + 4}'] = avg_emergency_flows_delay
 
         #Set comparasion formulas, for the AVG 1º Packet Delay and AVG Flow Delay in percentage
-        sheet[f'D{max_line + 3}'] = f'=IFERROR(ROUND((C{max_line + 3} - B{max_line + 3})/ABS(B{max_line + 3}) * 100, 3), "none")'
-        sheet[f'D{max_line + 4}'] = f'=IFERROR(ROUND((C{max_line + 4} - B{max_line + 4})/ABS(B{max_line + 4}) * 100, 3), "none")'
+        sheet[f'D{max_line + 3}'] = f'=IFERROR(ROUND((C{max_line + 3} - B{max_line + 3})/ABS(B{max_line + 3}) * 100, 2), "none")'
+        sheet[f'D{max_line + 4}'] = f'=IFERROR(ROUND((C{max_line + 4} - B{max_line + 4})/ABS(B{max_line + 4}) * 100, 2), "none")'
 
 
     workbook.save(constants.final_file_path)
@@ -618,6 +624,8 @@ def set_algorithm_headers(sheet, test_case, start_line):
     sheet[f'A{start_line + 12}'] = constants.headers_lines[11]
     sheet[f'A{start_line + 13}'] = constants.headers_lines[12]
     sheet[f'A{start_line + 14}'] = constants.headers_lines[13]
+    sheet[f'A{start_line + 15}'] = constants.headers_lines[14]
+    sheet[f'A{start_line + 16}'] = constants.headers_lines[15]
 
 
     # Set lines names in bold text
@@ -635,6 +643,8 @@ def set_algorithm_headers(sheet, test_case, start_line):
     sheet[f'A{start_line + 12}'].font = Font(bold=True)
     sheet[f'A{start_line + 13}'].font = Font(bold=True)
     sheet[f'A{start_line + 14}'].font = Font(bold=True)
+    sheet[f'A{start_line + 15}'].font = Font(bold=True)
+    sheet[f'A{start_line + 16}'].font = Font(bold=True)
 
 def set_comparasion_formulas(sheet, start_line):
     # Set the formulas to compare the results between the test cases

@@ -38,7 +38,7 @@ def export_results(OG_file):
         sheet.title = sheet_name
     
     # Write the header
-    header = ["Flow src", "Flow dst", "Source Port", "Destination Port", "DSCP", "Packet Size (Bytes)", "Is", "Nº of packets", "1º Packet Timestamp(seconds)", "Nº of out of order packets", "Out of order packets"]
+    header = ["Flow src", "Flow dst", "Source Port", "Destination Port", "DSCP", "Packet Size (Bytes)", "Is", "Nº of packets", "1º Packet Timestamp(seconds)", "Nº of out of order packets", "Out of order packets", "AVG Flow Jitter (nanoseconds)"]
     for col_num, value in enumerate(header, 1):
         cell = sheet.cell(row=1, column=col_num, value=value)
         cell.font = Font(bold=True)
