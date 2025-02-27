@@ -157,12 +157,12 @@ def export_results(results):
                 
                 # If file does not exist, write the header row
                 if not file_exists:
-                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets", "DSCP"]
+                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets", "DSCP", "Avg Jitter (Nanoseconds)"]
                     writer.writerow(header)
                 
                 # Prepare the data line
                 timestamp_first_sent = results['first_timestamp']
-                line = [args.iteration, args.me, my_IP, args.dst_ip, args.sport, args.dport, "sender", num_packets_successefuly_sent, timestamp_first_sent, None, None, args.dscp]
+                line = [args.iteration, args.me, my_IP, args.dst_ip, args.sport, args.dport, "sender", num_packets_successefuly_sent, timestamp_first_sent, None, None, args.dscp, None]
                 
                 # Write data
                 writer.writerow(line)

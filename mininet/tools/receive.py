@@ -61,11 +61,11 @@ def process_packet(pkt):  # Process packets in queue
                 "packet_count": 0,
                 "sequence_numbers": [],
                 "first_packet_time": pkt.time,
-                "DSCP": pkt[IP].tos >> 2
+                "DSCP": pkt[IP].tos >> 2,
+                "last_arrival_time": None,     # Track timestamp of the last packet arrival for jitter calculation
+                "avg_jitter": None             # Store the average jitter for the flow
             }
-        
-        # Increment the packet count for this flow
-        flows_metrics[flow_key]["packet_count"] += 1
+
 
         try:
             seq_number, message = payload.split('-', 1)
@@ -74,6 +74,23 @@ def process_packet(pkt):  # Process packets in queue
             print(f"Flow {flow_key} - Packet Sequence Number: {seq_number}")
         except ValueError:
             print(f"Flow {flow_key} - Error splitting payload: {payload}")
+
+        
+        #------------------Calculate Jitter------------------
+        # Track the timestamp of the current packet arrival
+        current_time = pkt.time
+        if flows_metrics[flow_key]["avg_jitter"] is None:
+            flows_metrics[flow_key]["avg_jitter"] = 0
+        else:
+            previous_pkt_count                    = flows_metrics[flow_key]["packet_count"]
+            current_jitter                        = current_time - flows_metrics[flow_key]["last_arrival_time"]
+            current_avg_jitter_undone             = flows_metrics[flow_key]["avg_jitter"] * previous_pkt_count
+            flows_metrics[flow_key]["avg_jitter"] = (current_avg_jitter_undone + current_jitter) / (previous_pkt_count + 1)
+
+        flows_metrics[flow_key]["last_arrival_time"] = current_time
+
+        # Increment the packet count for this flow
+        flows_metrics[flow_key]["packet_count"] += 1
 
     sys.stdout.flush()
 
@@ -131,7 +148,7 @@ def export_results():
                 
                 # If file does not exist, write the header row
                 if not file_exists:
-                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets", "DSCP"]
+                    header = ["Iteration", "Host", "IP Source", "IP Destination", "Source Port", "Destination Port", "Is", "Number", "Timestamp (seconds-Unix Epoch)", "Nº pkt out of order", "Out of order packets", "DSCP", "Avg Jitter (Nanoseconds)"]
                     writer.writerow(header)
 
                 with flows_lock:  # Ensure only one thread modifies flows_metrics at a time
@@ -139,8 +156,9 @@ def export_results():
                         src_ip, dst_ip, sport, dport = flow_key
                         first_packet_time = metrics["first_packet_time"]
                         out_of_order_packets = sorted(set(range(1, max(metrics["sequence_numbers"], default=1) + 1)) - set(metrics["sequence_numbers"]))
-                        
-                        line = [args.iteration, args.me, src_ip, dst_ip, sport, dport, "receiver", metrics["packet_count"], first_packet_time, len(out_of_order_packets), out_of_order_packets, metrics["DSCP"]]
+                        jitter = metrics["avg_jitter"] * 1000000000
+
+                        line = [args.iteration, args.me, src_ip, dst_ip, sport, dport, "receiver", metrics["packet_count"], first_packet_time, len(out_of_order_packets), out_of_order_packets, metrics["DSCP"], jitter]
                         
                         # Write data
                         writer.writerow(line)
