@@ -275,13 +275,13 @@ class Collector():
                         'src_ip': str(flow_info.src_ip),
                         'dst_ip': str(flow_info.dst_ip),
                         'src_port': int(flow_info.src_port),
-                        'dst_port': int(flow_info.dst_port)
+                        'dst_port': int(flow_info.dst_port),
+                        'dscp': int(flow_info.dscp),
                     },
                     'time': metric_timestamp,
                     'fields': {
                         'protocol': flow_info.ip_proto,
                         'size': flow_info.size,
-                        'dscp': flow_info.dscp,
                         'latency': int(flow_info.flow_latency),
                         'path': '-'.join(map(str, flow_info.switch_ids[::-1]))   #store as string separated by '-' and reverse the list so letfmost were the first hops
                     }
@@ -296,7 +296,8 @@ class Collector():
                         'src_ip': str(flow_info.src_ip),
                         'dst_ip': str(flow_info.dst_ip),
                         'src_port': int(flow_info.src_port),
-                        'dst_port': int(flow_info.dst_port)
+                        'dst_port': int(flow_info.dst_port),
+                        'dscp': int(flow_info.dscp)
                     },
                     'time': metric_timestamp,
                     'fields': {
