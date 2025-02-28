@@ -158,6 +158,11 @@ def high_load_test(net, routing):
     os.makedirs("/INT/results/logs", exist_ok=True)
     create_lock_file(lock_filename)
 
+    #delete old .csv file if it exists
+    if os.path.exists(f"/INT/results/{file_results}"):
+        print(f"Deleting the old results file: {file_results}")
+        os.remove(f"/INT/results/{file_results}")
+
     # Get the hosts
     h1 = net.get("h1") 
     h2 = net.get("h2") 
