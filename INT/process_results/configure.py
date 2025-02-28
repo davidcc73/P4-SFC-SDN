@@ -372,7 +372,7 @@ def set_caculation_formulas(dscp):
         sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, N1:N{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, O1:O{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
-        sheet[f'B{last_line + 6}'] = f'=SQRT(SUMPRODUCT((E1:E{constants.last_line_data}={condition})*(L1:L{constants.last_line_data})^2)/MAX(SUMPRODUCT((E1:E{constants.last_line_data}={condition})), 1))'
+        sheet[f'B{last_line + 6}'] =  f'=SQRT(SUMPRODUCT((E1:E{constants.last_line_data}={condition})*(L1:L{constants.last_line_data})^2)/MAX(SUMPRODUCT((E1:E{constants.last_line_data}={condition})), 1))'
 
 
 
@@ -387,7 +387,12 @@ def set_caculation_formulas(dscp):
 
 def set_INT_results(dscp):
     # For each sheet and respectice file, see the time interval given, get the values from the DB, and set the values in the sheet
-        
+    
+    if dscp == None:
+        dscp_condition = ""
+    else:
+        dscp_condition = f"AND dscp = \'{dscp}\'"
+
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
 
@@ -411,7 +416,7 @@ def set_INT_results(dscp):
         percentile_query = f"""
             SELECT PERCENTILE("latency", 95) AS p_latency
             FROM flow_stats
-            WHERE time >= '{start}' AND time <= '{end}'
+            WHERE time >= '{start}' AND time <= '{end}' {dscp_condition}
         """
 
         percentile_result = constants.apply_query(percentile_query)
@@ -420,7 +425,7 @@ def set_INT_results(dscp):
         query = f"""
                     SELECT MEAN("latency"), STDDEV("latency")
                     FROM  flow_stats
-                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}
+                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
                 """
         result = constants.apply_query(query)
         AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
@@ -432,13 +437,13 @@ def set_INT_results(dscp):
         percentile_query = f"""
             SELECT PERCENTILE("latency", 95) AS p_latency
             FROM switch_stats
-            WHERE time >= '{start}' AND time <= '{end}'
+            WHERE time >= '{start}' AND time <= '{end}'  {dscp_condition}
         """
         
         query = f"""
                     SELECT MEAN("latency"), STDDEV("latency")
                     FROM  switch_stats
-                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}
+                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
                 """
         result = constants.apply_query(query)
         AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
