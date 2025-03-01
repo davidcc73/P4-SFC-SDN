@@ -478,35 +478,6 @@ def set_caculation_section(dscp):
     set_caculation_formulas(dscp)
     set_INT_results(dscp)               #technically, also contains another section, but its easier to call it here
 
-def get_flow_delays(start, end):
-    # Get the average delay of emergency and non-emergency flows
-    query = f"""
-        SELECT MEAN("latency") 
-        FROM  flow_stats WHERE time >= '{start}' 
-        AND time <= '{end}' 
-        AND dscp >= 40
-    """
-    result = constants.apply_query(query)
-    if not result.raw["series"]:
-        avg_emergency_flows_delay = "none"
-    else:
-        avg_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
-
-    query = f"""
-        SELECT MEAN("latency")
-        FROM  flow_stats
-        WHERE time >= '{start}' AND time <= '{end}'
-        AND dscp < 40
-    """
-
-    result = constants.apply_query(query)
-    if not result.raw["series"]:
-        avg_non_emergency_flows_delay = "none"
-    else:
-        avg_non_emergency_flows_delay = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
-
-    return avg_emergency_flows_delay, avg_non_emergency_flows_delay 
-
 def set_compare_non_Emergency_to_Emergency_variation():
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
@@ -542,18 +513,17 @@ def set_compare_non_Emergency_to_Emergency_variation():
         start = constants.args.start[i]
         end = constants.args.end[i]
 
-        avg_emergency_flows_delay, avg_non_emergency_flows_delay = get_flow_delays(start, end)
-
         # Define the row range of data to consider
         row_range = constants.last_line_data
+        after_raw_data = row_range + 2
 
         # Set the formula for the Non-Emergency Flows
         sheet[f'B{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, "<40" , O1:O{row_range}), 2'  
-        sheet[f'B{max_line + 4}'] = avg_non_emergency_flows_delay
+        sheet[f'B{max_line + 4}'] = f'=ROUND(AVERAGEIFS(B{after_raw_data}:B{max_line}, A{after_raw_data}:A{max_line}, "AVG Flows Latency (nanoseconds)", C{after_raw_data}:C{max_line}, "<40"), 2)'  #NOT IDEAL to do avg of avg, but inflix stores all tags as strings including dscp, making it difficult to apply this logic in a query
 
         # Set the formula for the Emergency Flows
         sheet[f'C{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, ">=40", O1:O{row_range}), 2'
-        sheet[f'C{max_line + 4}'] = avg_emergency_flows_delay
+        sheet[f'C{max_line + 4}'] = f'=ROUND(AVERAGEIFS(B{after_raw_data}:B{max_line}, A{after_raw_data}:A{max_line}, "AVG Flows Latency (nanoseconds)", C{after_raw_data}:C{max_line}, ">=40"), 2)'
 
         #Set comparasion formulas, for the AVG 1º Packet Delay and AVG Flow Delay in percentage
         sheet[f'D{max_line + 3}'] = f'=IFERROR(ROUND((C{max_line + 3} - B{max_line + 3})/ABS(B{max_line + 3}) * 100, 2), "none")'
