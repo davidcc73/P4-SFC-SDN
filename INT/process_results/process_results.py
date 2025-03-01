@@ -216,9 +216,12 @@ def main():
     # Read the CSV files
     for file_index, filename in enumerate(constants.args.f):
         constants.results = {}                                              #reset the results dictionary between files
-        read_csv_files(filename)
+        constants.aux_calculated_results = {}                               #reset the aux_calculated_results dictionary between files
 
-        export.export_results(filename)  
+        read_csv_files(filename)
+        constants.calulate_std_jitter_per_dscp()                            #calculate the std from jitter per DSCP
+
+        export.export_results(filename)                                     #export the results to the final file
     
     configure.configure_final_file()
     adjust_columns_width()

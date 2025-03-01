@@ -331,7 +331,7 @@ def set_fist_pkt_delay():
     workbook.save(constants.final_file_path)
 
 def set_caculation_formulas(dscp):
-    if dscp == None:
+    if dscp == -1:
         title = "Calculations For All Flows"
         condition = "\">0\""
     else:
@@ -372,14 +372,7 @@ def set_caculation_formulas(dscp):
         sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, N1:N{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, O1:O{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
-        sheet[f'B{last_line + 6}'] =  f'=SQRT(SUMPRODUCT((E1:E{constants.last_line_data}={condition})*(L1:L{constants.last_line_data})^2)/MAX(SUMPRODUCT((E1:E{constants.last_line_data}={condition})), 1))'
-
-
-
-
-
-
-
+        sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[dscp]["std_jitter"]
 
 
     # Save the workbook
@@ -388,7 +381,7 @@ def set_caculation_formulas(dscp):
 def set_INT_results(dscp):
     # For each sheet and respectice file, see the time interval given, get the values from the DB, and set the values in the sheet
     
-    if dscp == None:
+    if dscp == -1:
         dscp_condition = ""
     else:
         dscp_condition = f"AND dscp = \'{dscp}\'"
@@ -463,8 +456,8 @@ def set_INT_results(dscp):
 def set_caculation_section():
     constants.get_all_sorted_DSCP()
 
-    set_caculation_formulas(None)
-    set_INT_results(None)
+    set_caculation_formulas(-1)
+    set_INT_results(-1)
     for dscp in constants.All_DSCP:
         set_caculation_formulas(dscp)
         set_INT_results(dscp)
