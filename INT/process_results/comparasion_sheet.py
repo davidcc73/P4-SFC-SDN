@@ -61,7 +61,6 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
 
     return line, col
 
-
 def set_algorithm_headers(sheet, test_case, start_line):
 
     # Set test case name in bold test
@@ -122,7 +121,6 @@ def set_comparasion_formulas(sheet, start_line):
         #print(sheet[f'A{start_line + i}'].value)
         sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
 
-
 def set_copied_values(sheet, test_case, start_line):    
     print("Seting values copy from other sheets")
     
@@ -144,8 +142,6 @@ def set_copied_values(sheet, test_case, start_line):
             cell_reference = f"{column}{line}"
             formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
             sheet[f'{get_column_letter(2 + i)}{start_line + variable_number + 1}'] = formula
-
-
 
 def set_Comparison_sheet():
     print("Setting the Comparison sheet")
