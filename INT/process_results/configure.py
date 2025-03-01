@@ -175,36 +175,36 @@ def write_INT_results_switchID(sheet, switch_data, dscp):
     else:
         title = f"Switch ID For Flows with DSCP = {dscp}"
 
-    sheet[f'A{last_line + 5}'] = title
-    sheet[f'B{last_line + 5}'] = "% of packets to each switch"
-    sheet[f'C{last_line + 5}'] = "Total Sum of Processed Bytes"
+    sheet[f'A{last_line + 1}'] = title
+    sheet[f'B{last_line + 1}'] = "% of packets to each switch"
+    sheet[f'C{last_line + 1}'] = "Total Sum of Processed Bytes"
 
-    sheet[f'A{last_line + 5}'].font = Font(bold=True)
-    sheet[f'B{last_line + 5}'].font = Font(bold=True)
-    sheet[f'C{last_line + 5}'].font = Font(bold=True)
+    sheet[f'A{last_line + 1}'].font = Font(bold=True)
+    sheet[f'B{last_line + 1}'].font = Font(bold=True)
+    sheet[f'C{last_line + 1}'].font = Font(bold=True)
 
 
     # Write percentages and total bytes processed, cycle through keys that are numbers
     for i, switch_id in enumerate(switch_data[dscp].keys()):
         if isinstance(switch_id, int):                #skip sets that are non-switch_id
-            sheet[f'A{last_line + 6 + i}'] = switch_id
+            sheet[f'A{last_line + 2 + i}'] = switch_id
             
             #percentage of total packets that went to each switch
-            sheet[f'B{last_line + 6 + i}'] = switch_data[dscp][switch_id]["Percentage Pkt"]
+            sheet[f'B{last_line + 2 + i}'] = switch_data[dscp][switch_id]["Percentage Pkt"]
             
             #Sum of processed bytes
-            sheet[f'C{last_line + 6 + i}'] = switch_data[dscp][switch_id]["Byte Sums"]
+            sheet[f'C{last_line + 2 + i}'] = switch_data[dscp][switch_id]["Byte Sums"]
 
     # Write the mean and standard deviation of the percentages and bytes
-    sheet[f'A{last_line + constants.num_switches + 5 + 1}'] = "Mean"
-    sheet[f'A{last_line + constants.num_switches + 5 + 2}'] = "Standard Deviation"
-    sheet[f'A{last_line + constants.num_switches + 5 + 1}'].font = Font(bold=True)
-    sheet[f'A{last_line + constants.num_switches + 5 + 2}'].font = Font(bold=True)
+    sheet[f'A{last_line + constants.num_switches + 1 + 1}'] = "Mean"
+    sheet[f'A{last_line + constants.num_switches + 1 + 2}'] = "Standard Deviation"
+    sheet[f'A{last_line + constants.num_switches + 1 + 1}'].font = Font(bold=True)
+    sheet[f'A{last_line + constants.num_switches + 1 + 2}'].font = Font(bold=True)
 
-    sheet[f'B{last_line + constants.num_switches + 5 + 1}'] = switch_data[dscp]["Percentage Mean"]
-    sheet[f'B{last_line + constants.num_switches + 5 + 2}'] = switch_data[dscp]["Percentage Standard Deviation"]
-    sheet[f'C{last_line + constants.num_switches + 5 + 1}'] = switch_data[dscp]["Byte Mean"]
-    sheet[f'C{last_line + constants.num_switches + 5 + 2}'] = switch_data[dscp]["Byte Standard Deviation"]
+    sheet[f'B{last_line + constants.num_switches + 1 + 1}'] = switch_data[dscp]["Percentage Mean"]
+    sheet[f'B{last_line + constants.num_switches + 1 + 2}'] = switch_data[dscp]["Percentage Standard Deviation"]
+    sheet[f'C{last_line + constants.num_switches + 1 + 1}'] = switch_data[dscp]["Byte Mean"]
+    sheet[f'C{last_line + constants.num_switches + 1 + 2}'] = switch_data[dscp]["Byte Standard Deviation"]
 
 def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency):
     # Write the results in the sheet
