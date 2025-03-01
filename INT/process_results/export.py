@@ -18,7 +18,7 @@ def extract_Is_values(line, iteration, flow, Is):
 
     return line
 
-def export_results(OG_file):
+def export_raw_results(OG_file):
     # Get the sheet name from filename before (_)
     sheet_name = OG_file.split("_")[0]
     

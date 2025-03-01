@@ -1,4 +1,5 @@
 from cmath import sqrt
+import pprint
 import constants
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
@@ -180,28 +181,17 @@ def get_mean_standard_deviation(switch_data):
 
     return switch_data
 
-def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data):
+def write_INT_results_switchID(sheet, switch_data, dscp):
     # Write the results in the sheet
     last_line = sheet.max_row + 1
 
-    # Set new headers
-    sheet[f'A{last_line + 0}'] = "AVG Flows Latency (nanoseconds)"
-    sheet[f'A{last_line + 1}'] = "STD Flows Latency (nanoseconds)"
-    sheet[f'A{last_line + 2}'] = "AVG Hop Latency (nanoseconds)"
-    sheet[f'A{last_line + 3}'] = "STD Hop Latency (nanoseconds)"
+    # Set new Switch ID headers
+    if dscp == -1:
+        title = "Switch ID For All Flows"
+    else:
+        title = f"Switch ID For Flows with DSCP = {dscp}"
 
-    sheet[f'A{last_line + 0}'].font = Font(bold=True)
-    sheet[f'A{last_line + 1}'].font = Font(bold=True)
-    sheet[f'A{last_line + 2}'].font = Font(bold=True)
-    sheet[f'A{last_line + 3}'].font = Font(bold=True)
-
-    sheet[f'B{last_line + 0}'] = AVG_flows_latency
-    sheet[f'B{last_line + 1}'] = STD_flows_latency
-    sheet[f'B{last_line + 2}'] = AVG_hop_latency
-    sheet[f'B{last_line + 3}'] = STD_hop_latency
-
-
-    sheet[f'A{last_line + 5}'] = "Switch ID"
+    sheet[f'A{last_line + 5}'] = title
     sheet[f'B{last_line + 5}'] = "% of packets to each switch"
     sheet[f'C{last_line + 5}'] = "Total Sum of Processed Bytes"
 
@@ -211,12 +201,9 @@ def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_l
 
 
     # Write percentages and total bytes processed, cycle through keys that are numbers
-    #pprint(switch_data)
-    #print("----------------------------------------")
+    #pprint.pprint(switch_data)
     for i, key in enumerate(switch_data.keys()):
         if isinstance(key, int):                #skip sets that are non-switch_id
-            #print(f"Key: {key} is an integer")
-            #print(f"i: {i}, Switch ID: {key},  Values: {switch_data[key]}")
             sheet[f'A{last_line + 6 + i}'] = key
             
             #percentage of total packets that went to each switch
@@ -236,10 +223,26 @@ def write_INT_results(file_path, workbook, sheet, AVG_flows_latency, STD_flows_l
     sheet[f'B{last_line + constants.num_switches + 5 + 2}'] = switch_data["Percentage Standard Deviation"]
     sheet[f'C{last_line + constants.num_switches + 5 + 1}'] = switch_data["Byte Mean"]
     sheet[f'C{last_line + constants.num_switches + 5 + 2}'] = switch_data["Byte Standard Deviation"]
-    
 
-    # Save the workbook
-    workbook.save(file_path)
+def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency):
+    # Write the results in the sheet
+    last_line = sheet.max_row + 1
+
+    # Set new Calculation headers
+    sheet[f'A{last_line + 0}'] = "AVG Flows Latency (nanoseconds)"
+    sheet[f'A{last_line + 1}'] = "STD Flows Latency (nanoseconds)"
+    sheet[f'A{last_line + 2}'] = "AVG Hop Latency (nanoseconds)"
+    sheet[f'A{last_line + 3}'] = "STD Hop Latency (nanoseconds)"
+
+    sheet[f'A{last_line + 0}'].font = Font(bold=True)
+    sheet[f'A{last_line + 1}'].font = Font(bold=True)
+    sheet[f'A{last_line + 2}'].font = Font(bold=True)
+    sheet[f'A{last_line + 3}'].font = Font(bold=True)
+
+    sheet[f'B{last_line + 0}'] = AVG_flows_latency
+    sheet[f'B{last_line + 1}'] = STD_flows_latency
+    sheet[f'B{last_line + 2}'] = AVG_hop_latency
+    sheet[f'B{last_line + 3}'] = STD_hop_latency
 
 
 def set_pkt_loss():
@@ -372,7 +375,7 @@ def set_caculation_formulas(dscp):
         sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, N1:N{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, O1:O{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
-        sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[dscp]["std_jitter"]
+        sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[dscp]["std_jitter"]       #array formuals are not working, so we calculated and set the value here
 
 
     # Save the workbook
@@ -413,7 +416,7 @@ def set_INT_results(dscp):
         """
 
         percentile_result = constants.apply_query(percentile_query)
-        p_latency = list(percentile_result.get_points())[0]['p_latency']   #nanoseconds
+        p_latency = list(percentile_result.get_points())[0]['p_latency']                #nanoseconds
 
         query = f"""
                     SELECT MEAN("latency"), STDDEV("latency")
@@ -421,7 +424,7 @@ def set_INT_results(dscp):
                     WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
                 """
         result = constants.apply_query(query)
-        AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
+        AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)           #nanoseconds
         STD_flows_latency = round(result.raw["series"][0]["values"][0][2], 2)
 
         ###########################################
@@ -439,7 +442,7 @@ def set_INT_results(dscp):
                     WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
                 """
         result = constants.apply_query(query)
-        AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)         #nanoseconds
+        AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)             #nanoseconds
         STD_hop_latency = round(result.raw["series"][0]["values"][0][2], 2)         
 
         # % of packets that went to each individual switch (switch_id)
@@ -451,16 +454,15 @@ def set_INT_results(dscp):
         #pprint("AVG_hop_latency: ", AVG_hop_latency)
         #pprint("switch_data: ", switch_data)
 
-        write_INT_results(constants.final_file_path, workbook, sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, switch_data)
+        write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency)
+        write_INT_results_switchID(sheet, switch_data, dscp)
 
-def set_caculation_section():
-    constants.get_all_sorted_DSCP()
+        # Save the workbook
+        workbook.save(constants.final_file_path)
 
-    set_caculation_formulas(-1)
-    set_INT_results(-1)
-    for dscp in constants.All_DSCP:
-        set_caculation_formulas(dscp)
-        set_INT_results(dscp)
+def set_caculation_section(dscp):
+    set_caculation_formulas(dscp)
+    set_INT_results(dscp)               #technically, also contains another section, but its easier to call it here
 
 def get_flow_delays(start, end):
     # Get the average delay of emergency and non-emergency flows
@@ -491,7 +493,7 @@ def get_flow_delays(start, end):
 
     return avg_emergency_flows_delay, avg_non_emergency_flows_delay 
 
-def set_Emergency_calculation():
+def set_Emergency_variation():
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
 
@@ -602,10 +604,18 @@ def set_Comparison_sheet():
 
 
 def configure_final_file():
+    constants.get_all_sorted_DSCP()
+
+    # Raw data area
     set_pkt_loss()
     set_fist_pkt_delay()
-    set_caculation_section()
-    set_Emergency_calculation()
+
+    # Calculations area for each dscp 
+    set_caculation_section(-1)             #All Flows
+    for dscp in constants.All_DSCP:        #Each DSCP
+        set_caculation_section(dscp)
+
+    set_Emergency_variation()
     set_Comparison_sheet()
 
 
