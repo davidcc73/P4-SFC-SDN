@@ -206,7 +206,12 @@ def write_INT_results_switchID(sheet, switch_data, dscp):
     sheet[f'C{last_line + constants.num_switches + 1 + 1}'] = switch_data[dscp]["Byte Mean"]
     sheet[f'C{last_line + constants.num_switches + 1 + 2}'] = switch_data[dscp]["Byte Standard Deviation"]
 
-def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency):
+def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, dscp):
+    if dscp == -1:
+        aux_dscp = "All Flows"
+    else:
+        aux_dscp = dscp
+
     # Write the results in the sheet
     last_line = sheet.max_row + 1
 
@@ -225,6 +230,11 @@ def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_laten
     sheet[f'B{last_line + 1}'] = STD_flows_latency
     sheet[f'B{last_line + 2}'] = AVG_hop_latency
     sheet[f'B{last_line + 3}'] = STD_hop_latency
+
+    sheet[f'C{last_line + 0}'] = aux_dscp
+    sheet[f'C{last_line + 1}'] = aux_dscp
+    sheet[f'C{last_line + 2}'] = aux_dscp
+    sheet[f'C{last_line + 3}'] = aux_dscp
 
 
 def set_pkt_loss():
@@ -319,9 +329,11 @@ def set_caculation_formulas(dscp):
     if dscp == -1:
         title = "Calculations For All Flows"
         condition = "\">0\""
+        aux_dscp = "All Flows"
     else:
         title = f"Calculations For Flows with DSCP = {dscp}"
         condition = dscp
+        aux_dscp = dscp
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
 
@@ -341,6 +353,7 @@ def set_caculation_formulas(dscp):
         sheet[f'A{last_line + 5}'] = "AVG Flow Jitter (nanoseconds)"
         sheet[f'A{last_line + 6}'] = "STD Flow Jitter (nanoseconds)"
         sheet[f'B{last_line}'] = "Values"
+        sheet[f'C{last_line}'] = "DSCP"
 
         sheet[f'A{last_line}'].font = Font(bold=True)
         sheet[f'A{last_line + 1}'].font = Font(bold=True)
@@ -350,6 +363,7 @@ def set_caculation_formulas(dscp):
         sheet[f'A{last_line + 5}'].font = Font(bold=True)
         sheet[f'A{last_line + 6}'].font = Font(bold=True)
         sheet[f'B{last_line}'].font = Font(bold=True)
+        sheet[f'C{last_line}'].font = Font(bold=True)
 
         # on the next line for each column, set the average of the column, ignore empty cells
         sheet[f'B{last_line + 1}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, J1:J{constants.last_line_data}), 2)'
@@ -359,6 +373,12 @@ def set_caculation_formulas(dscp):
         sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[dscp]["std_jitter"]       #array formuals are not working, so we calculated and set the value here
 
+        sheet[f'C{last_line + 1}'] = aux_dscp
+        sheet[f'C{last_line + 2}'] = aux_dscp
+        sheet[f'C{last_line + 3}'] = aux_dscp
+        sheet[f'C{last_line + 4}'] = aux_dscp
+        sheet[f'C{last_line + 5}'] = aux_dscp
+        sheet[f'C{last_line + 6}'] = aux_dscp
 
     # Save the workbook
     workbook.save(constants.final_file_path)
@@ -448,7 +468,7 @@ def set_INT_results(dscp):
         switch_data = calculate_percentages(start, end, switch_data, dscp, dscp_condition)
         switch_data = get_mean_standard_deviation(switch_data, dscp)
 
-        write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency)
+        write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency, dscp)
         write_INT_results_switchID(sheet, switch_data, dscp)
 
         # Save the workbook
@@ -487,7 +507,7 @@ def get_flow_delays(start, end):
 
     return avg_emergency_flows_delay, avg_non_emergency_flows_delay 
 
-def set_Emergency_variation():
+def set_compare_non_Emergency_to_Emergency_variation():
     # Configure each sheet
     workbook = load_workbook(constants.final_file_path)
 
@@ -497,6 +517,10 @@ def set_Emergency_variation():
             break
 
         sheet = workbook[sheet]
+        sheet.append([""])
+        sheet.append([""])
+        sheet.append([""])
+        sheet.append([""])
 
         # Set new headers
         max_line = sheet.max_row
@@ -515,10 +539,6 @@ def set_Emergency_variation():
         sheet[f'A{max_line + 3}'].font = Font(bold=True)
         sheet[f'A{max_line + 4}'].font = Font(bold=True)
 
-        #print(f"Processing sheet {sheet}")
-        #print(f"arg.f: {constants.args.f}")
-        #get the index of the constants.args.f which the name starts with the current sheet name
-        #print(f"Index: {i}")
         start = constants.args.start[i]
         end = constants.args.end[i]
 
@@ -528,11 +548,11 @@ def set_Emergency_variation():
         row_range = constants.last_line_data
 
         # Set the formula for the Non-Emergency Flows
-        sheet[f'B{max_line + 3}'] = f'=SUMIF(E1:E{row_range}, "<40" , O1:O{row_range})'  
+        sheet[f'B{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, "<40" , O1:O{row_range}), 2'  
         sheet[f'B{max_line + 4}'] = avg_non_emergency_flows_delay
 
         # Set the formula for the Emergency Flows
-        sheet[f'C{max_line + 3}'] = f'=SUMIF(E1:E{row_range}, ">=40", O1:O{row_range})'
+        sheet[f'C{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, ">=40", O1:O{row_range}), 2'
         sheet[f'C{max_line + 4}'] = avg_emergency_flows_delay
 
         #Set comparasion formulas, for the AVG 1º Packet Delay and AVG Flow Delay in percentage
@@ -609,7 +629,7 @@ def configure_final_file():
     for dscp in constants.All_DSCP:        #Each DSCP
         set_caculation_section(dscp)
 
-    set_Emergency_variation()
+    set_compare_non_Emergency_to_Emergency_variation()
     set_Comparison_sheet()
 
 
