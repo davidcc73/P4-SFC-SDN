@@ -62,28 +62,10 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
 
     return line, col
 
-def get_byte_sum(start, end):
+def get_byte_sum(start, end, dscp, dscp_condition):
     # Initialize the result dictionary to store total byte counts per switch ID
     sum = {}
-    switch_ids = []
-
-    #--------------Query to get unique switch_id values if it is a tag
-    # This approche did not take into account the existing but unused switches
-    #query = f'''
-    #        SHOW TAG VALUES 
-    #        FROM "switch_stats"  
-    #        WITH KEY = "switch_id"
-    #        WHERE time >= '{start}' AND time <= '{end}' 
-    #    '''
-    #tmp = constants.apply_query(query)  
-
-    # Extract the switch_id values into a list
-    #for row in tmp.raw["series"][0]["values"]:
-    #    switch_ids.append(int(row[1]))
-
     switch_ids = list(range(1, constants.num_switches + 1))
-
-    #pprint(switch_ids)
 
     # Loop through each unique switch ID
     for switch_id in switch_ids:
@@ -93,28 +75,32 @@ def get_byte_sum(start, end):
             FROM flow_stats 
             WHERE time >= '{start}' AND time <= '{end}' 
             AND path =~ /(^|-)({switch_id})(-|$|\b)/
+            {dscp_condition}
         """
 
         result = constants.apply_query(query)  # Assume this returns a dictionary with 'total_count'
         
-        # Add the result to the sum dictionary under the switch_id key
-        #print(f"Switch ID: {switch_id}")
-        #print(result.raw)
-        sum[switch_id] = {}
-        if not result.raw["series"]:
-            sum[switch_id]["Byte Sums"] = 0
+        # Add the result to the sum dictionary under the switch_id key and dscp key
+        if dscp not in sum:
+            sum[dscp] = {}
+        if switch_id not in sum[dscp]:
+            sum[dscp][switch_id] = {}
+        
+        if not result.raw["series"]:            #if there is no data, set to 0
+            sum[dscp][switch_id]["Byte Sums"] = 0
         else:
-            sum[switch_id]["Byte Sums"] = result.raw["series"][0]["values"][0][1]
-    #pprint(sum)
+            sum[dscp][switch_id]["Byte Sums"] = result.raw["series"][0]["values"][0][1]
 
     return sum
 
-def calculate_percentages(start, end, switch_data):
+def calculate_percentages(start, end, switch_data, dscp, dscp_condition):
     # Get the total count of packets
     query = f"""
         SELECT COUNT("latency") AS total_count
         FROM flow_stats
-        WHERE time >= '{start}' AND time <= '{end}'
+        WHERE time >= '{start}' 
+        AND time <= '{end}'
+        {dscp_condition}
     """
     result = constants.apply_query(query)
     total_count = result.raw["series"][0]["values"][0][1]  # Extract total_count from the result
@@ -123,35 +109,36 @@ def calculate_percentages(start, end, switch_data):
     query = f"""
         SELECT COUNT("latency") AS switch_count
         FROM switch_stats
-        WHERE time >= '{start}' AND time <= '{end}'
+        WHERE time >= '{start}'
+        AND time <= '{end}'
+        {dscp_condition}
         GROUP BY switch_id
     """
     result = constants.apply_query(query)
     
     # Calculate the percentage of packets that went to each switch
-    # initialize to all switches as 0, so unused switches are takrn into account too
+    # initialize to all switches as 0, so unused switches are taken into account too
     for switch_id in range(1, constants.num_switches + 1):
-        switch_data[switch_id]["Percentage Pkt"] = 0
+        switch_data[dscp][switch_id]["Percentage Pkt"] = 0
 
     for row in result.raw["series"]:
         #tuple pair: id, count
         switch_id = int(row["tags"]["switch_id"])
         switch_count = int(row["values"][0][1])
-        switch_data[switch_id]["Percentage Pkt"] = round((switch_count / total_count) * 100, 2)
+        switch_data[dscp][switch_id]["Percentage Pkt"] = round((switch_count / total_count) * 100, 2)
 
     #pprint(switch_data)
     return switch_data
 
-def get_mean_standard_deviation(switch_data):
-    #pprint(switch_data)
+def get_mean_standard_deviation(switch_data, dscp):
     sum_percentage = 0
     sum_byte = 0
     count = 0
 
     # Get the mean of the (Byte Sums) and (Percentage Pkt) for all switches in switch_data
-    for switch_id in switch_data:
-        sum_percentage += switch_data[switch_id]["Percentage Pkt"]
-        sum_byte += switch_data[switch_id]["Byte Sums"]
+    for switch_id in switch_data[dscp]:
+        sum_percentage += switch_data[dscp][switch_id]["Percentage Pkt"]
+        sum_byte       += switch_data[dscp][switch_id]["Byte Sums"]
         count += 1
 
     percentage_mean = sum_percentage / count
@@ -162,22 +149,19 @@ def get_mean_standard_deviation(switch_data):
     sum_squared_diff_percentage = 0
     sum_squared_diff_byte = 0
     
-    for switch_id in switch_data:
-        current_percentage = switch_data[switch_id]["Percentage Pkt"]
-        current_byte = switch_data[switch_id]["Byte Sums"]
+    for switch_id in switch_data[dscp]:
+        current_percentage = switch_data[dscp][switch_id]["Percentage Pkt"]
+        current_byte       = switch_data[dscp][switch_id]["Byte Sums"]
         sum_squared_diff_percentage += (current_percentage - percentage_mean) ** 2
-        sum_squared_diff_byte += (current_byte - byte_mean) ** 2
+        sum_squared_diff_byte       += (current_byte - byte_mean) ** 2
     
     percentage_std_dev = sqrt(sum_squared_diff_percentage / count).real
     byte_std_dev = sqrt(sum_squared_diff_byte / count).real
-
-    #print("percentage_std_dev: ", percentage_std_dev)
-    #print("byte_std_dev: ", percentage_std_dev)
     
-    switch_data["Percentage Mean"] = round(percentage_mean, 2)
-    switch_data["Byte Mean"] = round(byte_mean, 2)
-    switch_data["Percentage Standard Deviation"] = round(percentage_std_dev, 2)
-    switch_data["Byte Standard Deviation"] = round(byte_std_dev, 2)
+    switch_data[dscp]["Percentage Mean"]               = round(percentage_mean, 2)
+    switch_data[dscp]["Byte Mean"]                     = round(byte_mean, 2)
+    switch_data[dscp]["Percentage Standard Deviation"] = round(percentage_std_dev, 2)
+    switch_data[dscp]["Byte Standard Deviation"]       = round(byte_std_dev, 2)
 
     return switch_data
 
@@ -201,28 +185,26 @@ def write_INT_results_switchID(sheet, switch_data, dscp):
 
 
     # Write percentages and total bytes processed, cycle through keys that are numbers
-    #pprint.pprint(switch_data)
-    for i, key in enumerate(switch_data.keys()):
-        if isinstance(key, int):                #skip sets that are non-switch_id
-            sheet[f'A{last_line + 6 + i}'] = key
+    for i, switch_id in enumerate(switch_data[dscp].keys()):
+        if isinstance(switch_id, int):                #skip sets that are non-switch_id
+            sheet[f'A{last_line + 6 + i}'] = switch_id
             
             #percentage of total packets that went to each switch
-            sheet[f'B{last_line + 6 + i}'] = switch_data[key]["Percentage Pkt"]
+            sheet[f'B{last_line + 6 + i}'] = switch_data[dscp][switch_id]["Percentage Pkt"]
             
             #Sum of processed bytes
-            sheet[f'C{last_line + 6 + i}'] = switch_data[key]["Byte Sums"]
+            sheet[f'C{last_line + 6 + i}'] = switch_data[dscp][switch_id]["Byte Sums"]
 
     # Write the mean and standard deviation of the percentages and bytes
-    
     sheet[f'A{last_line + constants.num_switches + 5 + 1}'] = "Mean"
     sheet[f'A{last_line + constants.num_switches + 5 + 2}'] = "Standard Deviation"
     sheet[f'A{last_line + constants.num_switches + 5 + 1}'].font = Font(bold=True)
     sheet[f'A{last_line + constants.num_switches + 5 + 2}'].font = Font(bold=True)
 
-    sheet[f'B{last_line + constants.num_switches + 5 + 1}'] = switch_data["Percentage Mean"]
-    sheet[f'B{last_line + constants.num_switches + 5 + 2}'] = switch_data["Percentage Standard Deviation"]
-    sheet[f'C{last_line + constants.num_switches + 5 + 1}'] = switch_data["Byte Mean"]
-    sheet[f'C{last_line + constants.num_switches + 5 + 2}'] = switch_data["Byte Standard Deviation"]
+    sheet[f'B{last_line + constants.num_switches + 5 + 1}'] = switch_data[dscp]["Percentage Mean"]
+    sheet[f'B{last_line + constants.num_switches + 5 + 2}'] = switch_data[dscp]["Percentage Standard Deviation"]
+    sheet[f'C{last_line + constants.num_switches + 5 + 1}'] = switch_data[dscp]["Byte Mean"]
+    sheet[f'C{last_line + constants.num_switches + 5 + 2}'] = switch_data[dscp]["Byte Standard Deviation"]
 
 def write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency):
     # Write the results in the sheet
@@ -381,6 +363,58 @@ def set_caculation_formulas(dscp):
     # Save the workbook
     workbook.save(constants.final_file_path)
 
+def get_avg_stdev_flow_hop_latency(start, end, dscp_condition):
+    ############################################ Get the results from the DB
+    # We need AVG Latency of ALL flows combined (NOT distinguishing between flows)
+    # Query to get the 95th percentile latency value, to exclude outliers
+    percentile_query = f"""
+        SELECT PERCENTILE("latency", 95) AS p_latency
+        FROM flow_stats
+        WHERE time >= '{start}'
+        AND time <= '{end}'
+        {dscp_condition}
+    """
+
+    percentile_result = constants.apply_query(percentile_query)
+    p_latency = list(percentile_result.get_points())[0]['p_latency']                #nanoseconds
+
+    query = f"""
+                SELECT MEAN("latency"), STDDEV("latency")
+                FROM  flow_stats
+                WHERE time >= '{start}'
+                AND time <= '{end}'
+                AND "latency" <= {p_latency}
+                {dscp_condition}
+            """
+    result = constants.apply_query(query)
+    AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)           #nanoseconds
+    STD_flows_latency = round(result.raw["series"][0]["values"][0][2], 2)
+
+    ###########################################
+    # We need AVG Latency for processing of ALL packets (NOT distinguishing between switches/flows) 
+    # Query to get the 95th percentile latency value, to exclude outliers
+    percentile_query = f"""
+        SELECT PERCENTILE("latency", 95) AS p_latency
+        FROM switch_stats
+        WHERE time >= '{start}'
+        AND time <= '{end}'
+        {dscp_condition}
+    """
+    
+    query = f"""
+                SELECT MEAN("latency"), STDDEV("latency")
+                FROM  switch_stats
+                WHERE time >= '{start}'
+                AND time <= '{end}'
+                AND "latency" <= {p_latency}
+                {dscp_condition}
+            """
+    result = constants.apply_query(query)
+    AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)             #nanoseconds
+    STD_hop_latency = round(result.raw["series"][0]["values"][0][2], 2)         
+
+    return AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency
+
 def set_INT_results(dscp):
     # For each sheet and respectice file, see the time interval given, get the values from the DB, and set the values in the sheet
     
@@ -406,53 +440,13 @@ def set_INT_results(dscp):
         start = constants.args.start[i]
         end = constants.args.end[i]
 
-        ############################################ Get the results from the DB
-        # We need AVG Latency of ALL flows combined (NOT distinguishing between flows)
-        # Query to get the 95th percentile latency value, to exclude outliers
-        percentile_query = f"""
-            SELECT PERCENTILE("latency", 95) AS p_latency
-            FROM flow_stats
-            WHERE time >= '{start}' AND time <= '{end}' {dscp_condition}
-        """
-
-        percentile_result = constants.apply_query(percentile_query)
-        p_latency = list(percentile_result.get_points())[0]['p_latency']                #nanoseconds
-
-        query = f"""
-                    SELECT MEAN("latency"), STDDEV("latency")
-                    FROM  flow_stats
-                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
-                """
-        result = constants.apply_query(query)
-        AVG_flows_latency = round(result.raw["series"][0]["values"][0][1], 2)           #nanoseconds
-        STD_flows_latency = round(result.raw["series"][0]["values"][0][2], 2)
-
-        ###########################################
-        # We need AVG Latency for processing of ALL packets (NOT distinguishing between switches/flows) 
-        # Query to get the 95th percentile latency value, to exclude outliers
-        percentile_query = f"""
-            SELECT PERCENTILE("latency", 95) AS p_latency
-            FROM switch_stats
-            WHERE time >= '{start}' AND time <= '{end}'  {dscp_condition}
-        """
-        
-        query = f"""
-                    SELECT MEAN("latency"), STDDEV("latency")
-                    FROM  switch_stats
-                    WHERE time >= '{start}' AND time <= '{end}' AND "latency" <= {p_latency}  {dscp_condition}
-                """
-        result = constants.apply_query(query)
-        AVG_hop_latency = round(result.raw["series"][0]["values"][0][1], 2)             #nanoseconds
-        STD_hop_latency = round(result.raw["series"][0]["values"][0][2], 2)         
+        #get the flow and hop latency, for the given dscp, that includes all flows and switches
+        AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency = get_avg_stdev_flow_hop_latency(start, end, dscp_condition)
 
         # % of packets that went to each individual switch (switch_id)
-        switch_data = get_byte_sum(start, end)
-        switch_data = calculate_percentages(start, end, switch_data)
-        switch_data = get_mean_standard_deviation(switch_data)
-
-        #pprint("AVG_flows_latency: ", AVG_flows_latency)
-        #pprint("AVG_hop_latency: ", AVG_hop_latency)
-        #pprint("switch_data: ", switch_data)
+        switch_data = get_byte_sum(start, end, dscp, dscp_condition)
+        switch_data = calculate_percentages(start, end, switch_data, dscp, dscp_condition)
+        switch_data = get_mean_standard_deviation(switch_data, dscp)
 
         write_INT_results(sheet, AVG_flows_latency, STD_flows_latency, AVG_hop_latency, STD_hop_latency)
         write_INT_results_switchID(sheet, switch_data, dscp)
