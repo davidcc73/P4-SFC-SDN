@@ -89,7 +89,7 @@ def calulate_std_jitter_per_dscp():
     for iteration, iteration_values in results.items():
         for flow, flow_values in iteration_values.items():
             dscp = flow_values["DSCP"]
-            current_avg_jitter = flow_values["receiver"]["extra"][2]["avg_jitter"]      #get avg_jitter of current jitter
+            current_avg_jitter = flow_values["receiver"]["extra"]["avg_jitter"]      #get avg_jitter of current jitter
 
             if dscp not in aux_calculated_results:
                 aux_calculated_results[dscp] = {}

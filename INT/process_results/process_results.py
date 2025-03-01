@@ -101,7 +101,10 @@ def read_raw_results(row):
         extra2 = {"out_of_order_pkt": out_of_order_packets}
         extra3 = {"avg_jitter": avg_jitter}
 
-        values_end_points["extra"] = [extra1, extra2, extra3]
+        values_end_points["extra"] = {}
+        values_end_points["extra"].update(extra1)
+        values_end_points["extra"].update(extra2)
+        values_end_points["extra"].update(extra3)
 
     not_needed_anymore, pkt_size = get_pkt_size_dscp(flow)            #Get the flows info
     values_flow = {Is: values_end_points, "DSCP": dscp, "Packet Size": pkt_size}
@@ -125,9 +128,9 @@ def read_raw_results(row):
                 constants.results[iteration][flow][Is]["time"]    = (constants.results[iteration][flow][Is]["time"]    * old_number_hosts + values_end_points["time"]   ) / (old_number_hosts + 1)
                 constants.results[iteration][flow][Is]["num_pkt"] = (constants.results[iteration][flow][Is]["num_pkt"] * old_number_hosts + values_end_points["num_pkt"]) / (old_number_hosts + 1)
 
-                constants.results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] = (constants.results[iteration][flow][Is]["extra"][0]["num_out_of_order_pkt"] * old_number_hosts + number_out_of_order_packets) / (old_number_hosts + 1)
-                constants.results[iteration][flow][Is]["extra"][1]["out_of_order_pkt"]    += out_of_order_packets
-                constants.results[iteration][flow][Is]["extra"][2]["avg_jitter"]           = (constants.results[iteration][flow][Is]["extra"][2]["avg_jitter"] * old_number_hosts + avg_jitter) / (old_number_hosts + 1)
+                constants.results[iteration][flow][Is]["extra"]["num_out_of_order_pkt"] = (constants.results[iteration][flow][Is]["extra"]["num_out_of_order_pkt"] * old_number_hosts + number_out_of_order_packets) / (old_number_hosts + 1)
+                constants.results[iteration][flow][Is]["extra"]["out_of_order_pkt"]    += out_of_order_packets
+                constants.results[iteration][flow][Is]["extra"]["avg_jitter"]           = (constants.results[iteration][flow][Is]["extra"]["avg_jitter"] * old_number_hosts + avg_jitter) / (old_number_hosts + 1)
 
                 constants.results[iteration][flow][Is]["num_hosts"] = old_number_hosts + 1
 

@@ -9,8 +9,9 @@ def extract_Is_values(line, iteration, flow, Is):
     # Is values, all in the current line
     for key, Is_value in constants.results[iteration][flow][Is].items():
         if key == "extra":
-            for extra in Is_value:
-                line = line + list(extra.values())
+            for key, value in Is_value.items():
+                print(f"Key: {key}, Value: {value}")
+                line = line + [value]
         else:
             if key == "num_hosts":          #skip the num_hosts for final file
                 continue
