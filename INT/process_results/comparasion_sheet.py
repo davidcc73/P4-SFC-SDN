@@ -84,8 +84,6 @@ def set_algorithm_headers(sheet, start_line):
     sheet[f'A{start_line + 12}'] = constants.headers_lines[11]
     sheet[f'A{start_line + 13}'] = constants.headers_lines[12]
     sheet[f'A{start_line + 14}'] = constants.headers_lines[13]
-    sheet[f'A{start_line + 15}'] = constants.headers_lines[14]
-    sheet[f'A{start_line + 16}'] = constants.headers_lines[15]
 
 
     # Set lines names in bold text
@@ -103,12 +101,10 @@ def set_algorithm_headers(sheet, start_line):
     sheet[f'A{start_line + 12}'].font = Font(bold=True)
     sheet[f'A{start_line + 13}'].font = Font(bold=True)
     sheet[f'A{start_line + 14}'].font = Font(bold=True)
-    sheet[f'A{start_line + 15}'].font = Font(bold=True)
-    sheet[f'A{start_line + 16}'].font = Font(bold=True)
 
 def set_comparasion_formulas(sheet, start_line):
     # Set the formulas to compare the results between the test cases
-    for i in range(1, constants.num_values_to_compare_all_tests + 1):
+    for i in range(1, constants.num_values_to_compare_all_tests + 1 - 2):
         #print(sheet[f'A{start_line + i}'].value)
         sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
 
@@ -116,7 +112,7 @@ def set_copied_values(sheet, start_line, dscp):
     print("Seting values copy from other sheets")
     
     # Cycle through the variables to compare (lines)
-    for variable_number in range(constants.num_values_to_compare_all_tests):
+    for variable_number in range(constants.num_values_to_compare_all_tests - 2):
         
         # Cycle through the args.f to copy the values (columns)
         for i in range(len(constants.args.f)):
@@ -165,6 +161,42 @@ def comparasion_area(sheet, start_line, dscp):
     set_copied_values(sheet, start_line, dscp)
     sheet.append([""])
 
+def set_Non_to_Emergency_Data_Flows_Comparasion(sheet, start_line):
+    sheet[f'A{start_line}'] = "For All Data Flows"
+    sheet[f'A{start_line + 1}'] = constants.headers_lines[-2]
+    sheet[f'A{start_line + 2}'] = constants.headers_lines[-1]
+
+    sheet[f'A{start_line}'].font = Font(bold=True)
+    sheet[f'A{start_line + 1}'].font = Font(bold=True)
+    sheet[f'A{start_line + 2}'].font = Font(bold=True)
+
+    for i in range(len(constants.args.f)):
+        sheet_to_copy_from_name = constants.args.f[i].split("_")[0]
+
+        line1, column1 = get_line_column_to_copy_from(sheet_to_copy_from_name, 14, -1)
+        line2, column2 = get_line_column_to_copy_from(sheet_to_copy_from_name, 15, -1)
+
+        if line1 is None or column1 is None:
+            print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {14}")
+            continue
+        if line2 is None or column2 is None:
+            print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {15}")
+            continue
+
+        cell_reference1 = f"{column1}{line1}"
+        formula1 = f"='{sheet_to_copy_from_name}'!{cell_reference1}"
+        
+        cell_reference2 = f"{column2}{line2}"
+        formula2 = f"='{sheet_to_copy_from_name}'!{cell_reference2}"
+
+        sheet[f'{get_column_letter(2 + i)}{start_line + 1}'] = formula1
+        sheet[f'{get_column_letter(2 + i)}{start_line + 2}'] = formula2
+
+    #Comparasions
+    sheet[f'D{start_line + 1}'] = f'=IFERROR(ROUND((C{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
+    sheet[f'D{start_line + 2}'] = f'=IFERROR(ROUND((C{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
+
+
 def set_Comparison_sheet():
     print("Setting the Comparison sheet")
 
@@ -198,6 +230,7 @@ def set_Comparison_sheet():
         sheet.append([""])
     
     # Set (Non) to Emergency Data Flows
+    set_Non_to_Emergency_Data_Flows_Comparasion(sheet, sheet.max_row + 1)
 
     # Save the workbook
     workbook.save(constants.final_file_path)
