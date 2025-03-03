@@ -63,21 +63,6 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
 
 def set_algorithm_headers(sheet, test_case, start_line):
 
-    # Set test case name in bold test
-    title = f"{test_case}"
-    sheet[f'A{start_line}'] = title
-    sheet[f'A{start_line}'].font = Font(bold=True)
-
-    # Set the collumn names
-    sheet[f'B{start_line}'] = constants.algorithms[0]
-    sheet[f'C{start_line}'] = constants.algorithms[1]
-    sheet[f'D{start_line}'] = "Variation (%)"
-
-    # Set collumn names in bold text
-    sheet[f'B{start_line}'].font = Font(bold=True)
-    sheet[f'C{start_line}'].font = Font(bold=True)
-    sheet[f'D{start_line}'].font = Font(bold=True)
-
     # Set the lines names
     sheet[f'A{start_line + 1}'] = constants.headers_lines[0]
     sheet[f'A{start_line + 2}'] = constants.headers_lines[1]
@@ -143,6 +128,22 @@ def set_copied_values(sheet, test_case, start_line):
             formula = f"='{sheet_to_copy_from_name}'!{cell_reference}"
             sheet[f'{get_column_letter(2 + i)}{start_line + variable_number + 1}'] = formula
 
+def set_scenario_headers(sheet, test_case, start_line):
+    # Set test case name in bold test
+        title = f"{test_case}"
+        sheet[f'A{start_line}'] = title
+        sheet[f'A{start_line}'].font = Font(bold=True)
+
+        # Set the collumn names
+        sheet[f'B{start_line}'] = constants.algorithms[0]
+        sheet[f'C{start_line}'] = constants.algorithms[1]
+        sheet[f'D{start_line}'] = "Variation (%)"
+
+        # Set collumn names in bold text
+        sheet[f'B{start_line}'].font = Font(bold=True)
+        sheet[f'C{start_line}'].font = Font(bold=True)
+        sheet[f'D{start_line}'].font = Font(bold=True)
+
 def set_Comparison_sheet():
     print("Setting the Comparison sheet")
 
@@ -153,7 +154,6 @@ def set_Comparison_sheet():
     title = "Load Test Cases"
     sheet[f'A1'] = title
     sheet[f'A1'].font = Font(bold=True)
-
     sheet[f'A2'] = f"Variation: From {constants.algorithms[0]} to {constants.algorithms[1]}"
 
     # Empty line
@@ -162,11 +162,22 @@ def set_Comparison_sheet():
     # Create a block for each test case
     for test_case in constants.test_cases:
         # Get max line considering the previous test cases
-        max_line = sheet.max_row + 1
+        max_line = sheet.max_row + 2
+        set_scenario_headers(sheet, test_case, max_line)
 
-        set_algorithm_headers(sheet, test_case, max_line)
-        set_comparasion_formulas(sheet, max_line)
-        set_copied_values(sheet, test_case, max_line)
+        for dscp in constants.All_DSCP:
+            max_line = sheet.max_row + 1
+
+            #as bold text
+            sheet[f'A{max_line}'] = f"DSCP: {dscp}"
+            sheet[f'A{max_line}'].font = Font(bold=True)
+
+            max_line = sheet.max_row
+
+            set_algorithm_headers(sheet, test_case, max_line)
+            set_comparasion_formulas(sheet, max_line)
+            set_copied_values(sheet, test_case, max_line)
+            sheet.append([""])
 
         # Insert 2 empty lines
         sheet.append([""])
