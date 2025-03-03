@@ -1,7 +1,6 @@
 
 # Define the directory path
 import os
-import pprint
 
 from influxdb import InfluxDBClient
 import numpy as np

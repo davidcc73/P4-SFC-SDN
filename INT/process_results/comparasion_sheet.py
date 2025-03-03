@@ -6,7 +6,7 @@ from openpyxl.styles import Font
 
 
 
-def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
+def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number, dscp):
     line =None
     col = None
 
@@ -20,12 +20,18 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
         pass_1_occurance = False 
 
     # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
-    for row in sheet_to_copy_from.iter_rows(min_row=1, max_row=sheet_to_copy_from.max_row, min_col=1, max_col=1):
+    for row in sheet_to_copy_from.iter_rows(min_row=constants.last_line_data + 1, max_row = sheet_to_copy_from.max_row, min_col=1, max_col=1):
         
+        cell_e = sheet_to_copy_from[f"E{row[0].row}"]
+        value = str(cell_e.value).strip()
+
+        if value != str(dscp):  # Check if Wrong DSCP
+            continue      
+
         if pass_1_occurance == False and row[0].value == "AVG 1º Packet Delay (nanoseconds)":
             pass_1_occurance = True
             continue
-        
+
         if variable_number <= 9:
             if row[0].value == variable_name:
                 # Get the next collumn letter of the cell that contains the variable_name
@@ -61,7 +67,7 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number):
 
     return line, col
 
-def set_algorithm_headers(sheet, test_case, start_line):
+def set_algorithm_headers(sheet, start_line):
 
     # Set the lines names
     sheet[f'A{start_line + 1}'] = constants.headers_lines[0]
@@ -106,7 +112,7 @@ def set_comparasion_formulas(sheet, start_line):
         #print(sheet[f'A{start_line + i}'].value)
         sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
 
-def set_copied_values(sheet, test_case, start_line):    
+def set_copied_values(sheet, start_line, dscp):    
     print("Seting values copy from other sheets")
     
     # Cycle through the variables to compare (lines)
@@ -118,7 +124,7 @@ def set_copied_values(sheet, test_case, start_line):
             #--------------Collumn C is the second algorithm
             #parse 1st element pre _ in args.f
             sheet_to_copy_from_name = constants.args.f[i].split("_")[0]
-            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number)
+            line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number, dscp)
 
             if line is None or column is None:
                 print(f"Error getting line and column to copy from, sheet_to_copy_from: {sheet_to_copy_from_name}, variable number: {variable_number}")
@@ -144,6 +150,21 @@ def set_scenario_headers(sheet, test_case, start_line):
         sheet[f'C{start_line}'].font = Font(bold=True)
         sheet[f'D{start_line}'].font = Font(bold=True)
 
+def comparasion_area(sheet, start_line, dscp):
+    #as bold text
+    if dscp == -1:
+        sheet[f'A{start_line}'] = "All DSCP: All Data Flows"
+    else:
+        sheet[f'A{start_line}'] = f"DSCP: {dscp}"
+    sheet[f'A{start_line}'].font = Font(bold=True)
+
+    start_line= start_line + 1
+
+    set_algorithm_headers(sheet, start_line)
+    set_comparasion_formulas(sheet, start_line)
+    set_copied_values(sheet, start_line, dscp)
+    sheet.append([""])
+
 def set_Comparison_sheet():
     print("Setting the Comparison sheet")
 
@@ -164,24 +185,19 @@ def set_Comparison_sheet():
         # Get max line considering the previous test cases
         max_line = sheet.max_row + 2
         set_scenario_headers(sheet, test_case, max_line)
+        max_line = sheet.max_row + 1
+        comparasion_area(sheet, max_line, -1)
 
         for dscp in constants.All_DSCP:
             max_line = sheet.max_row + 1
 
-            #as bold text
-            sheet[f'A{max_line}'] = f"DSCP: {dscp}"
-            sheet[f'A{max_line}'].font = Font(bold=True)
-
-            max_line = sheet.max_row
-
-            set_algorithm_headers(sheet, test_case, max_line)
-            set_comparasion_formulas(sheet, max_line)
-            set_copied_values(sheet, test_case, max_line)
-            sheet.append([""])
+            comparasion_area(sheet, max_line, dscp)
 
         # Insert 2 empty lines
         sheet.append([""])
         sheet.append([""])
+    
+    # Set (Non) to Emergency Data Flows
 
     # Save the workbook
     workbook.save(constants.final_file_path)
