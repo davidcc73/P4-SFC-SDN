@@ -78,11 +78,13 @@ def get_all_sorted_DSCP():
     
     All_DSCP = sorted(All_DSCP)  
 
-def calulate_std_jitter_per_dscp():
+def calulate_std_jitter_per_dscp(current_filename):
     global aux_calculated_results, results
+    scenario_algorithms = current_filename.split("_")[0]
 
-    aux_calculated_results[-1] = {}                 #initialize the dictionary entry to store the avg_jitters for all DSCP
-    aux_calculated_results[-1]["avg_jitters"] = []
+    aux_calculated_results[scenario_algorithms] = {}
+    aux_calculated_results[scenario_algorithms][-1] = {}                 #initialize the dictionary entry to store the avg_jitters for all DSCP
+    aux_calculated_results[scenario_algorithms][-1]["avg_jitters"] = []
 
     # Group all the avg_jitters by DSCP
     for iteration, iteration_values in results.items():
@@ -90,18 +92,18 @@ def calulate_std_jitter_per_dscp():
             dscp = flow_values["DSCP"]
             current_avg_jitter = flow_values["receiver"]["extra"]["avg_jitter"]      #get avg_jitter of current jitter
 
-            if dscp not in aux_calculated_results:
-                aux_calculated_results[dscp] = {}
-                aux_calculated_results[dscp]["avg_jitters"] = []
+            if dscp not in aux_calculated_results[scenario_algorithms]:
+                aux_calculated_results[scenario_algorithms][dscp] = {}
+                aux_calculated_results[scenario_algorithms][dscp]["avg_jitters"] = []
             
-            aux_calculated_results[-1]["avg_jitters"].append(current_avg_jitter)
-            aux_calculated_results[dscp]["avg_jitters"].append(current_avg_jitter)
+            aux_calculated_results[scenario_algorithms][-1]["avg_jitters"].append(current_avg_jitter)
+            aux_calculated_results[scenario_algorithms][dscp]["avg_jitters"].append(current_avg_jitter)
 
     # Calculate the std of the avg_jitters
-    for dscp, dscp_values in aux_calculated_results.items():
+    for dscp, dscp_values in aux_calculated_results[scenario_algorithms].items():
         avg_jitters = dscp_values["avg_jitters"]
         
         # Calculate the std of the avg_jitters, 2 decimal places
         std_jitter = np.std(avg_jitters)
         std_jitter = round(std_jitter, 2)
-        aux_calculated_results[dscp]["std_jitter"] = std_jitter
+        aux_calculated_results[scenario_algorithms][dscp]["std_jitter"] = std_jitter

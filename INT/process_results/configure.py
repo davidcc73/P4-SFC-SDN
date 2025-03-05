@@ -282,8 +282,8 @@ def set_caculation_formulas(dscp):
     workbook = load_workbook(constants.final_file_path)
 
     # Set formula for each sheet
-    for sheet in workbook.sheetnames:
-        sheet = workbook[sheet]
+    for sheet_name in workbook.sheetnames:
+        sheet = workbook[sheet_name]
 
         #Pass the last line with data, and leave 2 empty lines
         last_line = sheet.max_row + 4
@@ -315,7 +315,7 @@ def set_caculation_formulas(dscp):
         sheet[f'B{last_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, N1:N{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 4}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, O1:O{constants.last_line_data}), 2)'
         sheet[f'B{last_line + 5}'] = f'=ROUND(AVERAGEIF(E1:E{constants.last_line_data}, {condition}, L1:L{constants.last_line_data}), 2)'
-        sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[dscp]["std_jitter"]       #array formuals are not working, so we calculated and set the value here
+        sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[sheet_name][dscp]["std_jitter"]       #array formuals are not working, so we calculated and set the value here
 
         sheet[f'E{last_line + 1}'] = dscp
         sheet[f'E{last_line + 2}'] = dscp
