@@ -1,23 +1,5 @@
 # table_add device table action criteria fields key_fields keys args_fields args
 
-#IPv4 Forwarding Unicast
-#Others
-#s1
-table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr" "00:00:00:00:10:01"
-table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "dstAddr" "00:00:00:00:10:01"
-#s4
-table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr" "00:00:00:00:40:01"
-#s5
-table_add device:s3 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr" "00:00:00:00:50:01"
-
-
-
-#L2 Forwarding (For some reason ONOS is failling to do this alone)
-#Mine
-#None
-
-
-
 #SFC Processing (refers to current node)
 table_add device:s3 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "3" "" ""
 

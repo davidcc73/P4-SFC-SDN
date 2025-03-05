@@ -334,13 +334,20 @@ Connect to ONOS CLI by doing `sudo make onos-cli` and run:
 
 ### Basic Configuration:
 ```bash
-# Push Table entries to each switch          
-source /config/sample_rules_hasfc/s1.txt 
-source /config/sample_rules_hasfc/s2.txt
-source /config/sample_rules_hasfc/s3.txt
-source /config/sample_rules_hasfc/s4.txt
-source /config/sample_rules_hasfc/s5.txt
+# Push IPv4 rules to each switch          
+source /config/IPv4/s1.txt 
+source /config/IPv4/s2.txt
+source /config/IPv4/s3.txt
+source /config/IPv4/s4.txt
+source /config/IPv4/s5.txt
 
+
+# Push SFC rules to each switch          
+source /config/SFC/s1.txt 
+source /config/SFC/s2.txt
+source /config/SFC/s3.txt
+source /config/SFC/s4.txt
+source /config/SFC/s5.txt
 
 # Push Mcast rules to each switch  
 source /config/rules_mcast/s1.txt 

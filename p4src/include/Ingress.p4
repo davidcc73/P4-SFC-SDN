@@ -262,7 +262,7 @@ control MyIngress(inout headers hdr,
         }
 
         //---------------------------------------------------------------------------Set if the current switch is a source for current packet
-         if(hdr.udp.isValid() || hdr.tcp.isValid()) {                                //just track higer level connections
+        if(hdr.udp.isValid() || hdr.tcp.isValid()) {                                //just track higer level connections
             process_int_set_source.apply(hdr, meta, standard_metadata);
         }
 
