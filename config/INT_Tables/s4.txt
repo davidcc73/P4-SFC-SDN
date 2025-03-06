@@ -5,7 +5,7 @@ table_set_default MyEgress.process_int_transit.tb_int_insert init_metadata 4
 //----------------------------------------------------SINK
 
 //set up process_int_set_sink (to which ports I am a sink node, my hosts)
-table_add MyIngress.process_int_set_sink.tb_set_sink int_set_sink 1 => 
+INT_table_add MyIngress.process_int_set_sink.tb_set_sink int_set_sink 1 => 
 
 
 
@@ -15,14 +15,14 @@ table_add MyIngress.process_int_set_sink.tb_set_sink int_set_sink 1 =>
 mirroring_add 100 100
 
 //INT report setup towards the INT collector, the key is a dummy values, the arg are values for the report (2 macs, 2 IPs, 1 dst port) the src ones are irrelevant
-table_add MyEgress.process_int_report.tb_generate_report do_report_encapsulation 0 => 00:00:00:00:30:01 00:00:00:00:00:05 10.0.4.10 10.0.30.1 1234
+INT_table_add MyEgress.process_int_report.tb_generate_report do_report_encapsulation 0 => 00:00:00:00:30:01 00:00:00:00:00:05 10.0.4.10 10.0.30.1 1234
 
 
 
 //----------------------------------------------------SOURCE
 
 //set up process_int_set_source (to which ports I am a source node)
-table_add MyIngress.process_int_set_source.tb_set_source int_set_source 1 => 
+INT_table_add MyIngress.process_int_set_source.tb_set_source int_set_source 1 => 
 
 
 
@@ -31,21 +31,21 @@ table_add MyIngress.process_int_set_source.tb_set_source int_set_source 1 =>
 
 //---------dst s1 subnet
 //port PostGreSQL 5432
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x1538&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x1538&&&0xFFFF => 11 10 0xF 0xF
 
 //port HTTPS 443
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x01BB&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x01BB&&&0xFFFF => 11 10 0xF 0xF
 
 //port HTTP 80
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x0050&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.1.0&&&0xFFFFFF00 0x00&&&0x00 0x0050&&&0xFFFF => 11 10 0xF 0xF
 
 
 //---------dst s5 subnet
 //port PostGreSQL 5432
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x1538&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x1538&&&0xFFFF => 11 10 0xF 0xF
 
 //port HTTPS 443
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x01BB&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x01BB&&&0xFFFF => 11 10 0xF 0xF
 
 //port HTTP 80
-table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x0050&&&0xFFFF => 11 10 0xF 0xF
+INT_table_add MyIngress.process_int_source.tb_int_source int_source 10.0.2.0&&&0xFFFFFF00 10.0.5.0&&&0xFFFFFF00 0x00&&&0x00 0x0050&&&0xFFFF => 11 10 0xF 0xF

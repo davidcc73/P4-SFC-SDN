@@ -68,7 +68,7 @@ public class INTSetRole extends AbstractShellCommand{
                         //print("Installing rule on device %s", uri);
                         result = app.insertDefaultTableRule(device.id(), pipeline, control, table, arg, action);
 
-                    } else if (parts[0].equals("table_add")) {
+                    } else if (parts[0].equals("INT_table_add")) {
                         tableParts = parts[1].split("\\.");
                         pipeline = tableParts[0];
                         control = tableParts[1];
