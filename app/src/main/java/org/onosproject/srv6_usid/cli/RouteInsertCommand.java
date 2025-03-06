@@ -71,6 +71,11 @@ public class RouteInsertCommand extends AbstractShellCommand {
         required = true, multiValued = false)
     String arg = null;
 
+    @Argument(index = 8, name = "priority",
+        description = "Priority of the rule, when multiple rules are matched [0-100] (100 max priority)",
+        required = true, multiValued = false)
+    Integer priority;
+
 
     @Override
     protected void doExecute() {
@@ -109,7 +114,7 @@ public class RouteInsertCommand extends AbstractShellCommand {
 
         // Execute command - replace this line with actual logic to interact with the device
         print("Installing rule on device %s", uri);
-        String res = app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args);
+        String res = app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args, priority);
 
         if(res != null){
             print("A problem occured\n");

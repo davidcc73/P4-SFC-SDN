@@ -1,14 +1,14 @@
-# table_add device table action criteria fields key_fields keys args_fields args
+# table_add device table action criteria fields key_fields keys args_fields args priority
 
 #SFC Processing (refers to current node)
-table_add device:s2 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "2" "" ""
+table_add device:s2 MyIngress.sf_processing MyIngress.sf_action EXACT "hdr.sfc_chain[0].sf" "2" "" "" 70
 
 
 #SFC Forwarding (Has SFC Header, but the current SFC value is not for us, ONE ENTRY PER POSSIBLE SFC VALUE)
-table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "1" "port" "1"
-table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "3" "port" "3"
-table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "4" "port" "2"
-table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "5" "port" "4"
+table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "1" "port" "1" 70
+table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "3" "port" "3" 70
+table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "4" "port" "2" 70
+table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_chain[0].sf" "5" "port" "4" 70
 
 
 #SFC Encapsulation 
@@ -17,10 +17,10 @@ table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_ch
 
 ################ FireWall
 #### mark node as FireWall
-table_add device:s2 MyIngress.is_it_firewall MyIngress.set_as_firewall EXACT "1" "1" "" ""
+table_add device:s2 MyIngress.is_it_firewall MyIngress.set_as_firewall EXACT "1" "1" "" "" 70
 
 #FireWall rules (Include all IPs of the exisiting hosts)
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "" ""
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "" ""
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "" ""
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "" ""
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "" "" 70

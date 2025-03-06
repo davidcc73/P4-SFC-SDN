@@ -31,6 +31,7 @@ import org.onosproject.net.config.NetworkConfigService;
 import org.onosproject.net.device.DeviceEvent;
 import org.onosproject.net.device.DeviceListener;
 import org.onosproject.net.device.DeviceService;
+import org.onosproject.net.flow.TableId;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.criteria.PiCriterion;
@@ -39,6 +40,7 @@ import org.onosproject.net.intf.InterfaceService;
 import org.onosproject.net.link.LinkEvent;
 import org.onosproject.net.link.LinkListener;
 import org.onosproject.net.link.LinkService;
+import org.onosproject.net.pi.model.PiTableId;
 import org.onosproject.net.pi.model.PiActionId;
 import org.onosproject.net.pi.model.PiActionParamId;
 import org.onosproject.net.pi.model.PiMatchFieldId;
@@ -46,6 +48,9 @@ import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiAction.Builder;
 import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.net.pi.runtime.PiTableAction;
+import org.onosproject.net.flow.DefaultFlowRule;
+import org.onosproject.net.flow.DefaultTrafficSelector;
+import org.onosproject.net.flow.DefaultTrafficTreatment;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -186,7 +191,7 @@ public class Ipv4RoutingComponent{
      */
     public String setConfigTables(DeviceId deviceId, String tableId, String action, String criteria, 
                                 String[] fields_keys, String[] keys, 
-                                String[] args_fields, String[] args) {
+                                String[] args_fields, String[] args, Integer priority) {
         PiCriterion match = null;        
         PiActionParam param = null;
         List<PiActionParam> actionParams = Lists.newArrayList();
@@ -262,12 +267,21 @@ public class Ipv4RoutingComponent{
             }
         }
 
-        builder = builder.withParameters(actionParams);    
+        builder = builder.withParameters(actionParams);
         PiTableAction tableAction = builder.build();
 
-
-        final FlowRule Rule = Utils.buildFlowRule(
-                deviceId, appId, tableId, match, tableAction);
+        //Manual FlowRule creation so we can set priority
+        final FlowRule Rule = DefaultFlowRule.builder()
+            .forDevice(deviceId)
+            .forTable(PiTableId.of(tableId))
+            .withSelector(DefaultTrafficSelector.builder().matchPi(match).build())
+            .withTreatment(DefaultTrafficTreatment.builder().piTableAction(tableAction).build())
+            .withPriority(priority)     // Set priority here
+            .fromApp(appId)
+            .makePermanent()            // Or use .makeTemporary(timeout) if needed
+            .build();
+        
+        //log.info("Rule: {}", Rule);
 
         flowRuleService.applyFlowRules(Rule);
         return null;
