@@ -26,15 +26,6 @@ source /config/IPv4/s3.txt
 source /config/IPv4/s4.txt
 source /config/IPv4/s5.txt
 
-
-# Push SFC rules to each switch          
-source /config/SFC/s1.txt 
-source /config/SFC/s2.txt
-source /config/SFC/s3.txt
-source /config/SFC/s4.txt
-source /config/SFC/s5.txt
-
-
 # Push Mcast rules to each switch  
 source /config/rules_mcast/s1.txt 
 source /config/rules_mcast/s2.txt
@@ -42,11 +33,25 @@ source /config/rules_mcast/s3.txt
 source /config/rules_mcast/s4.txt
 source /config/rules_mcast/s5.txt
 
-
 # Push INT rules to each switch
 INT_Role-set
 source /config/INT_Tables/INT_Transit_config.txt  
 
+
+#################### ONLY PUSH ONE SET OF RULES PER RUNTIME, EACH ONE IS A ROUTING METHOD TO TEST ####################
+# TO USE SFC - Push SFC rules to each switch          
+source /config/SFC/s1.txt 
+source /config/SFC/s2.txt
+source /config/SFC/s3.txt
+source /config/SFC/s4.txt
+source /config/SFC/s5.txt
+
+# TO USE PSEUDO-SFC - Push Pseudo SFC rules simulated with IPv4 table
+source /config/IPv4_pseudo-SFC/s1.txt
+source /config/IPv4_pseudo-SFC/s2.txt
+source /config/IPv4_pseudo-SFC/s3.txt
+source /config/IPv4_pseudo-SFC/s4.txt
+source /config/IPv4_pseudo-SFC/s5.txt
 
 
 

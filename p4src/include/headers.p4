@@ -244,6 +244,10 @@ struct metadata {                           //clones still have access to the me
 
     bool ipv4_update;                           //(OPTIONAL not in use) flag to mark ipv4 header change, leading to the update checksum or not
     bool sfc_forwarded;
+
+    //These 2 only used to help with the pseudo-SFC tests
+    bool ipv4_forwarded;                        //flag to mark if the pkt was already forwarded with basic IPv4 
+    bool NO_SFC_forwarded;                      //flag to mark if the pkt was already forwarded with pseudo-SFC
     
     int_metadata_t int_meta;                    //used by INT
     preserving_metadata_t perserv_meta;         //used by INT

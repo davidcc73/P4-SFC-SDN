@@ -25,6 +25,8 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+
+        meta.ipv4_forwarded = true;         //ONLY USE AS A WORK AROUND TO MARK PKT AS HAVE ALREADY BEEN "ENCAPSULATED" WITH SFC
     }
     table ipv4_lpm {
         key = {
@@ -32,6 +34,27 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             ipv4_forward;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
+    action pseudo_SFC_forward(macAddr_t dstAddr) {
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        
+        hdr.ipv4.ecn = 1;                   //ONLY USE AS A WORK AROUND TO MARK PKT AS HAVE ALREADY BEEN "ENCAPSULATED" WITH SFC
+        meta.NO_SFC_forwarded = true;       //ONLY USE AS A WORK AROUND TO MARK PKT AS HAVE ALREADY BEEN "ENCAPSULATED" WITH SFC
+    }
+    table pseudo_SFC {
+        key = {
+            meta.dscp_at_ingress: exact;   //this 2 keys only used to test scenario with no SFC, so we can force path changes like SFC
+            hdr.ipv4.ecn: exact;
+        }
+        actions = {
+            pseudo_SFC_forward;
             NoAction;
         }
         size = 1024;
@@ -311,21 +334,25 @@ control MyIngress(inout headers hdr,
         
         //--------------------------------- L3+L2 Forwarding (IP -> MAC -> Set the egress_spec)---------------------------------
         if(meta.sfc_forwarded == false){
-            if(multicaster.apply().hit){      // If the multicaster change the dst addresses to multicast
-                log_msg("Trying to change pkt to multicast");
-                meta.is_multicaster = true;
-                multicast_dst_addr.apply();   // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+            if(!pseudo_SFC.apply().hit){            // ONLY USED FOR TESTING, to force path changes like SFC
+                if(multicaster.apply().hit){        // If the multicaster change the dst addresses to multicast
+                    log_msg("Trying to change pkt to multicast");
+                    meta.is_multicaster = true;
+                    multicast_dst_addr.apply();     // meta.dscp_at_ingress -> dst_addr (both ethernet and IP) (in case of SFC decap, the header dscp is 0)
+                }
+                log_msg("Trying to forward with basic IPv4");
+                ipv4_lpm.apply();                   // IPv4 Forwarding L3: dst IP -> dst ethernet
             }
 
-            if(ipv4_lpm.apply().hit){  // IPv4 Forwarding L3: dst IP -> dst ethernet
-                log_msg("IPv4_LPM hit");
-                if(!unicast.apply().hit){        // Unicast Forwarding L2: dst ethernet -> ports
+            if(meta.ipv4_forwarded || meta.NO_SFC_forwarded){    // Got next mac address, do L2 forwarding
+                log_msg("L3 Forwarding done, trying L2 Forwarding");
+                if(!unicast.apply().hit){                        // Unicast Forwarding L2: dst ethernet -> ports
                     log_msg("Unicast failed. droping pkt");
                     drop();                        
                 }
             }
             else{
-                log_msg("IPv4_LPM failed. Trying Multicast");
+                log_msg("L3 Forwarding failed. Trying Multicast");
                 log_msg("hdr.ethernet.dstAddr:{}", {hdr.ethernet.dstAddr});
                 if(!multicast.apply().hit){   // Multicast Forwarding (based on the ethernet.dstAddr, sets mcast_grp)
                     log_msg("Multicast failed, droping pkt");
