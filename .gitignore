@@ -1,6 +1,5 @@
 /.vscode
 /tmp
-/INT/results/
 app/target/
 resources/
 
@@ -11,3 +10,5 @@ resources/
 test.txt
 p4src/build/
 app/bin/*
+INT/results/LOCK_HIGH-NO,SFC_raw_results.csv
+INT/results/LOCK_HIGH-SFC_raw_results.csv

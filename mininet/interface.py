@@ -25,8 +25,8 @@ packet_number    = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}       
 receiver_timeout = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time receiver will wait for pkts
 iteration_sleep  = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time between iterations
 
-num_iterations = 2
-iteration_duration_seconds = 1 * 20  #5 minutes, the duration of each iteration of the test
+num_iterations = 10
+iteration_duration_seconds = 5 * 60  #5 minutes, the duration of each iteration of the test
 sender_receiver_gap = 1              #seconds to wait for the receiver to start before starting the sender
 
 def update_times():
