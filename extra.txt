@@ -112,3 +112,7 @@ no process considero emergencia tudo com dscp superior a  > 40
 EXPLICAR COMO O USO DE int AGORA RETIRA A NECESSIDADE DE POR O DSCP A 0 DEPOIS DE DESENCAPSULAR O DSCP, so encapsulo para pacotes que o switch é INT source
 
 corrigir o mcast dst ethernet
+
+
+Criar este issue:
+Currently to determine the original size of the packet without the INT data, before storing data in the DB, we have a .json file that matches a size in bytes for each packets `DSCP`, this is only used for test purposes and a possible solution is at `Repository's Issues`.

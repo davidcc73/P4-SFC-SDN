@@ -38,15 +38,6 @@ This repository is structured as follows: <br/>
  * `Visualizer`, python script that reads the Database and processes the data to represent, in real-time, which paths in our topology each data flow is taking, for details see [Visualizer](#Visualizer) section. <br/>
   * `INT Collector`, python script that sniffs the packets from the topology switches' interfaces that are facing the INT collector, for details see [INT Collector](#INT-Collector) section.<br/>
 
-# Topology
-
-The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, the 2 must coincide if intended to expand the ONOS functions in the future.
-
-Our Topology:
-
-![Topology](images/topology.drawio.png "Topology")
-
-
 
 # Setup
 
@@ -291,7 +282,18 @@ The custom image was published at docker hub, and is pulled from there, by doing
 
 
 ### Interfaces
-`TODO`
+The mininet container is running in mode `network_mode: "host"` that makes so that all virtual interfaces of our topology elements are created at the host system that is running the Docker Engine, that is done to make the sniffing operations of the `INT Collector` easier.
+
+The switches s1, s4, and s5 (end-points) have a extra interface number `100`, that is directly connected to the `INT Collector`. to where they send the `INT reports`, in practice the `INT Collector` is not inserted in the topology and those interfaces, lead to no where and are only used to sniff out the `INT reports`.
+
+
+### Topology
+
+The topology created by `mininet` is defined at `config/topology.json`, while the topology view of the `ONOS` controller is defined at `config/netcfg.json`, the 2 must coincide if intended to expand the ONOS functions in the future.
+
+Our Topology:
+
+![Topology](images/topology.drawio.png "Topology")
 
 
 ## ONOS
@@ -299,18 +301,27 @@ Our custom ONOS' CLI commands:
 
 | Command           | Description   |
 |-------------------|---------------|
-| table_add      | Insert a table rule on a specifi switch |
+| `table_add`         | Insert a table rule [table_add device table action criteria fields key_fields keys args_fields args] |
+|`INT_Role-set`| Reads the `config/INT_Tables/` files, to insert the role/rules that each INT device needs to operate using INT|
+|`INT_Transit-insert`|Insert a INT instructions into the Transit table|
+|`mcast_port_add`| In a given device create a multicast group with the given ports, so packets associated to that group will be forwarded to those ports. IF GROUP ALREADY EXISTS, NO CHANGES CAN BE MADE TO IT, NO ERROR MSG WILL BE RETURNED FOR THIS CASE |
 
 ## P4
 All switches P4 enabled (based on [bmv2](https://github.com/p4lang/behavioral-model) P4 software implementation)
+
+All switches take advantage of the `IP Precedence` priority system, where by reading the packet's DSCP 3 MSB, that values is assign as the packet's priority level, for the switch's Traffic Manager to use when scheduling packets to be forwarded out of the switch.
 
 P4 Logs are located at `tmp/switchID/stratum_bmv2.log`, can be created by doing:
  * log_msg("User defined message");
  * log_msg("Value1 = {}, Value2 = {}",{value1, value2});
 
 
+## INT Collector
+Python script that sniffs the interfaces to where the INT reports are sent to.
 
+Parses the packet and stores their information in the DB.
 
+Currently to determine the original size of the packet without the INT data, before storing data in the DB, we have a .json file that matches a size in bytes for each packets `DSCP`, this is only used for test purposes and a possible solution is at `Repository's Issues`.
 
 
 
