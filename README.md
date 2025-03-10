@@ -115,6 +115,7 @@ The Web Interface can be accessed at http://localhost:3000/<br/>
 username: admin<br/>
 password: admin
 
+WARNING: Not fully adapted from IPv6 to IPv4.
 
 #### Connect to InfluxDB
 
@@ -142,21 +143,122 @@ Some data is displeyed incorrectly, trust the one printed by the INT collector.
 ### Install Docker Engine
 For Ubuntu the process is different from other distros, so it's recommened to follow the official instruction [here](https://docs.docker.com/engine/install/ubuntu/).
 
-### Install Dependencies
-In any location run:
-
-```bash
-sudo apt-get install sshpass     #install sshpass to be able to use the make commands
-sudo pip3 install mininet        #install mininet at host (makes clean ups easier)
-```
-In the root of the project run:
-```bash
-#Install our container's dependencies
-sudo make deps                   
-```
-
 
 # Implementation
+
+
+## Database
+The measurements in the DB are the following:
+
+<div style="display: flex; justify-content: space-between;">
+
+  <table>
+    <tr>
+      <th colspan="2">Flow Stats (entry per packet)</th>
+    </tr>
+    <tr>
+      <td><strong>Measurement</strong></td>
+      <td><code>values</code></td>
+    </tr>
+    <tr>
+      <td><strong>Tags</strong></td>
+      <td><code>src_ip</code><br><code>dst_ip</code><br><code>src_port</code><br><code>dst_port</code></td>
+    </tr>
+    <tr>
+      <td><strong>Time</strong></td>
+      <td><code>metric_timestamp</code></td>
+    </tr>
+    <tr>
+      <td><strong>Fields</strong></td>
+      <td><code>protocol</code><br><code>size</code><br><code>dscp</code><br><code>latency</code><br><code>path</code></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <th colspan="2">Switch Stats (entry per switch's packet processing)</th>
+    </tr>
+    <tr>
+      <td><strong>Measurement</strong></td>
+      <td><code>switch_stats</code></td>
+    </tr>
+    <tr>
+      <td><strong>Tags</strong></td>
+      <td><code>switch_id</code><br><code>src_ip</code><br><code>dst_ip</code><br><code>src_port</code><br><code>dst_port</code></td>
+    </tr>
+    <tr>
+      <td><strong>Time</strong></td>
+      <td><code>metric_timestamp</code></td>
+    </tr>
+    <tr>
+      <td><strong>Fields</strong></td>
+      <td><code>latency</code><br><code>size</code></td>
+    </tr>
+  </table>
+
+</div>
+
+<div style="display: flex; justify-content: space-between; margin-top: 20px;">
+
+  <table>
+    <tr>
+      <th colspan="2">Queue Occupancy (entry per switch’s packet processing)</th>
+    </tr>
+    <tr>
+      <td><strong>Measurement</strong></td>
+      <td><code>queue_occupancy</code></td>
+    </tr>
+    <tr>
+      <td><strong>Tags</strong></td>
+      <td><code>switch_id</code><br><code>queue_id</code></td>
+    </tr>
+    <tr>
+      <td><strong>Time</strong></td>
+      <td><code>metric_timestamp</code></td>
+    </tr>
+    <tr>
+      <td><strong>Fields</strong></td>
+      <td><code>queue</code></td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <th colspan="2">Link Latency (entry per switch’s packet processing)</th>
+    </tr>
+    <tr>
+      <td><strong>Measurement</strong></td>
+      <td><code>link_latency</code></td>
+    </tr>
+    <tr>
+      <td><strong>Tags</strong></td>
+      <td><code>egress_switch_id</code><br><code>egress_port_id</code><br><code>ingress_switch_id</code><br><code>ingress_port_id</code></td>
+    </tr>
+    <tr>
+      <td><strong>Time</strong></td>
+      <td><code>metric_timestamp</code></td>
+    </tr>
+    <tr>
+      <td><strong>Fields</strong></td>
+      <td><code>latency</code></td>
+    </tr>
+  </table>
+
+</div>
+
+
+
+## Grafana
+The Dashboard presents the following graphs out of the INT data:<br/>
+
+* `Processed Data per Switch`, to give information about which switches are processing more data than others.<br/>
+* `Packet sizes per flow`, to give information about the packet size belonging to each detected data flow.<br/>
+* `Packet sizes per switch`, to give information about the packet sizes that each switch has been processing, and their respective flows.<br/>
+* `Number/Percentage Packets per Switch`, how many overall packets each switch has been processing.<br/>
+* `Switch Latency`, to display the packet's processing time evolution on each switch.<br/>
+* `Link Latency`, displays the link latency of each of our links.<br/>
+* `Flow Latency`, the individual latency of each detected flow, from the moment it entered the 1º switch until it left the last one.
+
 
 ## Visualizer
 Python script that visually represents our topology and distinguishs between paths taken by the currently circulating flows, including multicasting, we use the `Networkx` library. 
@@ -171,6 +273,7 @@ The script represents:<br/>
 * Associates 1 color to each data flow.
 * Creates numbered and colored arrows between nodes, to specify their direction.
 * Path changes.
+* Fails to represent at the same time 2 egdes with the same direction between the same nodes.
 
 ![Topology Visualizer](images/Topology_Visualizer.png "Topology Visualizer")
 
