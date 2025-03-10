@@ -421,8 +421,6 @@ The last node in the chain is responsible for decapsulation of SFC and will forw
 
 Not all nodes need to be in the chain, there is support for intermediary nodes, by reading the current `sf` in the top of the chain (next service to be applyed).
 
-At decapsulation, DSCP is set to 0, to avoid re-encapsulation at the nodes that can do it.
-
 <strong>Currently Programmed Chains:</strong>
 
 | DSCP  | IP Precedence | Nodes to Travel to before DST |
@@ -476,7 +474,7 @@ source /config/IPv4/s5.txt
 ```
 
 
-# Now select ONLY ONE set of commands to define how detours should be done
+### Now select ONLY ONE set of commands to define how detours should be done
 ```bash
 # Push SFC rules to each switch          
 source /config/SFC/s1.txt 
@@ -495,11 +493,50 @@ source /config/rules_mcast/s5.txt
 
 
 
+## INT Collector
+Before Running make sure all mininet virtual interfaces have been created.
+
+```bash
+#Start the INT collector
+sudo python3 INT/receive/collector_influxdb.py
+```
+
+## Visualizer
+Before Running make sure the DB is running.
+
+```bash
+#Start the Topology Visualizer
+sudo python3 INT/visualizer/visualizer.py
+```
+
+
+## Generate INT Data
+A Source INT switch injects an INT header in the packet if it matches one of its INT rules, which are composed of:
+`2 IPs, 2 Ports and one mask for each one`.
+
+Just switches directly connected to hosts should be configured as their INT Source/Sink switches.
+
+The configuration files for each switch can be seen at: `config\INT_Tables`
+
+In our mininet cli menu, there are pre-configured scenarios that generate INT data, they use these scripts to do it: `INT\receive\receive.py` `INT\send\send.py`, they can be ran mannualy on each host by using the `xterm` command to open terminal windows to each host.
+
+Some examples of commands to use these scripts can be seen at: `Commands/SFC.txt`
 
 
 
 ## Tests
-`TODO`
+
+### Process Results
+
+For the Testing of the project, a Python script was created at `INT/process_results/process_results.py`, It is ran after running one or more scenarios in the mininet, we left our test scenarios pre-build in the mininet menu.
+
+The script:
+
+* Reads the the .csv file, at `INT\results`, to where each sender/receiver writes data relative to it's data flows.
+* Reads the DB to obtain the data related to each tests scenarion that was run, done via start and end times of the tests. For the latency of the flows and switch's processing time a percentile of `95%` was used to remove outliners.
+* Processes all data into file `INT\results\final_results.xlsx`, where the results are organized and are compared between scenarios and routing methods.
+
+Examples on how to run the script can be seen at file: `Commands\SFC.txt`.
 
 
 ### ONOS UI
@@ -510,7 +547,7 @@ Then, return to the UI and press <br/>
 * `l` to display the nodes labels <br/>
 * `a` a few times until it displays link utilization in packets per second <br/>
 
-Currently ONOS UI does not represent the links between switchs because we are not using LLDP.
+Currently ONOS UI does not represent the hosts because we are not using Dinamic host discovery via ARP.
 
 
 
