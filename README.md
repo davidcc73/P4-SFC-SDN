@@ -2,15 +2,22 @@
 This work was performed in the scope of the project MH-SDVanet: Multihomed Software Defined Vehicular Networks (reference PTDC/EEI-COM/5284/2020).<br/>
 
 
-Fork of the project [multip4/P4-SFC](https://github.com/multip4/P4-SFC), more exactly this version [davidcc73/P4-SFC](https://github.com/davidcc73/P4-SFC) and its corrections, `multip4/P4-SFC` implements SFC using P4 switches with no SDN Controller, this project aims to migrate it to Docker Containers and add to it a ONOS Controller, responsible for the pushing of the P4 Pipelines and the Table entries.
+Fork of the project [multip4/P4-SFC](https://github.com/multip4/P4-SFC), more exactly this version [davidcc73/P4-SFC](https://github.com/davidcc73/P4-SFC) and its corrections, `multip4/P4-SFC` implements SFC using P4 switches with no SDN Controller.
 
 
+This repository aims to expand that project by adding to it: <br/>
+ * Docker and ONOS, to migrate it to Docker Containers and ONOS Controller, responsible for the pushing of the P4 Pipelines and the Table entries.
+ * `In-band Network Telemetry (INT)`, selected data flows, defined by ONOS, will generate Telemetry. <br/>
+ * `Grafana Dashboard`, using the collected INT in the DB, represent it via real-time graphs. <br/>
+ * `Visualizer`, a Python script that reads the INT data and represents the paths currently taken by the data flows in the topology. <br/>
+  * `INT Collector`, a Python script that sniffs the INT Report packets and stores their indormation in the Database. <br/>
 
 
 # Repository structure
 This repository is structured as follows: <br/>
  * `app/` ONOS app Java implementation <br/>
  * `config/` configuration files <br/>
+ * `INT/` Contains all the programs that use the INT: `Grafana`, `Visualizer` <br/>
  * `mininet/` Mininet scripts to emulate a topology of `stratum_bmv2` devices <br/>
  * `images/` Contains the images used on this ReadMe file. <br/>
  * `p4src/` P4 implementation <br/>
@@ -18,6 +25,18 @@ This repository is structured as follows: <br/>
  * `utils/` utilities include dockerfile and wireshark plugin <br/>
  * `tmp/` temporary directory that contains the logs from `ONOS` and the `P4 Switches`<br/>
 
+# Architecture
+
+![Architecture](./images/Project_Architecture.drawio.png "Architecture")
+
+This repository is structured as follows: <br/>
+ * `Docker` Runs 2 conrtainers, one for mininet with the topology, other for ONOS controller and it's CLI. The mininet switches have a direct connection to ONOS. <br/>
+ * `ONOS` is the SDN controller used, contains a CLI to access it's opeartions, for details see [ONOS](#ONOS) section. <br/>
+ * `Mininet`, programm used to simulate the network topology, all switches use the same P4 code, and the used virtual interfaces are native to the System that hosts the Docker engine, for details see [Mininet](#Mininet) section. <br/>
+ * `InfluxDB`, is the used database to store the collected INT data, for details see [Database](#Database) section. <br/>
+ * `Grafana`, is tools used to visualize, in real-time, the collected telemetry in the form of graphs, for details see [Grafana](#Grafana) section. <br/>
+ * `Visualizer`, python script that reads the Database and processes the data to represent, in real-time, which paths in our topology each data flow is taking, for details see [Visualizer](#Visualizer) section. <br/>
+  * `INT Collector`, python script that sniffs the packets from the topology switches' interfaces that are facing the INT collector, for details see [INT Collector](#INT-Collector) section.<br/>
 
 # Topology
 
@@ -340,8 +359,11 @@ source /config/IPv4/s2.txt
 source /config/IPv4/s3.txt
 source /config/IPv4/s4.txt
 source /config/IPv4/s5.txt
+```
 
 
+# Now select ONLY ONE set of commands to define how detours should be done
+```bash
 # Push SFC rules to each switch          
 source /config/SFC/s1.txt 
 source /config/SFC/s2.txt
