@@ -291,7 +291,7 @@ control MyIngress(inout headers hdr,
 
         //---------------------------------------------------------------------------Set packet priority, meta.dscp_at_ingress is 0 by default which means priority 0 (best effort)
         //Get the OG pkt DSCP pre decapsulation
-        if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;} //when INT is used, the OG DSCP value is in the shim header
+        if(hdr.int_header.isValid()){ meta.dscp_at_ingress = hdr.intl4_shim.udp_tcp_ip_dscp;} //when INT is used, the OG DSCP value is in the shim header, so the pkt keeps its original priority level (IS CORRECT?)
         else{                         meta.dscp_at_ingress = hdr.ipv4.dscp;                 } //Note: after decapsulation, the OG DSCP becomes 0
 
         standard_metadata.priority = meta.dscp_at_ingress[5:3];
