@@ -319,6 +319,8 @@ Python script that sniffs the interfaces to where the INT reports are sent to.
 
 Parses the packet and stores their information in the DB.
 
+In the case of multicast usage the number os reports created is x, being x the number of sink switches that the packet was sent to, so if there is more then 1 destination host on a single switch, still only 1 INT report is created.
+
 Currently to determine the original size of the packet without the INT data, before storing data in the DB, we have a .json file that matches a size in bytes for each packets `DSCP`, this is only used for test purposes and a possible solution is at `Repository's Issues`.
 
 
@@ -532,8 +534,10 @@ The script:
 
 * Reads the the .csv file, at `INT\results`, to where each sender/receiver writes data relative to it's data flows.
 * Reads the DB to obtain the data related to each tests scenarion that was run, done via start and end times of the tests. For the latency of the flows and switch's processing time a percentile of `95%` was used to remove outliners.
+* Treats the multicast's pkt data from the DB as individual entities, with no correlation.
 * Processes all data into file `INT\results\final_results.xlsx`, where the results are organized between scenarios and routing methods, each combination has it's own sheet.
 * Each Sheets keeps the raw data but also calculation done by grouping the data flows by DSCP value (DSCP=-1 means all data flows).
+* Any data flow with a DSCP > 40 is considered a Emergency Data Flow.
 * A final sheet compares the results between all the others sheets.
 
 Examples on how to run the script can be seen at file: `Commands\SFC.txt`.
