@@ -534,7 +534,9 @@ The script:
 
 * Reads the the .csv file, at `INT\results`, to where each sender/receiver writes data relative to it's data flows.
 * Reads the DB to obtain the data related to each tests scenarion that was run, done via start and end times of the tests. For the latency of the flows and switch's processing time a percentile of `95%` was used to remove outliners.
-* Processes all data into file `INT\results\final_results.xlsx`, where the results are organized and are compared between scenarios and routing methods.
+* Processes all data into file `INT\results\final_results.xlsx`, where the results are organized between scenarios and routing methods, each combination has it's own sheet.
+* Each Sheets keeps the raw data but also calculation done by grouping the data flows by DSCP value (DSCP=-1 means all data flows).
+* A final sheet compares the results between all the others sheets.
 
 Examples on how to run the script can be seen at file: `Commands\SFC.txt`.
 

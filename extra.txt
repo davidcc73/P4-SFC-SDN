@@ -82,14 +82,12 @@ sudo python3 INT/process_results/process_results.py \
 WRITE ON README:
 
 por cada pkt multicast enviado, será gerado 1 report por cada switch sink que ele chegar
-hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology) and no multicast from host supported overall
-quando multicast para x nos no mesmo switch, so 1 report é criado, ter isso em conta no nº de pacotes que a DB diz que existem!!!!!
+hot fix: multicast pkts going to host ports in the sink switch (only works in our full mesh topology)
+ and no multicast from host supported overall
+quando multicast para x nos no mesmo switch, so 1 report é criado, ter isso em conta no nº de pacotes
+ que a DB diz que existem!!!!!
 
 explicar grafna defeitoso ports passam a keys e n ha mais flow label, creditos ao tiago
-
-
-//Note: after decapsulation, the OG DSCP becomes 0, fo abter that, the priority foR the next switches will alyways be BEST EFFORT. SET TO 0 TO AVOID RECAPSULATIONS AT edge switches (future pkt sink)
-
 
 INT e SFC n sao ativados quando o ip de dst pertence ao mesmo switch
 
@@ -98,10 +96,7 @@ na vm d etestes verificar que n ha pkts perdidos
 
 bug do visualyzer em nao mostrar overlap na mesma direção
 
-no readme explicar a interface
-
-explicar o process_results.py
-
+no readme explicar a CLI interface
 
 ajusat o file sizes aos novos dscps
 resolver o DSCP og n ir para a DB caso sfc seja usado
@@ -109,10 +104,7 @@ resolver o DSCP og n ir para a DB caso sfc seja usado
 no process considero emergencia tudo com dscp superior a  > 40
 
 
-EXPLICAR COMO O USO DE int AGORA RETIRA A NECESSIDADE DE POR O DSCP A 0 DEPOIS DE DESENCAPSULAR O DSCP, so encapsulo para pacotes que o switch é INT source
+EXPLICAR COMO O USO DE int AGORA RETIRA A NECESSIDADE DE POR O DSCP A 0 DEPOIS DE DESENCAPSULAR O DSCP,
+so encapsulo para pacotes que o switch é INT source
 
 corrigir o mcast dst ethernet
-
-
-Criar este issue:
-Currently to determine the original size of the packet without the INT data, before storing data in the DB, we have a .json file that matches a size in bytes for each packets `DSCP`, this is only used for test purposes and a possible solution is at `Repository's Issues`.
