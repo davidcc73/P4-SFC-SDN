@@ -106,8 +106,6 @@ The Web Interface can be accessed at http://localhost:3000/<br/>
 username: admin<br/>
 password: admin
 
-WARNING: Not fully adapted from IPv6 to IPv4.
-
 #### Connect to InfluxDB
 
 Go to Connections > Data sources, select InfluxDB and use the default url: http://localhost:8086<br/>
@@ -240,6 +238,8 @@ The measurements in the DB are the following:
 
 
 ## Grafana
+Imported from project https://github.com/davidcc73/p4-srv6-INT
+
 The Dashboard presents the following graphs out of the INT data:<br/>
 
 * `Processed Data per Switch`, to give information about which switches are processing more data than others.<br/>
