@@ -264,8 +264,6 @@ The script represents:<br/>
 * Associates 1 color to each data flow.
 * Creates numbered and colored arrows between nodes, to specify their direction.
 * Path changes.
-* Fails to represent at the same time 2 egdes with the same direction between the same nodes.
-
 ![Topology Visualizer](images/Topology_Visualizer.png "Topology Visualizer")
 
 ## Mininet

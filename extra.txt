@@ -93,9 +93,6 @@ INT e SFC n sao ativados quando o ip de dst pertence ao mesmo switch
 
 na vm d etestes verificar que n ha pkts perdidos
 
-
-bug do visualyzer em nao mostrar overlap na mesma direção
-
 no readme explicar a CLI interface
 
 ajusat o file sizes aos novos dscps
