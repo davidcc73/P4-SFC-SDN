@@ -88,9 +88,5 @@ INT e SFC n sao ativados quando o ip de dst pertence ao mesmo switch
 
 no readme explicar a CLI interface
 
-resolver o DSCP og n ir para a DB caso sfc seja usado
-
 EXPLICAR COMO O USO DE int AGORA RETIRA A NECESSIDADE DE POR O DSCP A 0 DEPOIS DE DESENCAPSULAR O DSCP,
 so encapsulo para pacotes que o switch é INT source
-
-corrigir o mcast dst ethernet

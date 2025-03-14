@@ -389,14 +389,15 @@ The node s3 is defined to act as a Multicaster, if the packet has no more `SFC` 
 
 <strong>Currently Programmed Multicast Conversion:</strong>
 
-| DSCP  | new DST MAC Address| new DST IP Address |
-|-------|--------------------|--------------------|
-|51     |01:00:5E:00:00:01   |239.1.1.1           |
-|52     |01:00:5E:00:00:02   |239.1.1.2           |
+| DSCP  | new DST MAC Address| new DST IP Address | Mcast Group |
+|-------|--------------------|--------------------|-------------|
+|40     |01:00:5E:00:00:02   |239.1.1.2           |2            |
+|51     |01:00:5E:00:00:01   |239.1.1.1           |1            |
+|52     |01:00:5E:00:00:02   |239.1.1.2           |1            |
 
 
 ## Multicasting/Broadcast
-By default all links at `config/netcfg.json`, are added to a multicast group `255` used for broadcasting, its up for the P4 code to prevent loops, like it currently does with `LLDP` broadcast packets.
+By default all links at `config/netcfg.json`, are added to a multicast group `255` used for `Broadcasting`, its up for the P4 code to prevent loops, like it currently does (and is used by the with `LLDP` broadcast packets).
 
 All the remaining multicast configurations are done via cli commands, and are located at directory `config/rules_mcast`
 
@@ -406,7 +407,7 @@ Each node detects the multicast packet by reading its `ethernet.dstAddr` and ass
 
 <strong>Currently Programmed Multicast Groups and their Ports per device:</strong>
 
-|Group\Node|s1  |s2|s3   |s4|s5|
+|Mcast Group\Node|s1  |s2|s3   |s4|s5|
 |----------|----|--|-----|--|--|
 |1         |1,20|--|1,2,4|1 |20|
 |2         |20  |--|1,2  |1 |--|
