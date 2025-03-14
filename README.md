@@ -11,6 +11,7 @@ This repository aims to expand that project by adding to it: <br/>
  * `Grafana Dashboard`, using the collected INT in the DB, represent it via real-time graphs. <br/>
  * `Visualizer`, a Python script that reads the INT data and represents the paths currently taken by the data flows in the topology. <br/>
   * `INT Collector`, a Python script that sniffs the INT Report packets and stores their indormation in the Database. <br/>
+  * Workaround that preserves the packet's original `DSCP` value, previously done yo prevent recapsulations, now avoided via the configuration done by `INT` to identify which switch is source to each pkt.
 
 
 # Repository structure
@@ -405,19 +406,23 @@ The remaining groups are set mannually via the commands `mcast_port_add` in whic
 
 Each node detects the multicast packet by reading its `ethernet.dstAddr` and associating it to a group.
 
+WARNING: No support to regular native multicast at host level (started by the hosts).
+
 <strong>Currently Programmed Multicast Groups and their Ports per device:</strong>
 
-|Mcast Group\Node|s1  |s2|s3   |s4|s5|
-|----------|----|--|-----|--|--|
-|1         |1,20|--|1,2,4|1 |20|
-|2         |20  |--|1,2  |1 |--|
-|255       |All|All|All|All|All|
+|Mcast Group\Node|s1  |s2 |s3   |s4 |s5 |
+|----------------|----|---|-----|---|---|
+|1               |1,20|---|1,2,4|1  |20 |
+|2               |20  |---|1,2  |1  |---|
+|255             |All |All|All  |All|All|
 
 
 
 
 
 ## SFC
+Encapsulation is done at the first switch, the source switch of the packet, we use the already INT configuration for sources and sinks to identify them.
+
 The last node in the chain is responsible for decapsulation of SFC and will forward the pkt using IPv4.
 
 Not all nodes need to be in the chain, there is support for intermediary nodes, by reading the current `sf` in the top of the chain (next service to be applyed).
@@ -527,9 +532,20 @@ Some examples of commands to use these scripts can be seen at: `Commands/SFC.txt
 
 ## Tests
 
+### Mininet CLI Menu
+By running:
+```bash
+sudo make mn-cli
+```
+The terminal will attatch to the mininet container, where a simple programable CLI menu will be running and can be edited at run-time via its python script and just pressinf `Enter` in the menu.
+
+It grants a option to access Mininet's command line where command can be run for the whole topology or sent to specific hosts, using `xterm hx` creates a terminal window exclusive to termina x.
+
+Also cointains the option to run pre-build scenarios of data transfers that we configured.
+
 ### Process Results
 
-For the Testing of the project, a Python script was created at `INT/process_results/process_results.py`, It is ran after running one or more scenarios in the mininet, we left our test scenarios pre-build in the mininet menu.
+For the Testing of the project, a Python script was created at `INT/process_results/process_results.py`, It is ran after running one or more scenarios in the mininet, we left our test scenarios pre-build in the mininet CLI menu.
 
 The script:
 
