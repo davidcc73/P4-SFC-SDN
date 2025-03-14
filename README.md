@@ -559,6 +559,8 @@ The script:
 
 Examples on how to run the script can be seen at file: `Commands\SFC.txt`.
 
+`WARNIG`: Its recommended to open the file `INT\results\final_results.xlsx` using LibreOffice to avoid data corruption.
+
 
 ### ONOS UI
 ONOS web UI has a graphical representation of the running topology from the controller point of view. <br/>
