@@ -532,7 +532,7 @@ Some examples of commands to use these scripts can be seen at: `Commands/SFC.txt
 
 ## Tests
 
-To compare `SFC` performance we needed to compare to another method capable of customs routing that was not very introsive in the p4 code, the solution was the creation of a new table `pseudo_SFC`, 
+To compare `SFC` performance we needed to compare to another method capable of customs routing to specific network nodes that was not very introsive in the p4 code, the solution was the creation of a new table `pseudo_SFC`, 
 that by using the IP and ECN fields simulates "encapsulation" by changing `ECN` to 1 `(ONLY ONE FOR TESTING)`. 
 
 `KEEP IN MIND`: The setup of this extra table in the code lead to code changes that ended up having performance penalties to the usage of `SFC` itself, due to the addition of new apply() and if() conditions to the code.
