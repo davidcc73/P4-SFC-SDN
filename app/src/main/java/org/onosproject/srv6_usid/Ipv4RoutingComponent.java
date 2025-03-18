@@ -189,7 +189,8 @@ public class Ipv4RoutingComponent{
     /**
      * @param deviceId the device ID
      */
-    public String setConfigTables(DeviceId deviceId, String tableId, String action, String criteria, 
+    public String setConfigTables(DeviceId deviceId, String tableId, String action, 
+                                String[] criterias, 
                                 String[] fields_keys, String[] keys, 
                                 String[] args_fields, String[] args, Integer priority) {
         PiCriterion match = null;        
@@ -205,27 +206,28 @@ public class Ipv4RoutingComponent{
 
         //-------------------------------------Match
         if(fields_keys != null && keys != null) {
-            if(criteria.equals("LPM")) {
-                if(keys[0].contains(":")){                 //only to match 1 MAC 
-                    MacAddress mac = MacAddress.valueOf(keys[0]);
-                    key = mac.toBytes();
-                }
-                else if(keys[0].contains(".")){            //only to match 1 IPv4
-                    IpAddress ip = IpAddress.valueOf(keys[0]);
-                    key = ip.toOctets();
-                }
-                else{
-                    return "Given key is not IP nor MAC" + keys[0];
-                }
-                prefix = Integer.valueOf(keys[1]);
-                builder_match = builder_match
-                        .matchLpm(
-                            PiMatchFieldId.of(fields_keys[0]),
-                            key,
-                            prefix);
+            for(int i = 0; i < fields_keys.length; i++) {
+                if(criterias[i].equals("LPM")) {
+                    if(keys[i].contains(":")){                 //only to match 1 MAC 
+                        MacAddress mac = MacAddress.valueOf(keys[0]);
+                        key = mac.toBytes();
+                    }
+                    else if(keys[i].contains(".")){            //only to match 1 IPv4
+                        IpAddress ip = IpAddress.valueOf(keys[i]);
+                        key = ip.toOctets();
+                    }
+                    else{
+                        return "Given key is not IP nor MAC" + keys[i];
+                    }
+                    prefix = Integer.valueOf(keys[i + 1]);
+                    builder_match = builder_match
+                            .matchLpm(
+                                PiMatchFieldId.of(fields_keys[i]),
+                                key,
+                                prefix);
+                    i++;  //skip next key (nº of bits, already used)
 
-            } else if(criteria.equals("EXACT")) {               //only to match x Integers or Macs
-                for(int i = 0; i < fields_keys.length; i++) {
+                }else if(criterias[i].equals("EXACT")) {         //only to match x Integers or Macs
                     if(keys[i].contains(":")){                  //either mac
                         MacAddress mac = MacAddress.valueOf(keys[i]);
                         key = mac.toBytes();
@@ -241,7 +243,7 @@ public class Ipv4RoutingComponent{
                                 Integer.valueOf(keys[i]));
                     }
                 }
-            }   
+            }
         }
         match = builder_match.build();     
 

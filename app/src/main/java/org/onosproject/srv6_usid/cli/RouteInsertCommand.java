@@ -106,15 +106,17 @@ public class RouteInsertCommand extends AbstractShellCommand {
         String[] keys = null;
         String[] args_fields = null;
         String[] args = null;
+        String[] criterias = null;
 
         if(!fields_key.trim().equals("")) fields_keys = fields_key.split(" ");
         if(!key.trim().equals("")) keys = key.split(" ");
         if(!args_field.trim().equals("")) args_fields = args_field.split(" ");
         if(!arg.trim().equals("")) args = arg.split(" ");
+        if(!criteria.trim().equals("")) criterias = criteria.split(" ");
 
         // Execute command - replace this line with actual logic to interact with the device
         print("Installing rule on device %s", uri);
-        String res = app.setConfigTables(device.id(), table, action, criteria, fields_keys, keys, args_fields, args, priority);
+        String res = app.setConfigTables(device.id(), table, action, criterias, fields_keys, keys, args_fields, args, priority);
 
         if(res != null){
             print("A problem occured\n");
