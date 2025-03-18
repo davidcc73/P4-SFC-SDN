@@ -200,32 +200,37 @@ public class Ipv4RoutingComponent{
         PiCriterion.Builder builder_match = PiCriterion.builder();
 
         byte[] key;
-        int prefix;
+        int prefix_int = -1;
+        String key_string = "";
 
         log.info("Adding Config rule to {}...", deviceId);
 
         //-------------------------------------Match
         if(fields_keys != null && keys != null) {
             for(int i = 0; i < fields_keys.length; i++) {
+                if(criterias[i].equals("LPM") || criterias[i].equals("TERNARY")) {
+                    String[] aux = keys[i].split("-");
+                    key_string = aux[0];
+                    prefix_int = Integer.valueOf(aux[1]);
+                }
+
                 if(criterias[i].equals("LPM")) {
-                    if(keys[i].contains(":")){                 //only to match 1 MAC 
-                        MacAddress mac = MacAddress.valueOf(keys[0]);
+                    if(key_string.contains(":")){                 //only to match 1 MAC 
+                        MacAddress mac = MacAddress.valueOf(key_string);
                         key = mac.toBytes();
                     }
-                    else if(keys[i].contains(".")){            //only to match 1 IPv4
-                        IpAddress ip = IpAddress.valueOf(keys[i]);
+                    else if(key_string.contains(".")){            //only to match 1 IPv4
+                        IpAddress ip = IpAddress.valueOf(key_string);
                         key = ip.toOctets();
                     }
                     else{
-                        return "Given key is not IP nor MAC" + keys[i];
+                        return "Given key is not IP nor MAC" + key_string;
                     }
-                    prefix = Integer.valueOf(keys[i + 1]);
                     builder_match = builder_match
                             .matchLpm(
                                 PiMatchFieldId.of(fields_keys[i]),
                                 key,
-                                prefix);
-                    i++;  //skip next key (nº of bits, already used)
+                                prefix_int);
 
                 }else if(criterias[i].equals("EXACT")) {         //only to match x Integers or Macs
                     if(keys[i].contains(":")){                  //either mac
@@ -242,6 +247,13 @@ public class Ipv4RoutingComponent{
                                 PiMatchFieldId.of(fields_keys[i]),
                                 Integer.valueOf(keys[i]));
                     }
+                }
+                else if(criterias[i].equals("TERNARY")) {        //only to match x Integers       
+                    builder_match = builder_match
+                        .matchTernary(
+                            PiMatchFieldId.of(fields_keys[i]),
+                            Integer.valueOf(key_string),
+                            prefix_int);
                 }
             }
         }
@@ -283,7 +295,7 @@ public class Ipv4RoutingComponent{
             .makePermanent()            // Or use .makeTemporary(timeout) if needed
             .build();
         
-        //log.info("Rule: {}", Rule);
+        log.info("Rule: {}", Rule);
 
         flowRuleService.applyFlowRules(Rule);
         return null;
