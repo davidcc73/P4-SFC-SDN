@@ -5,36 +5,36 @@
 
 ############Send to s2
 #DSCP: 2
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "2 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "2-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 10
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "10 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "10-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 12
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "12 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "12-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 13
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "13 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "13-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 15
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "15 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "15-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 16
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "16 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "16-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 51
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "51 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "51-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 #DSCP: 52
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "52 0" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "52-63 0-3" "dstAddr" "00:00:00:00:20:01" 90
 
 ############Send to s3
 #DSCP: 3
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "3 0" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "3-63 0-3" "dstAddr" "00:00:00:00:30:01" 90
 #DSCP: 11
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "11 0" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "11-63 0-3" "dstAddr" "00:00:00:00:30:01" 90
 #DSCP: 40
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "40 0" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "40-63 0-3" "dstAddr" "00:00:00:00:30:01" 90
 
 ############Send to s4
 #DSCP: 4
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "4 0" "dstAddr" "00:00:00:00:40:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "4-63 0-3" "dstAddr" "00:00:00:00:40:01" 90
 
 ############Send to s5
 #DSCP: 5
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "5 0" "dstAddr" "00:00:00:00:50:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "5-63 0-3" "dstAddr" "00:00:00:00:50:01" 90
 #DSCP: 14
-table_add device:s1 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "14 0" "dstAddr" "00:00:00:00:50:01" 90
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "TERNARY TERNARY" "meta.dscp_at_ingress hdr.ipv4.ecn" "14-63 0-3" "dstAddr" "00:00:00:00:50:01" 90

@@ -20,7 +20,7 @@ table_add device:s2 MyIngress.sfc_egress MyIngress.sfc_forward EXACT "hdr.sfc_ch
 table_add device:s2 MyIngress.is_it_firewall MyIngress.set_as_firewall EXACT "1" "1" "" "" 70
 
 #FireWall rules (Include all IPs of the exisiting hosts)
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "" "" 70
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "" "" 70
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "" "" 70
-table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.1-32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.1.2-32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.2.2-32" "" "" 70
+table_add device:s2 MyIngress.l3_fireWall NoAction LPM "hdr.ipv4.dstAddr" "10.0.5.1-32" "" "" 70

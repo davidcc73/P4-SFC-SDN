@@ -6,9 +6,9 @@ table_add device:s1 MyIngress.multicaster NoAction EXACT "1" "0" "" "" 70
 
 #### map multicast_mac_dst -> mcast_group
 #hosts: all hosts
-table_add device:s1 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:01 48" "gid" "1" 70
+table_add device:s1 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:01-48" "gid" "1" 70
 #hosts: h2, h4
-table_add device:s1 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:02 48" "gid" "2" 70
+table_add device:s1 MyIngress.multicast MyIngress.set_multicast_group LPM "hdr.ethernet.dstAddr" "01:00:5E:00:00:02-48" "gid" "2" 70
 
 
 
