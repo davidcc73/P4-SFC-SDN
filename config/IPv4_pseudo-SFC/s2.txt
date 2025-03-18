@@ -5,23 +5,23 @@
 
 ############Send to s1
 #DSCP: 16
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "16 1" "dstAddr" "00:00:00:00:10:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "16 1" "dstAddr" "00:00:00:00:10:01" 90
 
 ############Send to s3
 #DSCP: 10
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "10 1" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "10 1" "dstAddr" "00:00:00:00:30:01" 90
 #DSCP: 12
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "12 1" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "12 1" "dstAddr" "00:00:00:00:30:01" 90
 #DSCP: 51
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "51 1" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "51 1" "dstAddr" "00:00:00:00:30:01" 90
 #DSCP: 52
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "52 1" "dstAddr" "00:00:00:00:30:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "52 1" "dstAddr" "00:00:00:00:30:01" 90
 
 ############Send to s4
 #DSCP: 13
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "13 1" "dstAddr" "00:00:00:00:40:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "13 1" "dstAddr" "00:00:00:00:40:01" 90
 #DSCP: 15
-table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "15 1" "dstAddr" "00:00:00:00:40:01" 90
+table_add device:s2 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "15 1" "dstAddr" "00:00:00:00:40:01" 90
 
 ############Send to s5
 #None

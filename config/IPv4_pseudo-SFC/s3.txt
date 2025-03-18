@@ -5,15 +5,15 @@
 
 ############Send to s1
 #DSCP: 15
-table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "15 1" "dstAddr" "00:00:00:00:10:01" 90
+table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "15 1" "dstAddr" "00:00:00:00:10:01" 90
 
 ############Send to s2
 #DSCP: 11
-table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "11 1" "dstAddr" "00:00:00:00:20:01" 90
+table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "11 1" "dstAddr" "00:00:00:00:20:01" 90
 
 ############Send to s4
 #DSCP: 12
-table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward EXACT "meta.dscp_at_ingress hdr.ipv4.ecn" "12 1" "dstAddr" "00:00:00:00:40:01" 90
+table_add device:s3 MyIngress.pseudo_SFC MyIngress.pseudo_SFC_forward "EXACT" "meta.dscp_at_ingress hdr.ipv4.ecn" "12 1" "dstAddr" "00:00:00:00:40:01" 90
 
 ############Send to s5
 #None

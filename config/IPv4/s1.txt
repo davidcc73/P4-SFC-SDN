@@ -2,17 +2,17 @@
 
 #IPv4 Forwarding Unicast
 #Mine
-table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr" "00:00:00:00:01:01" 70
-table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.1.2 32" "dstAddr" "00:00:00:00:01:02" 70
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "LPM" "hdr.ipv4.dstAddr" "10.0.1.1 32" "dstAddr" "00:00:00:00:01:01" 70
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "LPM" "hdr.ipv4.dstAddr" "10.0.1.2 32" "dstAddr" "00:00:00:00:01:02" 70
 #Others
 #s4
-table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr" "00:00:00:00:40:01" 70
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "LPM" "hdr.ipv4.dstAddr" "10.0.2.2 32" "dstAddr" "00:00:00:00:40:01" 70
 #s5
-table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward LPM "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr" "00:00:00:00:50:01" 70
+table_add device:s1 MyIngress.ipv4_lpm MyIngress.ipv4_forward "LPM" "hdr.ipv4.dstAddr" "10.0.5.1 32" "dstAddr" "00:00:00:00:50:01" 70
 
 
 
 #L2 Forwarding (For some reason ONOS is failling to do this alone)
 #Mine
-table_add device:s1 MyIngress.unicast MyIngress.set_egress_port EXACT "hdr.ethernet.dstAddr" "00:00:00:00:01:01" "port" "1"  70
-table_add device:s1 MyIngress.unicast MyIngress.set_egress_port EXACT "hdr.ethernet.dstAddr" "00:00:00:00:01:02" "port" "20" 70
+table_add device:s1 MyIngress.unicast MyIngress.set_egress_port "EXACT" "hdr.ethernet.dstAddr" "00:00:00:00:01:01" "port" "1"  70
+table_add device:s1 MyIngress.unicast MyIngress.set_egress_port "EXACT" "hdr.ethernet.dstAddr" "00:00:00:00:01:02" "port" "20" 70
