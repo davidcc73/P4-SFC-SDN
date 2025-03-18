@@ -295,7 +295,7 @@ public class Ipv4RoutingComponent{
             .makePermanent()            // Or use .makeTemporary(timeout) if needed
             .build();
         
-        log.info("Rule: {}", Rule);
+        //log.info("Rule: {}", Rule);
 
         flowRuleService.applyFlowRules(Rule);
         return null;
