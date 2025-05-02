@@ -1,6 +1,7 @@
 from cmath import sqrt
 import os
 import sys
+import pprint
 import constants, comparasion_sheet, graphs
 from openpyxl import load_workbook
 from openpyxl.styles import Font
@@ -252,13 +253,14 @@ def set_pkt_loss():
                 continue
             
             # get value from collumn G, line row[0].row-1
-            pkts_received = sheet[f'G{row[0].row-1}'].value
-            pkts_sent = sheet[f'G{row[0].row}'].value
+            pkts_received = sheet[f'H{row[0].row-1}'].value
+            pkts_sent = sheet[f'H{row[0].row}'].value
             
             if pkts_received is None or pkts_sent is None:      #Skip the SRv6 area
                 continue
 
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
+            print(f"pkts_received: {pkts_received}, pkts_sent: {pkts_sent}")
             pkt_loss = pkts_received - pkts_sent
             sheet[f'M{row[0].row}'] = pkt_loss   
             sheet[f'N{row[0].row}'] = round((pkt_loss/pkts_sent)*100, 2)
@@ -361,17 +363,17 @@ def set_caculation_formulas(workbook, sheet_name, dscp, scenario_DSCPs):
 
 
     #-----------------------------------------------------------------------------------------------------Calculations
-    avg_collunm_I = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "D", dscp, "I", scenario_DSCPs)
-    avg_collunm_M = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "D", dscp, "M", scenario_DSCPs)
-    avg_collunm_N = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "D", dscp, "N", scenario_DSCPs)
-    avg_collunm_O = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "D", dscp, "O", scenario_DSCPs)
-    avg_collunm_K = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "D", dscp, "K", scenario_DSCPs)
+    avg_collunm_J = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "E", dscp, "J", scenario_DSCPs)
+    avg_collunm_M = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "E", dscp, "M", scenario_DSCPs)
+    avg_collunm_N = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "E", dscp, "N", scenario_DSCPs)
+    avg_collunm_I = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "E", dscp, "I", scenario_DSCPs)
+    avg_collunm_L = constants.get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, "E", dscp, "L", scenario_DSCPs)
 
-    sheet[f'B{last_line + 1}'] = avg_collunm_I
+    sheet[f'B{last_line + 1}'] = avg_collunm_J
     sheet[f'B{last_line + 2}'] = avg_collunm_M
     sheet[f'B{last_line + 3}'] = avg_collunm_N
-    sheet[f'B{last_line + 4}'] = avg_collunm_O
-    sheet[f'B{last_line + 5}'] = avg_collunm_K
+    sheet[f'B{last_line + 4}'] = avg_collunm_I
+    sheet[f'B{last_line + 5}'] = avg_collunm_L
     sheet[f'B{last_line + 6}'] = constants.aux_calculated_results[sheet_name][dscp]["std_jitter"]       #array formuals are not working, so we calculated and set the value here
 
 
@@ -386,6 +388,7 @@ def get_avg_stdev_flow_hop_latency(start, end, dscp_condition):
         AND time <= '{end}'
         {dscp_condition}
     """
+    pprint.pprint(percentile_query) 
     percentile_result = constants.apply_query(percentile_query)
     p_latency = list(percentile_result.get_points())[0]['p_latency']                #nanoseconds
 

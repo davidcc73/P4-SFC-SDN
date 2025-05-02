@@ -23,23 +23,23 @@ headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG
                 "Variation of the AVG 1º Packet Delay between (No)Emergency Flows (%)",
                 "Variation of the AVG Flow Delay between (No)Emergency Flows (%)"]
 
-index_of_headers_to_do_CDF_out_of_raw_values = [8, 9, 11, 13, 14, 15] # I J L N O P
+index_of_headers_to_do_CDF_out_of_raw_values = [8, 9, 11, 12, 13, 14] # I J L N O
 title_for_each_index_collumn = {        # title to be used for each plot
     8: "1º Packet Delay",
     9: "Nº of out of order packets",
-    11: "Flow Jitter",
-    13: "Nº of Packets Lost",
-    14: "Percentage of Packets Lost",
-    15: "1st Packet Delay"
+    10: "Flow Jitter",
+    12: "Nº of Packets Lost",
+    13: "Percentage of Packets Lost",
+    14: "1st Packet Delay"
 }
 
 units_for_each_index_collumn = {        # units to be used for the x labels of each plot
     8: "Seconds",
     9: "Nº of packets",
-    11: "Nanoseconds",
-    13: "Nº of packets",
-    14: "% of packets",
-    15: "Nanoseconds",
+    10: "Nanoseconds",
+    12: "Nº of packets",
+    13: "% of packets",
+    14: "Nanoseconds",
 }
 
 variables_to_do_CDF_out_of_db_values ={ # variables to do CDF out of DB, key are tables, and values are their variables
@@ -50,7 +50,6 @@ variables_to_do_CDF_out_of_db_values ={ # variables to do CDF out of DB, key are
 num_values_to_compare_all_tests = len(headers_lines)
 
 result_directory = "results"
-analyzer_directory = "analyzer"
 final_file = "final_results.xlsx"
 directory_images = "images"
 current_directory = os.path.dirname(os.path.abspath(__file__)) 
@@ -143,9 +142,9 @@ def get_collumn_average_per_dscp(sheet, last_line_raw_data_sheet, dscp_collumn_l
 
         if dscp_target == dscp_value or dscp_target == -1:                    # -1 means all DSCP
             values.append(data_value)   
-
+    
     if len(values) == 0:
-        print(f"Warning: No values found for DSCP {dscp_target} in column {data_collumn_letter}, sheet.title: {sheet.title}")
+        print(f"Warning: No values found for DSCP {dscp_target} in column {dscp_collumn_letter}, for valriable {data_collumn_letter}, sheet.title: {sheet.title}")
         sys.exit(1)
         
     # Apply percentile

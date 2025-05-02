@@ -165,24 +165,25 @@ def check_files_exist():
             print(f"File {filename} not found in {file_path}")
             sys.exit(1)
 
-    #---------------Check if the SRv6 logs exist
+    if constants.args.SRv6_index is not None:
+        #---------------Check if the SRv6 logs exist
 
-    full_analy_path = os.path.join(constants.parent_path, constants.analyzer_directory) 
+        full_analy_path = os.path.join(constants.parent_path, constants.analyzer_directory) 
 
-    # Check if the directory exists
-    if not os.path.isdir(full_analy_path):
-        print(f"Directory {constants.analyzer_directory} does not exist.")
-        sys.exit(1)
-    
-    # Check if the log files exist
-    if constants.args.SRv6_logs is not None:
-        for log_file in constants.args.SRv6_logs:
-            log_file_path = os.path.join(full_analy_path, log_file)
-            #print(f"Checking SRv6 log file: {log_file_path}")
+        # Check if the directory exists
+        if not os.path.isdir(full_analy_path):
+            print(f"Directory {constants.analyzer_directory} does not exist.")
+            sys.exit(1)
+        
+        # Check if the log files exist
+        if constants.args.SRv6_logs is not None:
+            for log_file in constants.args.SRv6_logs:
+                log_file_path = os.path.join(full_analy_path, log_file)
+                #print(f"Checking SRv6 log file: {log_file_path}")
 
-            if not os.path.isfile(log_file_path):
-                print(f"File {log_file} not found in {log_file_path}")
-                sys.exit(1)
+                if not os.path.isfile(log_file_path):
+                    print(f"File {log_file} not found in {log_file_path}")
+                    sys.exit(1)
 
 def read_SRv6_line(line):
     #print(f"Reading SRv6 line: {line}")
