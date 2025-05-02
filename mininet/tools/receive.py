@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import csv
 import fcntl
+import pprint
 import queue
 import sys
 import os
@@ -50,9 +51,9 @@ def process_packet(pkt):  # Process packets in queue
     # Extract and process the payload
     payload = None
     if TCP in pkt and pkt[TCP].payload:
-        payload = pkt[TCP].payload.load.decode('utf-8', 'ignore')
+        payload = bytes(pkt[TCP].payload).decode('utf-8', 'ignore')
     elif UDP in pkt and pkt[UDP].payload:
-        payload = pkt[UDP].payload.load.decode('utf-8', 'ignore')
+        payload = bytes(pkt[UDP].payload).decode('utf-8', 'ignore')
 
     with flows_lock:  # Ensure only one thread modifies flows_metrics at a time
         # Initialize flow metrics if this is the first packet for this flow
@@ -65,7 +66,6 @@ def process_packet(pkt):  # Process packets in queue
                 "last_arrival_time": None,     # Track timestamp of the last packet arrival for jitter calculation
                 "avg_jitter": None             # Store the average jitter for the flow
             }
-
 
         try:
             seq_number, message = payload.split('-', 1)
@@ -112,15 +112,26 @@ def terminate():
             src_ip, dst_ip, sport, dport = flow_key
             packet_count = metrics["packet_count"]
             sequence_numbers = metrics["sequence_numbers"]
-            out_of_order_count = len(set(range(1, max(sequence_numbers, default=1) + 1)) - set(sequence_numbers))
+            metrics["out_of_order_count"] = 0
+            metrics["out_of_order_packets"] = []
+            expected_seq = 0
 
-            print(f"Flow {flow_key} - Total Packets: {packet_count}, Sequence Numbers: {sequence_numbers}, Out of Order Packets Count: {out_of_order_count}")
+            for seq in sequence_numbers:
+                if seq < expected_seq:
+                    metrics["out_of_order_count"] += 1
+                    metrics["out_of_order_packets"].append(seq)
+                else:
+                    expected_seq = seq
 
-    export_results()
+            print(f"Flow {flow_key} - Sequence Numbers: {sequence_numbers}, Nº Received Packets: {packet_count}, Out of Order Packets Count: {metrics['out_of_order_count']}")
+
+    if args.export:
+        print("Exporting results...")
+        export_results()
 
 def export_results():
     print("Starting export_results()")
-    global args
+    global args, flows_metrics
     os.makedirs(result_directory, exist_ok=True)
 
     # Define the filename
@@ -155,7 +166,8 @@ def export_results():
                     for flow_key, metrics in flows_metrics.items():
                         src_ip, dst_ip, sport, dport = flow_key
                         first_packet_time = metrics["first_packet_time"]
-                        out_of_order_packets = sorted(set(range(1, max(metrics["sequence_numbers"], default=1) + 1)) - set(metrics["sequence_numbers"]))
+                        out_of_order_packets = metrics["out_of_order_packets"]
+                        out_of_order_packets_count = metrics["out_of_order_count"] 
                         jitter = metrics["avg_jitter"] * 1000000000
 
                         line = [args.iteration, args.me, src_ip, dst_ip, sport, dport, "receiver", metrics["packet_count"], first_packet_time, len(out_of_order_packets), out_of_order_packets, metrics["DSCP"], jitter]
@@ -198,8 +210,8 @@ def main():
     # Find interface ending in '0'
     iface = get_if_with_zero()
     
-    # Capture only incoming IPv4 packets
-    bpf_filter = "ip and inbound"
+    # Capture only incoming IPv4 packets, no DNS nor mDNS
+    bpf_filter = "ip and inbound and not port 53 and not port 5353"
     
     print(f"Starting sniffing for {args.duration} seconds...")
     processor_thread = threading.Thread(target=packet_processor)

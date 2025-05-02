@@ -20,7 +20,7 @@ def get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number, dscp)
         pass_1_occurance = False 
 
     # sheet_to_copy_from, get the line of the cell that contains the variable_name on collumn A and the collumn after it
-    for row in sheet_to_copy_from.iter_rows(min_row=constants.last_line_data + 1, max_row = sheet_to_copy_from.max_row, min_col=1, max_col=1):
+    for row in sheet_to_copy_from.iter_rows(min_row=constants.last_line_raw_data[sheet_to_copy_from_name] + 1, max_row = sheet_to_copy_from.max_row, min_col=1, max_col=1):
         
         cell_e = sheet_to_copy_from[f"E{row[0].row}"]
         value = str(cell_e.value).strip()
@@ -106,20 +106,24 @@ def set_comparasion_formulas(sheet, start_line):
     # Set the formulas to compare the results between the test cases
     for i in range(1, constants.num_values_to_compare_all_tests + 1 - 2):
         #print(sheet[f'A{start_line + i}'].value)
-        sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
+        sheet[f'E{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
+        sheet[f'F{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
+        sheet[f'G{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - C{start_line + i}) / ABS(C{start_line + i}) * 100, 2), 0)'
 
-def set_copied_values(sheet, start_line, dscp):    
-    print("Seting values copy from other sheets")
+def set_copied_values(sheet, current_test_scenario, start_line, dscp):    
+    print("Seting values to copy from other sheets")
     
     # Cycle through the variables to compare (lines)
     for variable_number in range(constants.num_values_to_compare_all_tests - 2):
         
-        # Cycle through the args.f to copy the values (columns)
-        for i in range(len(constants.args.f)):
-            
-            #--------------Collumn C is the second algorithm
-            #parse 1st element pre _ in args.f
-            sheet_to_copy_from_name = constants.args.f[i].split("_")[0]
+        # Cycle through the algorithms to compare (columns)
+        for i in range(len(constants.algorithms)):
+            curent_algorithm = constants.algorithms[i]
+
+            # Get the name of the sheet to copy from
+            sheet_to_copy_from_name = current_test_scenario + "-" + curent_algorithm
+            print(f"For {current_test_scenario} DSCP:{dscp} copying variable nº {variable_number} from sheet: {sheet_to_copy_from_name}")
+
             line, column = get_line_column_to_copy_from(sheet_to_copy_from_name, variable_number, dscp)
 
             if line is None or column is None:
@@ -139,14 +143,20 @@ def set_scenario_headers(sheet, test_case, start_line):
         # Set the collumn names
         sheet[f'B{start_line}'] = constants.algorithms[0]
         sheet[f'C{start_line}'] = constants.algorithms[1]
-        sheet[f'D{start_line}'] = "Variation (%)"
+        sheet[f'D{start_line}'] = constants.algorithms[2]
+        sheet[f'E{start_line}'] = "Variation 1 (%)"
+        sheet[f'F{start_line}'] = "Variation 2 (%)"
+        sheet[f'G{start_line}'] = "Variation 3 (%)"
 
         # Set collumn names in bold text
         sheet[f'B{start_line}'].font = Font(bold=True)
         sheet[f'C{start_line}'].font = Font(bold=True)
         sheet[f'D{start_line}'].font = Font(bold=True)
+        sheet[f'E{start_line}'].font = Font(bold=True)
+        sheet[f'F{start_line}'].font = Font(bold=True)
+        sheet[f'G{start_line}'].font = Font(bold=True)
 
-def comparasion_area(sheet, start_line, dscp):
+def comparasion_area(sheet, current_test_scenario, start_line, dscp):
     #as bold text
     if dscp == -1:
         sheet[f'A{start_line}'] = "All DSCP: All Data Flows"
@@ -158,20 +168,20 @@ def comparasion_area(sheet, start_line, dscp):
 
     set_algorithm_headers(sheet, start_line)
     set_comparasion_formulas(sheet, start_line)
-    set_copied_values(sheet, start_line, dscp)
+    set_copied_values(sheet, current_test_scenario, start_line, dscp)
     sheet.append([""])
 
-def set_Non_to_Emergency_Data_Flows_Comparasion(sheet, start_line):
+def set_Non_to_Emergency_Data_Flows_Comparasion(sheet, current_test_scenario, start_line):
     sheet[f'A{start_line}'] = "For All Data Flows"
     sheet[f'A{start_line + 1}'] = constants.headers_lines[-2]
     sheet[f'A{start_line + 2}'] = constants.headers_lines[-1]
 
-    sheet[f'A{start_line}'].font = Font(bold=True)
+    sheet[f'A{start_line}'].font     = Font(bold=True)
     sheet[f'A{start_line + 1}'].font = Font(bold=True)
     sheet[f'A{start_line + 2}'].font = Font(bold=True)
 
-    for i in range(len(constants.args.f)):
-        sheet_to_copy_from_name = constants.args.f[i].split("_")[0]
+    for i in range(len(constants.algorithms)):
+        sheet_to_copy_from_name = f"{current_test_scenario}-{constants.algorithms[i]}"
 
         line1, column1 = get_line_column_to_copy_from(sheet_to_copy_from_name, 14, -1)
         line2, column2 = get_line_column_to_copy_from(sheet_to_copy_from_name, 15, -1)
@@ -192,9 +202,33 @@ def set_Non_to_Emergency_Data_Flows_Comparasion(sheet, start_line):
         sheet[f'{get_column_letter(2 + i)}{start_line + 1}'] = formula1
         sheet[f'{get_column_letter(2 + i)}{start_line + 2}'] = formula2
 
-    #Comparasions
-    sheet[f'D{start_line + 1}'] = f'=IFERROR(ROUND((C{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
-    sheet[f'D{start_line + 2}'] = f'=IFERROR(ROUND((C{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
+    #Comparasions SHOULD BE TAKEN OUT THIS FUNCTION AND THE LOOP THAT IS CONTAINING IT
+    sheet[f'E{start_line + 1}'] = f'=IFERROR(ROUND((C{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
+    sheet[f'E{start_line + 2}'] = f'=IFERROR(ROUND((C{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
+
+    sheet[f'F{start_line + 1}'] = f'=IFERROR(ROUND((D{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
+    sheet[f'F{start_line + 2}'] = f'=IFERROR(ROUND((D{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
+
+    sheet[f'G{start_line + 1}'] = f'=IFERROR(ROUND((D{start_line + 1} - C{start_line + 1}) / ABS(C{start_line + 1}) * 100, 2), 0)'
+    sheet[f'G{start_line + 2}'] = f'=IFERROR(ROUND((D{start_line + 2} - C{start_line + 2}) / ABS(C{start_line + 2}) * 100, 2), 0)'
+
+def set_SRv6_area(sheet, current_test_scenario):
+    sheet_target = current_test_scenario + "-ECMP-SRv6"
+    last_line = sheet.max_row
+
+    sheet[f'A{last_line + 1}'] = "SRv6 Rules"
+    sheet[f'A{last_line + 2}'] = "AVG Nº of SRv6 rules Created"
+    sheet[f'A{last_line + 3}'] = "AVG Nº of SRv6 rules Removed"
+    sheet[f'B{last_line + 1}'] = "Values"
+
+    sheet[f'A{last_line + 1}'].font = Font(bold=True) 
+    sheet[f'A{last_line + 2}'].font = Font(bold=True)
+    sheet[f'A{last_line + 3}'].font = Font(bold=True)
+    sheet[f'B{last_line + 1}'].font = Font(bold=True)
+
+    sheet[f'B{last_line + 2}'] = f'=COUNTIF(\'{sheet_target}\'!B1:B{constants.last_line_raw_data[sheet_target]}, \"Created SRv6 rule") / {constants.args.num_iterations}'
+    sheet[f'B{last_line + 3}'] = f'=COUNTIF(\'{sheet_target}\'!B1:B{constants.last_line_raw_data[sheet_target]}, \"Removed SRv6 rule") / {constants.args.num_iterations}'
+
 
 
 def set_Comparison_sheet():
@@ -207,30 +241,46 @@ def set_Comparison_sheet():
     title = "Load Test Cases"
     sheet[f'A1'] = title
     sheet[f'A1'].font = Font(bold=True)
-    sheet[f'A2'] = f"Variation: From {constants.algorithms[0]} to {constants.algorithms[1]}"
+
+    sheet[f'A2'] = "Variation1: is betwee KShort and ECMP"
+    sheet[f'A3'] = "Variation2: is betwee KShort and ECMP+SRv6"
+    sheet[f'A4'] = "Variation3: is betwee ECMP and ECMP+SRv6"
+
+    sheet[f'A2'].font = Font(bold=True)
+    sheet[f'A3'].font = Font(bold=True)
+    sheet[f'A4'].font = Font(bold=True)
 
     # Empty line
     sheet.append([""])
     
     # Create a block for each test case
-    for test_case in constants.test_cases:
+    for current_test_scenario in constants.test_scenarios:
+        print(f"Setting the Comparison sheet for test scenario: {current_test_scenario}")
         # Get max line considering the previous test cases
         max_line = sheet.max_row + 2
-        set_scenario_headers(sheet, test_case, max_line)
+        set_scenario_headers(sheet, current_test_scenario, max_line)
         max_line = sheet.max_row + 1
-        comparasion_area(sheet, max_line, -1)
+        has_emergency_dscp = False
 
-        for dscp in constants.All_DSCP:
+        for dscp in constants.DSCP_per_scenario[current_test_scenario]:
+            if not has_emergency_dscp and dscp >= 40:
+                has_emergency_dscp = True
+            
             max_line = sheet.max_row + 1
+            comparasion_area(sheet, current_test_scenario, max_line, dscp)
 
-            comparasion_area(sheet, max_line, dscp)
+        # Set SRv6 area
+        if constants.args.SRv6_index is not None:
+            set_SRv6_area(sheet, current_test_scenario)
+
+        # If contains DSCP >= 40, set comparasion for Non to Emergency Data Flows
+        if has_emergency_dscp:
+            sheet.append([""])
+            set_Non_to_Emergency_Data_Flows_Comparasion(sheet, current_test_scenario, sheet.max_row + 1)
 
         # Insert 2 empty lines
         sheet.append([""])
         sheet.append([""])
-    
-    # Set (Non) to Emergency Data Flows
-    set_Non_to_Emergency_Data_Flows_Comparasion(sheet, sheet.max_row + 1)
 
     # Save the workbook
     workbook.save(constants.final_file_path)

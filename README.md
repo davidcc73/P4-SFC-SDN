@@ -54,6 +54,7 @@ In any location run:
 ```bash
 sudo apt-get install sshpass              #install sshpass to be able to use the make commands
 sudo apt install python3-scapy -y         #send/process packets
+sudo apt install python3-pandas -y        #process packets
 sudo apt install mininet                  #install mininet at host (makes clean ups easier)
 sudo apt install python3-openpyxl -y      #to export raw CSV results to excel
 sudo apt install python3-networkx -y      #to visualize the network flows in the topology in real-time

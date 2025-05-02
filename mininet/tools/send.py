@@ -10,7 +10,7 @@ import random
 import struct
 import time  # Add time module for sleep
 from scapy.all import sendp, get_if_list, get_if_hwaddr, get_if_addr
-from scapy.all import Ether, IP, TCP, UDP
+from scapy.all import Ether, IP, TCP, UDP, srp
 
 args = None
 
@@ -48,6 +48,9 @@ def check_header_size():
 def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
 
     global my_IP
+
+    start_time = time.time()  # Start timer for timeout
+
     results = {
         'first_timestamp': None,
         'failed_packets': 0
@@ -66,6 +69,11 @@ def send_packet(args, pkt_ETHE, payload_space, iface, addr, src_ip):
     my_IP = Base_pkt[IP].src
 
     for i in range(args.c):
+        # Check for timeout
+        if time.time() - start_time >= args.time_out:
+            print(f"Timeout reached after {args.time_out} seconds. Exiting loop.")
+            break
+
         # Reset packet
         pkt = Base_pkt
 
@@ -205,7 +213,8 @@ def parse_args():
     parser.add_argument('--s', help="packet's total size in bytes", type=int,
                         action='store', required=True)
     
-
+    parser.add_argument('--time_out', help="timeout in seconds", type=int,
+                        action='store', required=False, default=1)
 
     # Non-mandatory flag
     parser.add_argument('--export', help='File to export results', 

@@ -18,36 +18,33 @@ export_file_HIGH = "HIGH"
 export_file_HIGH_EMERGENCY = "HIGH+EMERGENCY"
 
 host_IPs  = {"h1": "10.0.1.1/24", "h2": "10.0.2.2/24", "h3": "10.0.5.1/24", "h4": "10.0.1.2/24"}
-intervals = {"Message": 0.1, "Audio": 0.1, "Video": 0.001, "Emergency": 0.001}       #seconds, used to update the other dictionaries
-sizes     = {"Message": 262, "Audio": 420, "Video": 874, "Emergency": 483}           #bytes
+intervals = {"Message": 0.1, "Audio": 0.01, "Video": 0.02, "Emergency": 0.02}         #seconds, used to update the other dictionaries below 0.02 is unstable
+sizes     = {"Message": 262, "Audio": 420,  "Video": 1250, "Emergency": 100}          #bytes coincide with the INT/receive/packet size.json
 
 packet_number    = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times()
-receiver_timeout = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time receiver will wait for pkts
-iteration_sleep  = {"Message": 0, "Audio": 0, "Video": 0, "Emergency": 0}            #placeholder values, updated in update_times(), time between iterations
+receiver_timeout = 0                                                                 #placeholder values, updated in update_times(), time receiver will wait for pkts
+iteration_sleep  = 0                                                                 #placeholder values, updated in update_times(), time between iterations
 
 num_iterations = 10
 iteration_duration_seconds = 5 * 60  #5 minutes, the duration of each iteration of the test
-sender_receiver_gap = 1              #seconds to wait for the receiver to start before starting the sender
+
+sender_receiver_gap = 5              #seconds to wait for the receiver to start before starting the sender
+export_results_gap = 5               #seconds to wait for the senders/receivers to finish before exporting the results
 
 def update_times():
-    global iteration_duration_seconds
-    global intervals, packet_number, receiver_timeout, iteration_sleep
+    global iteration_duration_seconds, intervals, packet_number, receiver_timeout, iteration_sleep
 
     #update the number of packets to be sent in each flow type
-    packet_number["Message"]   = round(iteration_duration_seconds / (intervals["Message"]   + 0.1))
-    packet_number["Audio"]     = round(iteration_duration_seconds / (intervals["Audio"]     + 0.1))
-    packet_number["Video"]     = round(iteration_duration_seconds / (intervals["Video"]     + 0.1))
-    packet_number["Emergency"] = round(iteration_duration_seconds / (intervals["Emergency"] + 0.1))
+    packet_number["Message"]   = round(iteration_duration_seconds / intervals["Message"]  )
+    packet_number["Audio"]     = round(iteration_duration_seconds / intervals["Audio"]    )
+    packet_number["Video"]     = round(iteration_duration_seconds / intervals["Video"]    )
+    packet_number["Emergency"] = round(iteration_duration_seconds / intervals["Emergency"])
 
-    receiver_timeout["Message"]   = packet_number["Message"]   * intervals["Message"]   * 1.05  + sender_receiver_gap * 1.05
-    receiver_timeout["Audio"]     = packet_number["Audio"]     * intervals["Audio"]     * 1.05  + sender_receiver_gap * 1.05
-    receiver_timeout["Video"]     = packet_number["Video"]     * intervals["Video"]     * 1.05  + sender_receiver_gap * 1.05
-    receiver_timeout["Emergency"] = packet_number["Emergency"] * intervals["Emergency"] * 1.05  + sender_receiver_gap * 1.05
+    #Give time to the receiver to receive all packets
+    receiver_timeout = iteration_duration_seconds * 1.05 + sender_receiver_gap
 
-    iteration_sleep["Message"]   = receiver_timeout["Message"]   * 1.05
-    iteration_sleep["Audio"]     = receiver_timeout["Audio"]     * 1.05
-    iteration_sleep["Video"]     = receiver_timeout["Video"]     * 1.05
-    iteration_sleep["Emergency"] = receiver_timeout["Emergency"] * 1.05
+    #Give time to exporting the results
+    iteration_sleep  = receiver_timeout * 1.05 + export_results_gap
 
 def create_lock_file(lock_filename):
     lock_file_path = os.path.join("/INT/results", lock_filename)
@@ -59,7 +56,7 @@ def create_lock_file(lock_filename):
 
 def send_packet_script(me, dst_ip, l4, sport, dport, msg, dscp, size, count, interval, export_file, iteration):
     
-    command = f"python3 /mininet/tools/send.py --dst_ip {dst_ip} --dscp {dscp} --l4 {l4} --sport {sport} --dport {dport} --m {msg} --s {size} --c {count} --i {interval}"
+    command = f"python3 /mininet/tools/send.py --dst_ip {dst_ip} --dscp {dscp} --l4 {l4} --sport {sport} --dport {dport} --m {msg} --s {size} --c {count} --i {interval} --time_out {iteration_duration_seconds} "
     
     if export_file != None:
         command = command + f" --export {export_file} --me {me.name} --iteration {iteration}"
@@ -141,7 +138,7 @@ def create_Emergency_flow(src_host, dst_IP, dscp, sport, dport, file_results, it
                         sport= sport, dport = dport, msg = msg, 
                         dscp = dscp, size = size, count = num_packets, 
                         interval = i, export_file = file_results, iteration = iteration)
-    
+
 def high_load_test(net, routing):
     global export_file_HIGH
     dport = 443
@@ -179,12 +176,6 @@ def high_load_test(net, routing):
     h3_dst_IP = h3_IP_and_maks.split("/")[0]
     h4_dst_IP = h4_IP_and_maks.split("/")[0]
 
-
-    #See max sleep time for receiver to wait for packets
-    max_receiver_timeout = max(receiver_timeout["Message"], receiver_timeout["Audio"], receiver_timeout["Video"], receiver_timeout["Emergency"])
-    #See max sleep time between flows types to create
-    max_iteration_sleep = max(iteration_sleep["Message"], iteration_sleep["Audio"], iteration_sleep["Video"], iteration_sleep["Emergency"])
-
     #generate 5 different random sports between 49152 and 65535
     sports = random.sample(range(49152, 65535), 5)
     print(f"Sports: {sports}")
@@ -193,10 +184,10 @@ def high_load_test(net, routing):
         print(f"--------------Starting iteration {iteration} of {num_iterations}")
 
         #-------------Start the receive script on the destination hosts
-        receive_packet_script(h1, file_results, iteration, max_receiver_timeout)
-        receive_packet_script(h2, file_results, iteration, max_receiver_timeout)
-        receive_packet_script(h3, file_results, iteration, max_receiver_timeout)
-        receive_packet_script(h4, file_results, iteration, max_receiver_timeout)
+        receive_packet_script(h1, file_results, iteration, receiver_timeout)
+        receive_packet_script(h2, file_results, iteration, receiver_timeout)
+        receive_packet_script(h3, file_results, iteration, receiver_timeout)
+        receive_packet_script(h4, file_results, iteration, receiver_timeout)
 
         time.sleep(sender_receiver_gap) 
         
@@ -208,8 +199,8 @@ def high_load_test(net, routing):
         create_Emergency_flow(h2, h1_dst_IP, 51, sports[4], dport, file_results, iteration)    #DSCP 51
 
         #-------------Keep the test running for a specified duration
-        print(f"Waiting for {max_iteration_sleep} seconds")
-        time.sleep(max_iteration_sleep)  
+        print(f"Waiting for {iteration_sleep} seconds")
+        time.sleep(iteration_sleep)  
 
     # Get the current time in FORMAT RFC3339
     rfc3339_time = datetime.now(timezone.utc).isoformat()

@@ -4,6 +4,8 @@ from openpyxl.styles import Font
 
 import constants
 
+
+
 def extract_Is_values(line, iteration, flow, Is):
     line = line + [Is]
     # Is values, all in the current line
@@ -17,6 +19,34 @@ def extract_Is_values(line, iteration, flow, Is):
             line = line + [Is_value]
 
     return line
+
+def export_SRv6_rules(sheet, iteration):
+    sheet.append([""])
+
+    # Add the "SRv6 Operations" header
+    header = ["SRv6 Operations"]
+    new_next_row = sheet.max_row + 1
+    for col_num, value in enumerate(header, 1):
+        cell = sheet.cell(row=new_next_row, column=col_num, value=value)
+        cell.font = Font(bold=True)
+    
+    # Add the detailed headers for SRv6 operations
+    header = ["Timestamp", "Operation", "Responsible Switch", "Source", "Destination", "Flow Label"]
+    new_next_row = sheet.max_row + 1
+    for col_num, value in enumerate(header, 1):
+        cell = sheet.cell(row=new_next_row, column=col_num, value=value)
+        cell.font = Font(bold=True)
+
+    # Add the SRv6 operations
+    for operation in constants.results[iteration]["SRv6_Operations"]:
+        new_next_row = sheet.max_row + 1
+        rule_src_IP = operation["rule"]["srcIP"]
+        rule_dst_IP = operation["rule"]["dstIP"]
+        rule_flow_label = operation["rule"]["flow_label"]
+        line = [operation["timestamp"], operation["operation"], operation["responsible_switch"], rule_src_IP, rule_dst_IP, rule_flow_label]
+        sheet.append(line)
+
+    sheet.append([""])
 
 def export_raw_results(OG_file):
     # Get the sheet name from filename before (_)
@@ -55,6 +85,9 @@ def export_raw_results(OG_file):
 
         # Flow by flow
         for flow in constants.results[iteration]:
+            if flow == "SRv6_Operations":                                #skip the SRv6_Operations data for the current iteration
+                continue
+            
             keys = list(constants.results[iteration][flow].keys())
 
             DSCP = constants.results[iteration][flow]["DSCP"]
@@ -80,8 +113,13 @@ def export_raw_results(OG_file):
             # Is by Is, sender must be the 1º
             sheet.append(line_s)
             sheet.append(line_r)
+        
+        # Write the SRv6 operations of this Iteration if they exist
+        if "SRv6_Operations" in constants.results[iteration]:
+            export_SRv6_rules(sheet, iteration)
 
-            constants.last_line_data = sheet.max_row
+        # Store the last line of raw data for the current sheet
+        constants.last_line_raw_data[sheet_name] = sheet.max_row
 
     # Save the workbook
     workbook.save(file_path)
