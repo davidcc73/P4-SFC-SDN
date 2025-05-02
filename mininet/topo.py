@@ -49,6 +49,11 @@ class DynamicTopo(Topo):
         for link in topology_config['links']:
             element0 = link[0]
             element1 = link[1]
+            bw = link[2]
+            max_queue = link[3]
+            delay = link[4]
+            jitter = link[5]
+            loss = link[6]
 
             #if both are switches
             if element0.startswith("s") and element1.startswith("s"):
@@ -59,7 +64,8 @@ class DynamicTopo(Topo):
                 port_switch1 = int(link[1].split("p")[1])
 
                 
-                self.addLink(id_switch0, id_switch1, cls=TCLink, port1 = port_switch0, port2 = port_switch1)
+                self.addLink(id_switch0, id_switch1, cls=TCLink, port1 = port_switch0, port2 = port_switch1, 
+                    bw=bw, max_queue_size = max_queue, delay=delay, jitter = jitter, loss = loss, use_hfsc=True)
                 
             else: #switch and host
                 if element0.startswith("h"):
@@ -75,7 +81,9 @@ class DynamicTopo(Topo):
                 id_host = host.split("-")[0]
                 port_host = int(host.split("p")[1])
 
-                self.addLink(id_host, id_switch, port1 = port_host, port2 = port_switch, cls=TCLink)
+                self.addLink(id_host, id_switch, port1 = port_host, port2 = port_switch, cls=TCLink, 
+                    bw=bw, max_queue_size = max_queue, delay=delay, jitter = jitter, loss = loss, use_hfsc=True)
+
 
 def disable_ipv6(net):
     """ Disable IPv6 on all hosts and switches """
