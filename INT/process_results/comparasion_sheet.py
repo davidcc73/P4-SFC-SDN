@@ -143,10 +143,8 @@ def set_scenario_headers(sheet, test_case, start_line):
         # Set the collumn names
         sheet[f'B{start_line}'] = constants.algorithms[0]
         sheet[f'C{start_line}'] = constants.algorithms[1]
-        sheet[f'D{start_line}'] = constants.algorithms[2]
         sheet[f'E{start_line}'] = "Variation 1 (%)"
         sheet[f'F{start_line}'] = "Variation 2 (%)"
-        sheet[f'G{start_line}'] = "Variation 3 (%)"
 
         # Set collumn names in bold text
         sheet[f'B{start_line}'].font = Font(bold=True)

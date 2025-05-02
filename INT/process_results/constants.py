@@ -23,11 +23,11 @@ headers_lines = ["AVG Out of Order Packets (Nº)", "AVG Packet Loss (Nº)", "AVG
                 "Variation of the AVG 1º Packet Delay between (No)Emergency Flows (%)",
                 "Variation of the AVG Flow Delay between (No)Emergency Flows (%)"]
 
-index_of_headers_to_do_CDF_out_of_raw_values = [8, 9, 11, 12, 13, 14] # I J L N O
+index_of_headers_to_do_CDF_out_of_raw_values = [8, 9, 11, 12, 13, 14] # I J L M N O
 title_for_each_index_collumn = {        # title to be used for each plot
     8: "1º Packet Delay",
     9: "Nº of out of order packets",
-    10: "Flow Jitter",
+    11: "Flow Jitter",
     12: "Nº of Packets Lost",
     13: "Percentage of Packets Lost",
     14: "1st Packet Delay"
@@ -36,7 +36,7 @@ title_for_each_index_collumn = {        # title to be used for each plot
 units_for_each_index_collumn = {        # units to be used for the x labels of each plot
     8: "Seconds",
     9: "Nº of packets",
-    10: "Nanoseconds",
+    11: "Nanoseconds",
     12: "Nº of packets",
     13: "% of packets",
     14: "Nanoseconds",
