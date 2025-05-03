@@ -260,7 +260,7 @@ def set_pkt_loss():
                 continue
 
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
-            print(f"pkts_received: {pkts_received}, pkts_sent: {pkts_sent}")
+            #print(f"pkts_received: {pkts_received}, pkts_sent: {pkts_sent}")
             pkt_loss = pkts_received - pkts_sent
             sheet[f'M{row[0].row}'] = pkt_loss   
             sheet[f'N{row[0].row}'] = round((pkt_loss/pkts_sent)*100, 2)
@@ -388,7 +388,7 @@ def get_avg_stdev_flow_hop_latency(start, end, dscp_condition):
         AND time <= '{end}'
         {dscp_condition}
     """
-    pprint.pprint(percentile_query) 
+    #pprint.pprint(percentile_query) 
     percentile_result = constants.apply_query(percentile_query)
     p_latency = list(percentile_result.get_points())[0]['p_latency']                #nanoseconds
 
