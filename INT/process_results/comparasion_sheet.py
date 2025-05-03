@@ -106,9 +106,7 @@ def set_comparasion_formulas(sheet, start_line):
     # Set the formulas to compare the results between the test cases
     for i in range(1, constants.num_values_to_compare_all_tests + 1 - 2):
         #print(sheet[f'A{start_line + i}'].value)
-        sheet[f'E{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
-        sheet[f'F{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
-        sheet[f'G{start_line + i}'] = f'=IFERROR(ROUND((D{start_line + i} - C{start_line + i}) / ABS(C{start_line + i}) * 100, 2), 0)'
+        sheet[f'D{start_line + i}'] = f'=IFERROR(ROUND((C{start_line + i} - B{start_line + i}) / ABS(B{start_line + i}) * 100, 2), 0)'
 
 def set_copied_values(sheet, current_test_scenario, start_line, dscp):    
     print("Seting values to copy from other sheets")
@@ -143,16 +141,12 @@ def set_scenario_headers(sheet, test_case, start_line):
         # Set the collumn names
         sheet[f'B{start_line}'] = constants.algorithms[0]
         sheet[f'C{start_line}'] = constants.algorithms[1]
-        sheet[f'E{start_line}'] = "Variation 1 (%)"
-        sheet[f'F{start_line}'] = "Variation 2 (%)"
+        sheet[f'D{start_line}'] = "Variation (%)"
 
         # Set collumn names in bold text
         sheet[f'B{start_line}'].font = Font(bold=True)
         sheet[f'C{start_line}'].font = Font(bold=True)
         sheet[f'D{start_line}'].font = Font(bold=True)
-        sheet[f'E{start_line}'].font = Font(bold=True)
-        sheet[f'F{start_line}'].font = Font(bold=True)
-        sheet[f'G{start_line}'].font = Font(bold=True)
 
 def comparasion_area(sheet, current_test_scenario, start_line, dscp):
     #as bold text
@@ -201,14 +195,8 @@ def set_Non_to_Emergency_Data_Flows_Comparasion(sheet, current_test_scenario, st
         sheet[f'{get_column_letter(2 + i)}{start_line + 2}'] = formula2
 
     #Comparasions SHOULD BE TAKEN OUT THIS FUNCTION AND THE LOOP THAT IS CONTAINING IT
-    sheet[f'E{start_line + 1}'] = f'=IFERROR(ROUND((C{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
-    sheet[f'E{start_line + 2}'] = f'=IFERROR(ROUND((C{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
-
-    sheet[f'F{start_line + 1}'] = f'=IFERROR(ROUND((D{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
-    sheet[f'F{start_line + 2}'] = f'=IFERROR(ROUND((D{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
-
-    sheet[f'G{start_line + 1}'] = f'=IFERROR(ROUND((D{start_line + 1} - C{start_line + 1}) / ABS(C{start_line + 1}) * 100, 2), 0)'
-    sheet[f'G{start_line + 2}'] = f'=IFERROR(ROUND((D{start_line + 2} - C{start_line + 2}) / ABS(C{start_line + 2}) * 100, 2), 0)'
+    sheet[f'D{start_line + 1}'] = f'=IFERROR(ROUND((C{start_line + 1} - B{start_line + 1}) / ABS(B{start_line + 1}) * 100, 2), 0)'
+    sheet[f'D{start_line + 2}'] = f'=IFERROR(ROUND((C{start_line + 2} - B{start_line + 2}) / ABS(B{start_line + 2}) * 100, 2), 0)'
 
 def set_SRv6_area(sheet, current_test_scenario):
     sheet_target = current_test_scenario + "-ECMP-SRv6"
@@ -239,14 +227,6 @@ def set_Comparison_sheet():
     title = "Load Test Cases"
     sheet[f'A1'] = title
     sheet[f'A1'].font = Font(bold=True)
-
-    sheet[f'A2'] = "Variation1: is betwee KShort and ECMP"
-    sheet[f'A3'] = "Variation2: is betwee KShort and ECMP+SRv6"
-    sheet[f'A4'] = "Variation3: is betwee ECMP and ECMP+SRv6"
-
-    sheet[f'A2'].font = Font(bold=True)
-    sheet[f'A3'].font = Font(bold=True)
-    sheet[f'A4'].font = Font(bold=True)
 
     # Empty line
     sheet.append([""])

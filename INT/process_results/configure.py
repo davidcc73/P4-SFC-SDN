@@ -306,8 +306,8 @@ def set_fist_pkt_delay():
             # Set the formula, pkt loss, -1 is sender, 0 is receiver
             # The values are 2 Timestamp (seconds-Unix Epoch)
             # subtraction give seconds, we convert to nanoseconds
-            first_pkt_sent = sheet[f'H{row[0].row-1}'].value
-            first_pkt_received = sheet[f'H{row[0].row}'].value
+            first_pkt_sent = sheet[f'I{row[0].row-1}'].value
+            first_pkt_received = sheet[f'I{row[0].row}'].value
 
             if first_pkt_received is None or first_pkt_sent is None:      #Skip the SRv6 area
                 continue
@@ -523,11 +523,11 @@ def set_compare_non_Emergency_to_Emergency_variation():
         after_raw_data = row_range + 2
 
         # Set the formula for the Non-Emergency Flows
-        sheet[f'B{max_line + 3}'] = f'=ROUND(AVERAGEIF(D1:D{row_range}, "<40" , O1:O{row_range}), 2'  
+        sheet[f'B{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, "<40" , O1:O{row_range}), 2'  
         sheet[f'B{max_line + 4}'] = f'=ROUND(AVERAGEIFS(B{after_raw_data}:B{max_line}, A{after_raw_data}:A{max_line}, "AVG Flows Latency (nanoseconds)", E{after_raw_data}:E{max_line}, "<40"), 2)'  #NOT IDEAL to do avg of avg, but inflix stores all tags as strings including dscp, making it difficult to apply this logic in a query
 
         # Set the formula for the Emergency Flows
-        sheet[f'C{max_line + 3}'] = f'=ROUND(AVERAGEIF(D1:D{row_range}, ">=40", O1:O{row_range}), 2'
+        sheet[f'C{max_line + 3}'] = f'=ROUND(AVERAGEIF(E1:E{row_range}, ">=40", O1:O{row_range}), 2'
         sheet[f'C{max_line + 4}'] = f'=ROUND(AVERAGEIFS(B{after_raw_data}:B{max_line}, A{after_raw_data}:A{max_line}, "AVG Flows Latency (nanoseconds)", E{after_raw_data}:E{max_line}, ">=40"), 2)'
 
         #Set comparasion formulas, for the AVG 1º Packet Delay and AVG Flow Delay in percentage
