@@ -30,6 +30,9 @@ This repository is structured as follows: <br/>
 
 ![Architecture](./images/Project_Architecture.drawio.png "Architecture")
 
+
+
+
 This repository is structured as follows: <br/>
  * `Docker` Runs 2 conrtainers, one for mininet with the topology, other for ONOS controller and it's CLI. The mininet switches have a direct connection to ONOS. <br/>
  * `ONOS` is the SDN controller used, contains a CLI to access it's opeartions, for details see [ONOS](#ONOS) section. <br/>
@@ -136,6 +139,10 @@ For Ubuntu the process is different from other distros, so it's recommened to fo
 
 
 # Implementation
+
+## Testbed
+![Testbed](./images/Project_Testbed.drawio.png "Testbed")
+
 
 
 ## Database
